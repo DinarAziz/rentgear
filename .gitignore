@@ -1,0 +1,10 @@
+.DS_Store
+node_modules/
+build/
+rentgear_app/build/
+rentgear_app/.dart_tool/
+rentgear_app/.idea/
+rentgear_app/android/.gradle/
+rentgear_app/android/.kotlin/
+rentgear_app/ios/Pods/
+*.log

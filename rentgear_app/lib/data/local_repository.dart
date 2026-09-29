@@ -1,0 +1,591 @@
+import 'dart:typed_data';
+
+import '../domain/availability.dart';
+import '../domain/equipment_rules.dart';
+import '../domain/guarantee.dart';
+import '../domain/models.dart';
+import '../domain/rental_state_machine.dart';
+import 'local_codec.dart';
+import 'local_store.dart';
+import 'repository.dart';
+import 'seed.dart';
+
+/// Repository lokal: aplikasi Android berjalan mandiri tanpa server.
+/// Data awal dari [SeedData], perubahan disimpan ke [LocalStore] (memori HP).
+/// Aturan bisnis (ALG-2, state machine, aturan jaminan, hak akses) dijalankan
+/// di sini dengan perilaku yang sama seperti server Laravel nanti.
+class LocalRentGearRepository implements RentGearRepository {
+  LocalRentGearRepository._(SeedData seed, this._store, this.latency)
+      : _users = seed.users,
+        _categories = seed.categories,
+        _equipment = List.of(seed.equipment),
+        _providers = seed.providers(),
+        _rentals = seed.rentals();
+
+  /// [store] `null` = hanya di memori (dipakai unit test).
+  factory LocalRentGearRepository.open({
+    LocalStore? store,
+    DateTime? now,
+    Duration latency = const Duration(milliseconds: 250),
+  }) {
+    final repo = LocalRentGearRepository._(SeedData(now ?? DateTime.now()), store, latency);
+    final saved = store?.read();
+    if (saved != null) repo._restore(saved);
+    return repo;
+  }
+
+  static const demoPassword = 'password';
+  static const _schemaVersion = 2;
+
+  final LocalStore? _store;
+  final Duration latency;
+  final List<AppUser> _users;
+  final List<Category> _categories;
+  List<Equipment> _equipment;
+  List<ProviderProfile> _providers;
+  List<Rental> _rentals;
+  final Map<String, String> _idempotency = {};
+  int _sequence = 0;
+  String? _sessionUserId;
+
+  Future<T> _delay<T>(T Function() body) async {
+    if (latency > Duration.zero) await Future<void>.delayed(latency);
+    return body();
+  }
+
+  /// Seperti [_delay], lalu menyimpan seluruh data ke HP.
+  Future<T> _mutate<T>(T Function() body) => _delay(() {
+        final result = body();
+        _save();
+        return result;
+      });
+
+  // ---------------------------------------------------------------- persistence
+
+  LocalCodec? get _codec {
+    final store = _store;
+    if (store == null) return null;
+    return LocalCodec(savePhoto: store.savePhoto, loadPhoto: store.loadPhoto);
+  }
+
+  void _save() {
+    final codec = _codec;
+    if (codec == null) return;
+    _store!.write({
+      'version': _schemaVersion,
+      'sequence': _sequence,
+      'session': _sessionUserId,
+      'idempotency': _idempotency,
+      'providers': {
+        for (final p in _providers)
+          p.id: {'status': p.status.name, 'policy': codec.policy(p.policy)},
+      },
+      'equipment': [for (final e in _equipment) codec.equipment(e)],
+      'rentals': [for (final r in _rentals) codec.rental(r)],
+    });
+  }
+
+  void _restore(Map<String, dynamic> data) {
+    if (data['version'] != _schemaVersion) return; // format lama: pakai seed
+    final codec = _codec!;
+    _sequence = data['sequence'] as int;
+    _sessionUserId = data['session'] as String?;
+    _idempotency.addAll((data['idempotency'] as Map).cast<String, String>());
+    final providers = data['providers'] as Map<String, dynamic>;
+    for (final p in _providers) {
+      final saved = providers[p.id] as Map<String, dynamic>?;
+      if (saved == null) continue;
+      p
+        ..status = ProviderStatus.values.byName(saved['status'] as String)
+        ..policy = codec.policyFrom(saved['policy'] as Map<String, dynamic>);
+    }
+    _equipment = [
+      for (final e in data['equipment'] as List) codec.equipmentFrom(e as Map<String, dynamic>),
+    ];
+    _rentals = [
+      for (final r in data['rentals'] as List) codec.rentalFrom(r as Map<String, dynamic>),
+    ];
+  }
+
+  /// Menghapus semua perubahan dan kembali ke data demo awal.
+  Future<void> resetDemoData() => _delay(() {
+        _store?.clear();
+        final fresh = SeedData(DateTime.now());
+        _providers = fresh.providers();
+        _equipment = List.of(fresh.equipment);
+        _rentals = fresh.rentals();
+        _idempotency.clear();
+        _sequence = 0;
+        _sessionUserId = null;
+      });
+
+  // ---------------------------------------------------------------- lookups
+
+  Equipment _equipmentById(String id) => _equipment.firstWhere(
+        (e) => e.id == id,
+        orElse: () => throw const AppException('NOT_FOUND', 'Alat tidak ditemukan.'),
+      );
+
+  ProviderProfile _providerById(String id) => _providers.firstWhere(
+        (p) => p.id == id,
+        orElse: () => throw const AppException('NOT_FOUND', 'Penyedia tidak ditemukan.'),
+      );
+
+  Rental _rentalById(String id) => _rentals.firstWhere(
+        (r) => r.id == id,
+        orElse: () => throw const AppException('NOT_FOUND', 'Transaksi tidak ditemukan.'),
+      );
+
+  bool _isVisible(Equipment e) =>
+      e.isActive && _providerById(e.providerId).status == ProviderStatus.verified;
+
+  /// ALG-2 per ukuran. [size] `null` untuk alat tanpa ukuran; untuk alat
+  /// berukuran, `null` berarti jumlah ketersediaan semua ukuran.
+  int _available(Equipment e, DateTime start, DateTime end, [String? size]) {
+    if (e.hasSizes && size == null) {
+      return e.sizes.fold(0, (sum, s) => sum + _available(e, start, end, s.label));
+    }
+    return sweepAvailableQty(
+        stockTotal: e.stockFor(size),
+        start: start,
+        end: end,
+        ranges: [
+          for (final r in _rentals)
+            if (r.equipmentId == e.id &&
+                r.size == size &&
+                RentalStateMachine.lockingStatuses.contains(r.status))
+              OccupancyRange(r.startDate, r.endDate, r.qty),
+        ],
+      );
+  }
+
+  // ---------------------------------------------------------------- access
+
+  void _requireOwner(Rental r, AppUser actor) {
+    if (actor.role != UserRole.provider || actor.providerId != r.providerId) {
+      throw const AppException('FORBIDDEN', 'Transaksi ini bukan milik toko Anda.');
+    }
+  }
+
+  void _requireRenter(Rental r, AppUser actor) {
+    if (actor.role != UserRole.customer || actor.id != r.customerId) {
+      throw const AppException('FORBIDDEN', 'Transaksi ini bukan milik Anda.');
+    }
+  }
+
+  void _requireAdmin(AppUser actor) {
+    if (actor.role != UserRole.admin) {
+      throw const AppException('FORBIDDEN', 'Hanya admin yang boleh melakukan aksi ini.');
+    }
+  }
+
+  /// [actor] `null` = job sistem.
+  void _transition(Rental r, RentalStatus to, AppUser? actor, {String? note}) {
+    final error = RentalStateMachine.guardError(r, to, actor?.role);
+    if (error != null) throw AppException('INVALID_TRANSITION', error);
+    r.logs.add(StatusLog(
+      from: r.status,
+      to: to,
+      actorName: switch (actor?.role) {
+        null => 'Sistem',
+        UserRole.provider => r.providerName,
+        _ => actor!.name,
+      },
+      at: DateTime.now(),
+      note: note,
+    ));
+    r.status = to;
+  }
+
+  // ---------------------------------------------------------------- auth
+
+  @override
+  Future<AppUser> login(String email, String password) => _mutate(() {
+        final user = _users.where((u) => u.email == email.trim().toLowerCase());
+        if (user.isEmpty || password != demoPassword) {
+          throw const AppException('AUTH_FAILED', 'Email atau password salah.');
+        }
+        _sessionUserId = user.first.id;
+        return user.first;
+      });
+
+  @override
+  Future<AppUser?> restoreSession() => _delay(() {
+        final id = _sessionUserId;
+        return id == null ? null : _users.where((u) => u.id == id).firstOrNull;
+      });
+
+  @override
+  Future<void> logout() => _mutate(() => _sessionUserId = null);
+
+  // ---------------------------------------------------------------- jobs
+
+  /// Pengganti Laravel Scheduler selama belum ada server: dijalankan saat
+  /// aplikasi dibuka dan saat login.
+  @override
+  Future<int> runScheduledJobs() => _mutate(() {
+        final now = DateTime.now();
+        final today = dateOnly(now);
+        var changed = 0;
+        void apply(Rental r, RentalStatus to, String note) {
+          _transition(r, to, null, note: note);
+          if (to == RentalStatus.expired || to == RentalStatus.cancelled) {
+            r.cancelReason = note;
+          }
+          changed++;
+        }
+
+        for (final r in _rentals) {
+          final since = now.difference(r.logs.last.at);
+          switch (r.status) {
+            case RentalStatus.pendingConfirmation when since > const Duration(hours: 12):
+              apply(r, RentalStatus.expired, 'Penyedia tidak merespons dalam 12 jam');
+            case RentalStatus.awaitingPayment when since > const Duration(hours: 24):
+              apply(r, RentalStatus.cancelled, 'Tidak dibayar dalam 24 jam');
+            case RentalStatus.paid when today.isAfter(r.startDate):
+              apply(r, RentalStatus.noShow, 'Alat tidak diambil sampai tanggal mulai lewat');
+            case RentalStatus.pickedUp when today.isAfter(r.endDate):
+              apply(r, RentalStatus.overdue, 'Melewati tanggal selesai');
+            default:
+              break;
+          }
+        }
+        return changed;
+      });
+
+  // ---------------------------------------------------------------- catalog
+
+  @override
+  Future<List<Category>> categories() => _delay(() => List.of(_categories));
+
+  @override
+  Future<List<Equipment>> searchEquipment({String query = '', String? categoryId}) =>
+      _delay(() {
+        final q = query.trim().toLowerCase();
+        return _equipment
+            .where(_isVisible)
+            .where((e) => categoryId == null || e.categoryId == categoryId)
+            .where((e) =>
+                q.isEmpty ||
+                e.name.toLowerCase().contains(q) ||
+                e.brand.toLowerCase().contains(q))
+            .toList();
+      });
+
+  @override
+  Future<List<Equipment>> providerEquipment(String providerId) =>
+      _delay(() => _equipment.where((e) => e.providerId == providerId).toList());
+
+  @override
+  Future<Equipment> equipment(String id) => _delay(() => _equipmentById(id));
+
+  @override
+  Future<ProviderProfile> provider(String id) => _delay(() => _providerById(id));
+
+  @override
+  Future<List<ProviderProfile>> providers() => _delay(() => List.of(_providers));
+
+  @override
+  Future<int> availableQty(String equipmentId, DateTime start, DateTime end, {String? size}) =>
+      _delay(() => _available(_equipmentById(equipmentId), start, end, size));
+
+  @override
+  Future<Map<String, int>> sizeAvailability(String equipmentId, DateTime start, DateTime end) =>
+      _delay(() {
+        final e = _equipmentById(equipmentId);
+        return {for (final s in e.sizes) s.label: _available(e, start, end, s.label)};
+      });
+
+  // ---------------------------------------------------------------- booking
+
+  @override
+  Future<Rental> createBooking(BookingRequest req) => _mutate(() {
+        // Kirim ulang dengan key yang sama tidak membuat booking ganda.
+        final existing = _idempotency[req.idempotencyKey];
+        if (existing != null) return _rentalById(existing);
+
+        final customer = _users.firstWhere((u) => u.id == req.customerId);
+        if (customer.role != UserRole.customer) {
+          throw const AppException('FORBIDDEN', 'Hanya penyewa yang bisa membuat booking.');
+        }
+        final e = _equipmentById(req.equipmentId);
+        final p = _providerById(e.providerId);
+        if (p.status != ProviderStatus.verified) {
+          throw const AppException('PROVIDER_INACTIVE', 'Penyedia belum terverifikasi.');
+        }
+
+        final start = dateOnly(req.startDate);
+        final end = dateOnly(req.endDate);
+        if (start.isBefore(dateOnly(DateTime.now()))) {
+          throw const AppException('INVALID_DATE', 'Tanggal mulai sudah lewat.');
+        }
+        if (end.isBefore(start)) {
+          throw const AppException('INVALID_DATE', 'Tanggal selesai sebelum tanggal mulai.');
+        }
+        if (req.qty < 1) {
+          throw const AppException('INVALID_QTY', 'Jumlah minimal 1.');
+        }
+        if (e.hasSizes && !e.sizes.any((s) => s.label == req.size)) {
+          throw const AppException('SIZE_REQUIRED', 'Pilih ukuran terlebih dahulu.');
+        }
+        if (!e.hasSizes && req.size != null) {
+          throw const AppException('VALIDATION', 'Alat ini tidak memiliki pilihan ukuran.');
+        }
+        if (!e.isActive) {
+          throw const AppException('NOT_FOUND', 'Alat sedang tidak disewakan.');
+        }
+
+        // Cek ulang ketersediaan tepat sebelum menulis (di server: di dalam
+        // transaksi DB + lockForUpdate). Dart berjalan satu thread, jadi blok
+        // sinkron ini sudah atomik.
+        if (_available(e, start, end, req.size) < req.qty) {
+          throw const AppException('SLOT_UNAVAILABLE', 'Stok tidak cukup pada tanggal tersebut.');
+        }
+
+        final days = inclusiveDays(start, end);
+        final total = e.pricePerDay * req.qty * days + e.depositAmount * req.qty;
+        final errors = p.policy.validate(req.guarantees,
+            rentalValue: total, renterName: customer.name);
+        if (errors.isNotEmpty) {
+          throw AppException('GUARANTEE_INVALID', errors.join('\n'));
+        }
+
+        _sequence++;
+        final now = DateTime.now();
+        final id = 'r-${now.microsecondsSinceEpoch}';
+        final rental = Rental(
+          id: id,
+          invoiceCode:
+              'INV-${now.year}${_two(now.month)}${_two(now.day)}-${_sequence.toString().padLeft(4, '0')}',
+          customerId: customer.id,
+          customerName: customer.name,
+          providerId: p.id,
+          providerName: p.businessName,
+          equipmentId: e.id,
+          equipmentName: e.name,
+          categoryId: e.categoryId,
+          qty: req.qty,
+          size: req.size,
+          photo: e.photos.firstOrNull,
+          startDate: start,
+          endDate: end,
+          pricePerDaySnapshot: e.pricePerDay,
+          depositSnapshot: e.depositAmount,
+          status: RentalStatus.pendingConfirmation,
+          createdAt: now,
+          guarantees: [
+            for (final (i, d) in req.guarantees.indexed)
+              Guarantee(
+                id: '$id-g$i',
+                type: d.type!,
+                holderName: d.holderName.trim(),
+                documentNumber: d.documentNumber.replaceAll(RegExp(r'\s'), ''),
+                photo: d.photo,
+              ),
+          ],
+          logs: [
+            StatusLog(from: null, to: RentalStatus.pendingConfirmation, actorName: customer.name, at: now),
+          ],
+        );
+        _rentals.add(rental);
+        _idempotency[req.idempotencyKey] = id;
+        return rental;
+      });
+
+  static String _two(int n) => n.toString().padLeft(2, '0');
+
+  @override
+  Future<Rental> rental(String id) => _delay(() => _rentalById(id));
+
+  List<Rental> _sorted(Iterable<Rental> list) =>
+      list.toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+  @override
+  Future<List<Rental>> customerRentals(String customerId) =>
+      _delay(() => _sorted(_rentals.where((r) => r.customerId == customerId)));
+
+  @override
+  Future<List<Rental>> providerRentals(String providerId) =>
+      _delay(() => _sorted(_rentals.where((r) => r.providerId == providerId)));
+
+  @override
+  Future<List<Rental>> allRentals() => _delay(() => _sorted(_rentals));
+
+  // ---------------------------------------------------------------- guarantee flow
+
+  @override
+  Future<Rental> reviewGuarantee(
+    String rentalId,
+    String guaranteeId,
+    AppUser actor, {
+    required bool accept,
+    String? note,
+  }) =>
+      _mutate(() {
+        final r = _rentalById(rentalId);
+        _requireOwner(r, actor);
+        if (r.status != RentalStatus.pendingConfirmation) {
+          throw const AppException('INVALID_STATE', 'Jaminan hanya bisa diperiksa sebelum konfirmasi.');
+        }
+        final g = r.guarantees.firstWhere((x) => x.id == guaranteeId);
+        g
+          ..status = accept ? GuaranteeStatus.verified : GuaranteeStatus.rejected
+          ..note = note;
+        return r;
+      });
+
+  @override
+  Future<Rental> confirmBooking(String rentalId, AppUser actor) => _mutate(() {
+        final r = _rentalById(rentalId);
+        _requireOwner(r, actor);
+        _transition(r, RentalStatus.awaitingPayment, actor);
+        return r;
+      });
+
+  @override
+  Future<Rental> rejectBooking(String rentalId, AppUser actor, String reason) =>
+      _mutate(() {
+        final r = _rentalById(rentalId);
+        _requireOwner(r, actor);
+        _transition(r, RentalStatus.rejected, actor, note: reason);
+        r.cancelReason = reason;
+        return r;
+      });
+
+  @override
+  Future<Rental> cancelBooking(String rentalId, AppUser actor, String reason) =>
+      _mutate(() {
+        final r = _rentalById(rentalId);
+        _requireRenter(r, actor);
+        _transition(r, RentalStatus.cancelled, actor, note: reason);
+        r.cancelReason = reason;
+        return r;
+      });
+
+  @override
+  Future<Rental> submitPayment(String rentalId, AppUser actor, Uint8List proof) =>
+      _mutate(() {
+        final r = _rentalById(rentalId);
+        _requireRenter(r, actor);
+        // Versi mock: bukti langsung dianggap sah. Di server, bukti masuk
+        // tabel payments berstatus pending dan diverifikasi dulu.
+        _transition(r, RentalStatus.paid, actor, note: 'Bukti bayar diunggah');
+        r.paymentProof = proof;
+        return r;
+      });
+
+  @override
+  Future<Rental> handover(String rentalId, AppUser actor) => _mutate(() {
+        final r = _rentalById(rentalId);
+        _requireOwner(r, actor);
+        if (r.status != RentalStatus.paid) {
+          throw const AppException('INVALID_STATE', 'Alat hanya bisa diserahkan setelah pembayaran.');
+        }
+        final now = DateTime.now();
+        for (final g in r.guarantees) {
+          g
+            ..status = GuaranteeStatus.held
+            ..heldAt = now;
+        }
+        _transition(r, RentalStatus.pickedUp, actor,
+            note: 'Dokumen asli jaminan diterima provider');
+        return r;
+      });
+
+  @override
+  Future<Rental> receiveReturn(String rentalId, AppUser actor) => _mutate(() {
+        final r = _rentalById(rentalId);
+        _requireOwner(r, actor);
+        _transition(r, RentalStatus.returned, actor);
+        return r;
+      });
+
+  @override
+  Future<Rental> returnGuaranteesAndComplete(String rentalId, AppUser actor) =>
+      _mutate(() {
+        final r = _rentalById(rentalId);
+        _requireOwner(r, actor);
+        if (r.status != RentalStatus.returned) {
+          throw const AppException('INVALID_STATE', 'Alat belum dikembalikan.');
+        }
+        final now = DateTime.now();
+        for (final g in r.guarantees) {
+          g
+            ..status = GuaranteeStatus.returned
+            ..returnedAt = now;
+        }
+        _transition(r, RentalStatus.completed, actor,
+            note: 'Dokumen asli jaminan dikembalikan ke penyewa');
+        return r;
+      });
+
+  // ---------------------------------------------------------------- provider & admin
+
+  @override
+  Future<Equipment> saveEquipment(Equipment draft, AppUser actor) => _mutate(() {
+        final providerId = actor.providerId;
+        if (actor.role != UserRole.provider || providerId == null) {
+          throw const AppException('FORBIDDEN', 'Hanya penyedia yang bisa mengelola alat.');
+        }
+        final isNew = draft.id.isEmpty;
+        if (!isNew && _equipmentById(draft.id).providerId != providerId) {
+          throw const AppException('FORBIDDEN', 'Alat ini bukan milik toko Anda.');
+        }
+        final errors = validateEquipment(draft);
+        if (errors.isNotEmpty) throw AppException('VALIDATION', errors.join('\n'));
+
+        final saved = Equipment(
+          id: isNew ? 'e-${DateTime.now().microsecondsSinceEpoch}' : draft.id,
+          providerId: providerId,
+          categoryId: draft.categoryId,
+          name: draft.name.trim(),
+          brand: draft.brand.trim(),
+          description: draft.description.trim(),
+          pricePerDay: draft.pricePerDay,
+          depositAmount: draft.depositAmount,
+          weightGram: draft.weightGram,
+          stock: draft.hasSizes ? 0 : draft.stock,
+          sizes: draft.sizes,
+          photos: draft.photos,
+          rating: isNew ? 0 : _equipmentById(draft.id).rating,
+          conditionScore: isNew ? 100 : _equipmentById(draft.id).conditionScore,
+          capacityPerson: draft.capacityPerson,
+          isActive: draft.isActive,
+        );
+        if (isNew) {
+          _equipment.add(saved);
+        } else {
+          _equipment[_equipment.indexWhere((e) => e.id == saved.id)] = saved;
+        }
+        return saved;
+      });
+
+  @override
+  Future<ProviderProfile> updateGuaranteePolicy(
+          String providerId, GuaranteePolicy policy, AppUser actor) =>
+      _mutate(() {
+        final p = _providerById(providerId);
+        if (actor.providerId != p.id) {
+          throw const AppException('FORBIDDEN', 'Bukan toko Anda.');
+        }
+        if (policy.acceptedTypes.isEmpty) {
+          throw const AppException('VALIDATION', 'Pilih minimal satu jenis jaminan.');
+        }
+        if (policy.acceptedTypes.length < policy.requiredCount(double.infinity)) {
+          throw const AppException('VALIDATION',
+              'Jenis jaminan yang diterima lebih sedikit dari jumlah jaminan yang diminta.');
+        }
+        p.policy = policy;
+        return p;
+      });
+
+  @override
+  Future<ProviderProfile> setProviderStatus(
+          String providerId, ProviderStatus status, AppUser actor) =>
+      _mutate(() {
+        _requireAdmin(actor);
+        final p = _providerById(providerId);
+        p.status = status;
+        return p;
+      });
+}

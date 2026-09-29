@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>RentGear promo</title>
+<style>
+  :root{
+    --forest:#2E6B4F;
+    --forest-deep:#20503A;
+    --summit:#E07A2F;
+    --sand:#F6F3EC;
+    --ink:#1F2A24;
+    --muted:#6B7570;
+    --white:#FFFFFF;
+    --line: rgba(31,42,36,0.08);
+
+    /* same motion vocabulary as lib/widgets/motion.dart */
+    --ease-out: cubic-bezier(.16,.84,.44,1);
+    --ease-pop: cubic-bezier(.34,1.56,.64,1);
+    --entrance: .26s;
+    --standard: .22s;
+    --delight: .5s;
+
+    /* step MUST equal scene-in + scene-hold: the next scene's fade-in has to
+       start exactly when this scene's fade-out starts, or both sit fully
+       opaque at once and the copy text double-exposes during the crossfade. */
+    --scene-in: .4s;
+    --scene-hold: 3.6s;
+    --scene-out: .4s;
+    --step: 4.0s;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;width:1920px;height:1080px;background:var(--sand);
+    font-family:-apple-system,"SF Pro Display","Inter",Helvetica,Arial,sans-serif;
+    overflow:hidden;}
+
+  .stage{position:relative;width:1920px;height:1080px;}
+
+  .bg-glow{position:absolute;inset:0;
+    background:
+      radial-gradient(760px 760px at 18% 30%, rgba(46,107,79,0.10), transparent 60%),
+      radial-gradient(900px 700px at 88% 82%, rgba(224,122,47,0.07), transparent 60%);
+  }
+
+  .brandline{position:absolute; left:64px; bottom:48px; display:flex; align-items:center; gap:12px; z-index:50;}
+  .brandline .mark{width:22px;height:16px;}
+  .brandline span{font-size:18px; font-weight:700; color:var(--ink); letter-spacing:.2px; opacity:.55;}
+
+  .dots{position:absolute; right:64px; bottom:52px; display:flex; gap:9px; z-index:50;}
+  .dots i{width:7px;height:7px;border-radius:50%;background:var(--ink); opacity:.15; display:block;}
+  .dots i.on{background:var(--forest); opacity:1;}
+
+  /* ---------- scene scaffolding ---------- */
+  .scene{
+    position:absolute; inset:0;
+    opacity:0;
+    animation-name: scene-life;
+    animation-duration: calc(var(--scene-in) + var(--scene-hold) + var(--scene-out));
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+  }
+  @keyframes scene-life{
+    /* fade+scale: the incoming scene settles in from 103%, the outgoing one
+       recedes to 98.5% as it fades — a depth cue so an overlapping frame
+       reads as one scene arriving/leaving, not two flat layers double-printed. */
+    0%    { opacity:0; transform:scale(1.03); }
+    9.09% { opacity:1; transform:scale(1); }      /* .4/4.4 */
+    90.91%{ opacity:1; transform:scale(1); }      /* (.4+3.6)/4.4 */
+    100%  { opacity:0; transform:scale(.985); }
+  }
+
+  .scene[data-i="0"]{ animation-delay: calc(var(--step) * 0); }
+  .scene[data-i="1"]{ animation-delay: calc(var(--step) * 1); }
+  .scene[data-i="2"]{ animation-delay: calc(var(--step) * 2); }
+  .scene[data-i="3"]{ animation-delay: calc(var(--step) * 3); }
+  .scene[data-i="4"]{ animation-delay: calc(var(--step) * 4); }
+  .scene[data-i="5"]{ animation-delay: calc(var(--step) * 5); }
+
+  .scene .kenburns{position:absolute; inset:-40px; transform:scale(1); animation: kb 4.4s linear forwards;}
+  @keyframes kb{ from{ transform:scale(1);} to{ transform:scale(1.035);} }
+
+  /* ---------- entrance helper (mirrors FadeSlideIn) ---------- */
+  .enter{ opacity:0; transform:translateY(14px); animation: enter var(--entrance) var(--ease-out) forwards; }
+  @keyframes enter{ to{ opacity:1; transform:translateY(0); } }
+
+  /* ---------- bookend (title / closing) scenes ---------- */
+  .bookend{ display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; position:relative; z-index:2;}
+  .lockup-mark{ width:150px; height:110px; margin-bottom:22px; }
+  .brand-name{ font-size:104px; font-weight:800; color:var(--forest); letter-spacing:-2px; margin:0; }
+  .tagline{ font-size:32px; color:var(--muted); margin:14px 0 0; font-weight:500;}
+  .rule{ width:220px; height:5px; border-radius:3px; background:var(--summit); margin:34px 0; }
+  .footnote{ font-size:22px; color:var(--muted); letter-spacing:.3px;}
+  .cta{
+    display:inline-flex; align-items:center; gap:10px; background:var(--forest); color:#fff;
+    padding:20px 44px; border-radius:999px; font-size:24px; font-weight:700;
+    box-shadow: 0 18px 40px -12px rgba(46,107,79,0.55);
+  }
+
+  /* ---------- product-scene layout: phone left, copy right ---------- */
+  .product{ position:relative; z-index:2; height:100%; display:flex; align-items:center; padding:0 150px; gap:120px;}
+  .phone-wrap{ position:relative; width:520px; flex:none; display:flex; justify-content:center;}
+  .phone-shadow{ position:absolute; bottom:-30px; width:360px; height:46px; left:50%; transform:translateX(-50%);
+    background:radial-gradient(ellipse at center, rgba(31,42,36,0.28), transparent 70%); filter:blur(2px);}
+  .phone{
+    position:relative; width:412px; height:860px; border-radius:52px;
+    background:linear-gradient(160deg,#20241f,#0d100e 65%);
+    padding:14px; box-shadow: 0 40px 80px -30px rgba(20,30,24,0.55), 0 2px 0 rgba(255,255,255,0.04) inset;
+  }
+  .phone::before{ /* side button */
+    content:""; position:absolute; right:-3px; top:150px; width:3px; height:70px; background:#141814; border-radius:2px;
+  }
+  .screen{ position:relative; width:100%; height:100%; background:var(--sand); border-radius:38px; overflow:hidden;}
+  .notch{ position:absolute; top:16px; left:50%; transform:translateX(-50%); width:120px; height:22px; border-radius:12px; background:#0d100e; z-index:5;}
+  .statusbar{ position:absolute; top:0; left:0; right:0; height:52px; display:flex; align-items:center; justify-content:space-between; padding:0 30px; font-size:14px; font-weight:700; color:var(--ink); z-index:4;}
+
+  .copy{ max-width:760px; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:16px; font-weight:800; letter-spacing:3px; color:var(--summit); margin:0 0 18px; }
+  .eyebrow::before{ content:""; width:22px; height:2.5px; background:var(--summit); border-radius:2px; }
+  h2.title{ font-size:58px; line-height:1.08; font-weight:800; color:var(--ink); margin:0 0 26px; letter-spacing:-1px;}
+  .lede{ font-size:26px; line-height:1.55; color:var(--muted); font-weight:450; }
+  .lede b{ color:var(--ink); font-weight:700; }
+
+  /* ---------- icon chip ---------- */
+  .ic{ width:56px; height:56px; border-radius:16px; display:flex; align-items:center; justify-content:center; flex:none;}
+  .ic svg{ width:28px; height:28px; }
+
+  /* ---------- catalog scene ---------- */
+  .app-header{ padding:78px 26px 0; }
+  .hello{ font-size:24px; font-weight:800; color:var(--ink); margin:0 0 16px;}
+  .search{ height:50px; border-radius:16px; background:#fff; border:1px solid var(--line); display:flex; align-items:center; padding:0 18px; gap:10px; color:var(--muted); font-size:15px; margin-bottom:16px;}
+  .chips{ display:flex; gap:8px; margin-bottom:20px;}
+  .chip{ height:34px; padding:0 18px; border-radius:999px; display:flex; align-items:center; font-size:13px; font-weight:700;}
+  .chip.on{ background:var(--forest); color:#fff;}
+  .chip.off{ background:#fff; color:var(--ink); border:1px solid var(--line);}
+  .list{ padding:0 26px; display:flex; flex-direction:column; gap:12px;}
+  .card{ background:#fff; border-radius:20px; padding:14px; display:flex; gap:14px; align-items:center;
+    box-shadow: 0 10px 24px -18px rgba(31,42,36,0.35); border:1px solid var(--line);}
+  .card .meta{ flex:1; min-width:0;}
+  .card .name{ font-size:16px; font-weight:700; color:var(--ink); margin:0 0 2px;}
+  .card .brand{ font-size:13px; color:var(--muted); margin:0 0 6px;}
+  .card .row{ font-size:13px; color:var(--ink); display:flex; gap:10px; align-items:center; margin-bottom:6px;}
+  .card .row .muted{ color:var(--muted);}
+  .card .price{ font-size:17px; font-weight:800; color:var(--forest);}
+  .card .price small{ font-size:12px; font-weight:500; color:var(--muted);}
+
+  .stagger > *{ opacity:0; transform:translateY(14px); animation: enter var(--entrance) var(--ease-out) forwards; }
+
+  /* ---------- detail / booking scene ---------- */
+  .hero-img{ position:relative; height:280px; background:
+      linear-gradient(160deg,#3c5a44,#243b2c);
+  }
+  .hero-img .glyph{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+  .hero-img .glyph svg{ width:96px; height:96px; opacity:.92; }
+  .badge-idx{ position:absolute; right:16px; bottom:16px; background:rgba(0,0,0,.45); color:#fff; font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px;}
+  .sheet{ padding:22px 26px 0; }
+  .item-title{ font-size:24px; font-weight:800; color:var(--ink); margin:0 0 2px;}
+  .item-sub{ font-size:15px; color:var(--muted); margin:0 0 14px;}
+  .pillrow{ display:flex; gap:8px; margin-bottom:18px;}
+  .pill{ height:32px; padding:0 14px; border-radius:999px; font-size:13px; font-weight:700; display:flex; align-items:center; gap:6px;}
+  .price-card{ background:#fff; border:1px solid var(--line); border-radius:18px; padding:18px 20px; margin-bottom:16px;}
+  .price-line{ display:flex; justify-content:space-between; font-size:15px; color:var(--muted); padding:6px 0;}
+  .price-line b{ color:var(--ink); font-weight:700;}
+  .price-line.total{ border-top:1px solid var(--line); margin-top:6px; padding-top:14px;}
+  .price-line.total b{ color:var(--forest); font-size:19px; font-weight:800;}
+  .cta-btn{ height:64px; border-radius:18px; background:var(--forest); color:#fff; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; margin:6px 26px 0; box-shadow:0 16px 30px -14px rgba(46,107,79,0.6);}
+
+  /* ---------- status timeline scene ---------- */
+  .tx-head{ padding:74px 26px 0; display:flex; justify-content:space-between; align-items:flex-start;}
+  .tx-head .inv{ font-size:14px; color:var(--muted); margin-top:6px;}
+  .status-wrap{ position:relative; display:inline-block; }
+  .status-badge{ height:34px; padding:0 18px; border-radius:999px; font-size:13px; font-weight:800; display:flex; align-items:center;}
+  .timeline{ margin:22px 26px 0; background:#fff; border:1px solid var(--line); border-radius:20px; padding:20px 20px 8px;}
+  .timeline h4{ font-size:15px; font-weight:800; color:var(--ink); margin:0 0 14px;}
+  .step{ display:flex; align-items:center; gap:14px; padding:12px 0; }
+  .dot{ width:12px; height:12px; border-radius:50%; flex:none;}
+  .check{ width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:none; background:#1E8E3E;
+    transform:scale(0); animation: pop var(--delight) var(--ease-pop) forwards; }
+  .check svg{ width:14px;height:14px;}
+  @keyframes pop{ to{ transform:scale(1); } }
+  .step .label{ font-size:15px; font-weight:700; color:var(--ink);}
+
+  /* ---------- admin scene ---------- */
+  .admin-head{ padding:74px 26px 0;}
+  .admin-head h3{ font-size:24px; font-weight:800; color:var(--ink); margin:0;}
+  .prov-list{ padding:20px 26px 0; display:flex; flex-direction:column; gap:14px;}
+  .prov{ background:#fff; border:1px solid var(--line); border-radius:20px; padding:18px; position:relative; box-shadow:0 10px 24px -18px rgba(31,42,36,0.3);}
+  .prov.highlight{ border:2px solid var(--forest); box-shadow:0 0 0 6px rgba(46,107,79,0.10);}
+  .prov .top{ display:flex; justify-content:space-between; align-items:flex-start;}
+  .prov .name{ font-size:17px; font-weight:800; color:var(--ink);}
+  .prov .addr{ font-size:13px; color:var(--muted); margin:6px 0;}
+  .prov .doc{ font-size:12px; color:var(--ink); opacity:.75;}
+  .badge-crossfade{ position:relative; height:30px; width:126px;}
+  .badge-crossfade span{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; border-radius:999px; font-size:12px; font-weight:800;}
+  .badge-crossfade .from{ background:#FBE7D2; color:var(--summit); animation: crossOut var(--standard) var(--ease-out) forwards; animation-delay: 1.6s;}
+  .badge-crossfade .to{ background:#DCF3E3; color:#1E8E3E; opacity:0; transform:scale(.92); animation: crossIn var(--standard) var(--ease-out) forwards; animation-delay: 1.6s;}
+  @keyframes crossOut{ to{ opacity:0; transform:scale(.92);} }
+  @keyframes crossIn{ to{ opacity:1; transform:scale(1);} }
+  .just-verified{ font-size:12px; font-weight:800; color:var(--forest); margin-top:10px; opacity:0; animation: enter var(--entrance) var(--ease-out) forwards; animation-delay:1.85s;}
+
+  /* icon backgrounds */
+  .bg-forest{ background:#DCEDE3; color:var(--forest);}
+  .bg-blue{ background:#DCE8F5; color:#1D6FB8;}
+  .bg-sun{ background:#F3E7D8; color:#8a6a2f;}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="bg-glow"></div>
+
+  <!-- 0: TITLE -->
+  <section class="scene" data-i="0">
+    <div class="bookend">
+      <svg class="lockup-mark" viewBox="0 0 150 110"><path d="M8 100 L60 20 L82 55 L104 10 L142 100 Z" fill="#2E6B4F"/></svg>
+      <h1 class="brand-name">RentGear</h1>
+      <p class="tagline">Sewa alat hiking &amp; camping, aman dan terverifikasi</p>
+      <div class="rule"></div>
+      <p class="footnote">Aplikasi mobile &nbsp;&#183;&nbsp; katalog real &nbsp;&#183;&nbsp; jaminan dokumen &nbsp;&#183;&nbsp; alur penuh tervalidasi</p>
+    </div>
+  </section>
+
+  <!-- 1: CATALOG -->
+  <section class="scene" data-i="1">
+    <div class="kenburns product">
+      <div class="phone-wrap">
+        <div class="phone-shadow"></div>
+        <div class="phone"><div class="notch"></div><div class="screen">
+          <div class="statusbar"><span>12:41</span><span>&#9679;&#9679;&#9679;</span></div>
+          <div class="app-header enter" style="animation-delay:.05s">
+            <p class="hello">Halo, Budi</p>
+            <div class="search">Cari tenda, carrier, merek&#8230;</div>
+            <div class="chips">
+              <div class="chip on">Semua</div>
+              <div class="chip off">Tenda</div>
+              <div class="chip off">Carrier</div>
+            </div>
+          </div>
+          <div class="list stagger">
+            <div class="card" style="animation-delay:.10s">
+              <div class="ic bg-forest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 L21 20 H3 Z"/><path d="M12 4 L12 20"/></svg></div>
+              <div class="meta">
+                <p class="name">Tenda Dome 4 Orang</p>
+                <p class="brand">Eiger</p>
+                <div class="row">&#9733; 4.7 <span class="muted">&#183; Stok 3</span></div>
+                <div class="price">Rp45.000<small> /hari</small></div>
+              </div>
+            </div>
+            <div class="card" style="animation-delay:.15s">
+              <div class="ic bg-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="8" width="12" height="13" rx="3"/><path d="M9 8 V6 a3 3 0 0 1 6 0 v2"/><path d="M9 13h6"/></svg></div>
+              <div class="meta">
+                <p class="name">Carrier 60L</p>
+                <p class="brand">Consina</p>
+                <div class="row">&#9733; 4.6 <span class="muted">&#183; Stok 5</span></div>
+                <div class="price">Rp35.000<small> /hari</small></div>
+              </div>
+            </div>
+            <div class="card" style="animation-delay:.20s">
+              <div class="ic bg-sun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13a8 8 0 0 0 15.3 3.2A9 9 0 0 1 8.8 5.7 8 8 0 0 0 4 13Z"/></svg></div>
+              <div class="meta">
+                <p class="name">Sleeping Bag Polar</p>
+                <p class="brand">Rei</p>
+                <div class="row">&#9733; 4.5 <span class="muted">&#183; Stok 8</span></div>
+                <div class="price">Rp15.000<small> /hari</small></div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+      <div class="copy">
+        <p class="eyebrow">KATALOG</p>
+        <h2 class="title">Cari alat, langsung ketahuan stoknya</h2>
+        <p class="lede">Foto asli, rating, dan <b>stok real-time</b> per hari &mdash; bukan data tebakan.<br>Filter kategori &amp; pencarian instan.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2: DETAIL + BOOKING -->
+  <section class="scene" data-i="2">
+    <div class="kenburns product">
+      <div class="phone-wrap">
+        <div class="phone-shadow"></div>
+        <div class="phone"><div class="notch"></div><div class="screen">
+          <div class="hero-img enter">
+            <div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 L21 20 H3 Z"/><path d="M12 4 L12 20"/></svg></div>
+            <div class="badge-idx">1/3</div>
+          </div>
+          <div class="sheet">
+            <p class="item-title enter" style="animation-delay:.08s">Tenda Dome 4 Orang</p>
+            <p class="item-sub enter" style="animation-delay:.10s">Eiger</p>
+            <div class="pillrow stagger">
+              <div class="pill" style="animation-delay:.14s;background:#FBE7D2;color:var(--summit)">&#9733; 4.7</div>
+              <div class="pill" style="animation-delay:.18s;background:#DCF3E3;color:#1E8E3E">Kondisi 88/100</div>
+              <div class="pill" style="animation-delay:.22s;background:#EEEEEA;color:var(--ink)">3,2 kg</div>
+            </div>
+            <div class="price-card enter" style="animation-delay:.24s">
+              <div class="price-line"><span>Sewa per hari</span><b>Rp45.000</b></div>
+              <div class="price-line"><span>Deposit (dikembalikan)</span><b>Rp100.000</b></div>
+              <div class="price-line total"><span>Total (2 hari)</span><b>Rp190.000</b></div>
+            </div>
+          </div>
+          <div class="cta-btn enter" style="animation-delay:.3s">Sewa Sekarang</div>
+        </div></div>
+      </div>
+      <div class="copy">
+        <p class="eyebrow">BOOKING</p>
+        <h2 class="title">Dari lihat alat sampai bayar, satu alur</h2>
+        <p class="lede">Galeri foto, <b>rincian biaya otomatis</b>, dan jaminan dokumen yang jelas sebelum konsumen menekan Sewa.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3: STATUS TIMELINE -->
+  <section class="scene" data-i="3">
+    <div class="kenburns product">
+      <div class="phone-wrap">
+        <div class="phone-shadow"></div>
+        <div class="phone"><div class="notch"></div><div class="screen">
+          <div class="tx-head enter">
+            <div>
+              <p class="item-title" style="font-size:20px;margin-bottom:4px;">Detail Transaksi</p>
+              <p class="inv">INV-20260927-0002</p>
+            </div>
+            <div class="status-badge" style="background:#DCF3E3;color:#1E8E3E;">Selesai</div>
+          </div>
+          <div class="timeline enter" style="animation-delay:.1s">
+            <h4>Riwayat status</h4>
+            <div class="step"><div class="dot" style="background:#E0762A"></div><div class="label">Menunggu konfirmasi</div></div>
+            <div class="step"><div class="dot" style="background:#E0762A"></div><div class="label">Menunggu pembayaran</div></div>
+            <div class="step"><div class="dot" style="background:#1D6FB8"></div><div class="label">Siap diambil</div></div>
+            <div class="step"><div class="dot" style="background:#2E6B4F"></div><div class="label">Sedang disewa</div></div>
+            <div class="step"><div class="dot" style="background:#1E8E6B"></div><div class="label">Sudah dikembalikan</div></div>
+            <div class="step">
+              <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></div>
+              <div class="label">Selesai</div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+      <div class="copy">
+        <p class="eyebrow">STATUS</p>
+        <h2 class="title">Setiap perubahan status terlihat jelas</h2>
+        <p class="lede">Badge status berpindah mulus, dan transaksi yang baru <b>&ldquo;Selesai&rdquo;</b> ditandai centang &mdash; bukan cuma titik biasa.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4: ADMIN VERIFICATION -->
+  <section class="scene" data-i="4">
+    <div class="kenburns product">
+      <div class="phone-wrap">
+        <div class="phone-shadow"></div>
+        <div class="phone"><div class="notch"></div><div class="screen">
+          <div class="admin-head enter"><h3>Verifikasi Penyedia</h3></div>
+          <div class="prov-list stagger">
+            <div class="prov" style="animation-delay:.08s">
+              <div class="top"><div class="name">Arjuna Outdoor</div><div class="status-badge" style="background:#DCF3E3;color:#1E8E3E;height:30px;">Terverifikasi</div></div>
+              <p class="addr">Jl. Soekarno Hatta No. 12, Malang</p>
+              <p class="doc">Jaminan: KTP, SIM</p>
+            </div>
+            <div class="prov" style="animation-delay:.14s">
+              <div class="top"><div class="name">Semeru Camp Rent</div><div class="status-badge" style="background:#DCF3E3;color:#1E8E3E;height:30px;">Terverifikasi</div></div>
+              <p class="addr">Jl. Raya Senduro No. 5, Lumajang</p>
+              <p class="doc">Jaminan: KTP, KTM</p>
+            </div>
+            <div class="prov highlight" style="animation-delay:.20s">
+              <div class="top"><div class="name">Puncak Outdoor</div>
+                <div class="badge-crossfade">
+                  <span class="from">Menunggu</span>
+                  <span class="to">Terverifikasi</span>
+                </div>
+              </div>
+              <p class="addr">Jl. Panglima Sudirman No. 88, Batu</p>
+              <p class="doc">Jaminan: KTP, SIM</p>
+              <p class="just-verified">Baru saja diverifikasi</p>
+            </div>
+          </div>
+        </div></div>
+      </div>
+      <div class="copy">
+        <p class="eyebrow">ADMIN</p>
+        <h2 class="title">Provider baru, tersaring sebelum tampil</h2>
+        <p class="lede">Admin memverifikasi tiap penyedia. Alat penyedia baru muncul di katalog hanya setelah status <b>Terverifikasi</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5: CLOSING -->
+  <section class="scene" data-i="5">
+    <div class="bookend">
+      <svg class="lockup-mark" style="width:120px;height:88px;" viewBox="0 0 150 110"><path d="M8 100 L60 20 L82 55 L104 10 L142 100 Z" fill="#2E6B4F"/></svg>
+      <h2 style="font-size:72px;font-weight:800;color:var(--forest);margin:0;letter-spacing:-1.5px;">RentGear siap dipakai</h2>
+      <p class="tagline" style="font-size:28px;">Booking cepat &#183; jaminan dokumen &#183; provider terverifikasi</p>
+      <div class="cta" style="margin-top:34px;">Coba sekarang</div>
+      <p class="footnote" style="margin-top:44px;">Dibangun dengan Flutter &#183; satu kode untuk Android &amp; iOS</p>
+    </div>
+  </section>
+
+  <div class="brandline">
+    <svg class="mark" viewBox="0 0 150 110"><path d="M8 100 L60 20 L82 55 L104 10 L142 100 Z" fill="#2E6B4F"/></svg>
+    <span>RentGear</span>
+  </div>
+  <div class="dots" id="dots"></div>
+</div>
+<script>
+  // progress dots follow the active scene, purely cosmetic / helps QA scrubbing
+  var dots = document.getElementById('dots');
+  for (var i=0;i<6;i++){ var d=document.createElement('i'); dots.appendChild(d); }
+  var els = dots.children;
+  var STEP = 4.0, total = 5.2;
+  function tick(){
+    var t = (performance.now()/1000) % (STEP*6);
+    for (var i=0;i<6;i++){
+      var start = i*STEP, end = start+total;
+      els[i].className = (t>=start && t<end) ? 'on' : '';
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+</script>
+</body>
+</html>
