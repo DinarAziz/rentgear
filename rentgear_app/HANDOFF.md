@@ -227,8 +227,11 @@ github.com/DinarAziz/rentgear):
 - Checked in Chrome (Playwright screenshots at 390x844, 820x1180 and 1440x900): login, catalog, equipment detail,
   admin dashboard, Transaksi, Penyedia and Profil all render as planned. The web version has not been tested on
   a real phone browser, and none of these changes were rechecked on the Android build.
-- Rebuilding the web release: `flutter build web --release` in `rentgear_app/`, then
-  `rsync -a --delete --exclude README.md build/web/ ../webapp/`. Many older files are not `dart format`ted on
+- Rebuilding the web release: run `tool/build_web.sh`. It builds, renames `main.dart.js` to
+  `main.dart.<hash>.js`, loads `flutter_bootstrap.js?v=<hash>` from `index.html`, then refreshes `../webapp/` and
+  `../rentgear-web.zip`. The hash is needed because rentgear.serverbaik.my.id sits behind Cloudflare, which cached
+  the old `main.dart.js` per `Accept-Encoding` (gzip/br copies from 29 Sep were still served after the new upload),
+  so desktop browsers kept getting the phone-only build. `index.html` is not cached by Cloudflare (`DYNAMIC`). Many older files are not `dart format`ted on
   purpose, so format only the files you touch and never the whole `lib/`.
 
 ## Next (resume here)
