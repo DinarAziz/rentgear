@@ -259,3 +259,48 @@ github.com/DinarAziz/rentgear):
   been built, run, or tested yet — sessions 1-5 were Android/Redmi only and session 6 was web only. No `dart:io` usage is known to be
   Android-only, but that hasn't been audited for iOS yet either.
 - The Laravel backend is on hold per the user's request.
+
+## Session (2026-09-30, Lynk.id payment)
+
+Payment now goes through the platform's Lynk.id page instead of a bank transfer to each provider.
+
+- `lib/core/payment.dart`: `lynkPaymentUrl`, default `https://lynk.id/pembayaranbaik`; override at build time with
+  `--dart-define=LYNK_URL=...`.
+- `rental_detail_screen.dart`: the customer's "Cara bayar" card (`_LynkPaymentCard`) shows the total and the invoice code,
+  each with a copy button, three short steps, and a "Buka Lynk.id" button. The button opens the page in a Custom Tab
+  (`LaunchMode.inAppBrowserView`). The payment proof upload is unchanged; labels now say "bukti bayar".
+  `ProviderProfile.bankAccount` is now the provider's payout account and no longer appears in the customer's payment card.
+- New dependency `url_launcher`; `AndroidManifest.xml` `<queries>` has an https VIEW intent.
+- Test: `test/lynk_payment_test.dart`. `flutter analyze` clean, 31 tests pass.
+
+Verified on the Redmi (debug APK): Rina books Tenda Dome 14-15 Oct (INV-20260930-0002, left in "Menunggu pembayaran"),
+Arjuna marks the KTP Valid and confirms, Rina sees the Lynk.id card, copying the invoice code shows "Kode invoice disalin.",
+and "Buka Lynk.id" opens lynk.id/pembayaranbaik.
+
+Open items:
+- The Lynk.id page has no product yet (only the avatar), so nobody can pay there. It needs a product that takes a
+  free amount (support/tip type), or the URL should point straight at that product.
+- On this Redmi, Developer options > "Don't keep activities" is ON (`mAlwaysFinishActivities=true`). Every time the app goes
+  to the background, Android destroys the activity, so after the Lynk.id tab the app comes back on Katalog instead of
+  the rental. `settings put global always_finish_activities 0` over adb does not take effect live; the switch has to be
+  turned off in the phone's settings. This is a device setting, not an app bug.
+- The amount on the receipt is still not matched against the bill automatically; that needs the Laravel webhook.
+
+## Next: switch payment to Midtrans (decided 2026-09-30, not started)
+
+The user compared Lynk.id, Midtrans, Xendit, Tripay and DOKU and chose **Midtrans Sandbox (Snap)**. Lynk.id stays in the
+app only until Midtrans works. Lynk.id has no API for per-invoice amounts, and the user's page has no product.
+
+Plan:
+1. The user signs up at dashboard.sandbox.midtrans.com and gets the Server Key and Client Key (Settings > Access Keys).
+   The Server Key must never go into the APK.
+2. Laravel API (not built yet), two endpoints to start with:
+   - `POST /api/rentals/{id}/payment`: create a Snap transaction (`order_id` = invoice code, `gross_amount` = grandTotal)
+     with `midtrans/midtrans-php`, return `redirect_url`.
+   - `POST /api/midtrans/notification`: check `signature_key` = SHA512(order_id + status_code + gross_amount + ServerKey),
+     then on `settlement`/`capture` move the rental from "Menunggu pembayaran" to "Siap diambil".
+   - Use ngrok to expose the local server for the webhook, and set it as the Payment Notification URL in the sandbox dashboard.
+3. Flutter: replace `_LynkPaymentCard` with a "Bayar sekarang" button that calls endpoint 1 and opens `redirect_url` in
+   a Custom Tab (`url_launcher` is already installed). Proof upload is no longer needed once the webhook works.
+   `LocalRentGearRepository` has no server, so this needs an HTTP repository, or a small payment client used alongside it.
+4. Demo: pay with the Midtrans sandbox simulator (VA/QRIS).
