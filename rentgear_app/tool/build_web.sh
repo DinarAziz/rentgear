@@ -10,6 +10,8 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+# flutter build keeps old files, so a previous main.dart.<hash>.js would ship too.
+rm -rf build/web
 flutter build web --release
 
 out=build/web
