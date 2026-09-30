@@ -1,10 +1,10 @@
-# RentGear — Handoff (updated 2026-09-27 ~13:15)
+# RentGear — Handoff (updated 2026-09-30)
 
-Status of the Android app work so the next session can resume the device testing.
+Status of the Android app and web build so the next session can pick up where this one stopped.
 
 ## Current state
 
-- `flutter analyze`: no issues. `flutter test`: 29 tests pass.
+- `flutter analyze`: no issues. `flutter test`: 30 tests pass.
 - Standalone Android app with no server. Data is saved on the phone through
   `LocalRentGearRepository` + `LocalStore` (JSON + photo files, schema version 2).
 - Test phone: **REDMI 17** (HyperOS) over USB debugging, adb serial `AIFMWOTWAMMRJBPR`,
@@ -199,6 +199,38 @@ app itself, not a simulated one:
 Also this session: pushed the current build to the phone for sharing — `flutter build apk --release` (58.8MB, much
 smaller than the 188MB debug build) copied to `/sdcard/Download/RentGear.apk` on the Redmi via `adb push`.
 
+## Session 6 (2026-09-29/30, web build and responsive layouts)
+
+Web support came back (commits `17a7247`, `8ee7fa4`, `3607b1d`, all pushed to `origin/master`,
+github.com/DinarAziz/rentgear):
+
+- `LocalStore` is split by platform through a conditional export: `local_store_io.dart` (mobile/desktop, same as before)
+  and `local_store_web.dart` (browser `localStorage`). Before the split, `dart:io`/`path_provider` crashed the web app
+  on load.
+- `../webapp/` holds a compiled release build that can be served as-is (see `../webapp/README.md`, e.g. Termux
+  `python -m http.server`). `../rentgear-web.zip` is the same build zipped for sharing. The zip is not tracked in git.
+- The old 480px phone-only frame in `app.dart` is gone. Every layout now picks one of three widths from
+  `lib/core/responsive.dart` (`FormFactor`: phone < 600, tablet < 1024, desktop from 1024 up):
+  - `AdaptiveShell` (used by the customer, provider and admin shells): bottom `NavigationBar` on a phone, an icon
+    `NavigationRail` with labels on a tablet, and an extended rail with the RentGear logo on a desktop.
+  - Catalog: the phone list stays the same. Tablet and desktop get a grid of photo cards (`_EquipmentTile`) with
+    2–5 columns (about 220px minimum per card).
+  - `ResponsiveCardList` shows 1/2/3 columns of variable-height cards. It is used by Sewa Saya, provider Pesanan,
+    Alat Saya, admin Transaksi and Verifikasi Penyedia.
+  - `ReadableListView`/`ReadableWidth` center booking, rental detail (including its action bar), the equipment form,
+    Aturan Jaminan, Profil and Kredit foto at a max width of 760px (Profil 640). The side margins still scroll with
+    the mouse wheel.
+  - Login: phone as before; tablet puts the form in a card; desktop splits the screen into a green brand panel and
+    the form.
+  - Equipment detail from 900px wide: gallery on the left, info plus the "Sewa Sekarang" button on the right.
+  - Admin dashboard: 2 columns on a phone, 3 on a tablet, all 5 stats in one row on a desktop.
+- Checked in Chrome (Playwright screenshots at 390x844, 820x1180 and 1440x900): login, catalog, equipment detail,
+  admin dashboard, Transaksi, Penyedia and Profil all render as planned. The web version has not been tested on
+  a real phone browser, and none of these changes were rechecked on the Android build.
+- Rebuilding the web release: `flutter build web --release` in `rentgear_app/`, then
+  `rsync -a --delete --exclude README.md build/web/ ../webapp/`. Many older files are not `dart format`ted on
+  purpose, so format only the files you touch and never the whole `lib/`.
+
 ## Next (resume here)
 
 1. The real-phone check on this build is complete: happy path, rejection path, Admin flow, and large font (including the
@@ -210,14 +242,17 @@ smaller than the 188MB debug build) copied to `/sdcard/Download/RentGear.apk` on
    (tests in `test/format_test.dart`); provider profile shows the shop card (name, address, status, bank account);
    "Keluar" and admin "Verifikasi"/"Tolak" ask for confirmation first.
 3. Nice to have: a confirmation dialog whose action labels do not wrap to two lines.
+4. Web: try the responsive layouts on a real phone and tablet browser (e.g. `webapp/` served from Termux), and run
+   the Android build once to confirm the phone layout still matches earlier sessions.
+5. Desktop admin dashboard is mostly empty below the stat row; a recent-transactions list could fill it.
 
 ## Notes
 
-- `web/` was removed (the app uses `dart:io`). Target platforms: Android (tested on the Redmi) and, per the user's
+- Web is supported again (see Session 6). Mobile target platforms: Android (tested on the Redmi) and, per the user's
   2026-09-27 request, **iOS too** — full mobile, one Flutter codebase for both. `ios/` already exists (Flutter's default
   scaffold) and this Mac has Xcode 27.0 + CocoaPods 1.16.2, so a build is possible, but `flutter doctor` flags the iOS
   27.0 Simulator runtime as not installed (Xcode > Settings > Components) — needed before `flutter run`/`build ios` can
   target a simulator; a real device build needs an Apple ID + signing team in Xcode instead. Nothing iOS-specific has
-  been built, run, or tested yet — all sessions so far (1-5) were Android/Redmi only. No `dart:io` usage is known to be
+  been built, run, or tested yet — sessions 1-5 were Android/Redmi only and session 6 was web only. No `dart:io` usage is known to be
   Android-only, but that hasn't been audited for iOS yet either.
 - The Laravel backend is on hold per the user's request.
