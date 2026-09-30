@@ -43,37 +43,12 @@ class _RentGearAppState extends State<RentGearApp> {
       locale: const Locale('id', 'ID'),
       supportedLocales: const [Locale('id', 'ID'), Locale('en')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      builder: (context, child) => _ResponsiveFrame(child: child),
       home: switch (role) {
         null => const LoginScreen(),
         UserRole.customer => const CustomerShell(),
         UserRole.provider => const ProviderShell(),
         UserRole.admin => const AdminShell(),
       },
-    );
-  }
-}
-
-/// Keeps the phone-shaped UI centered with a max width on wide screens
-/// (web/desktop/tablet), instead of stretching layouts meant for a phone.
-class _ResponsiveFrame extends StatelessWidget {
-  const _ResponsiveFrame({required this.child});
-
-  final Widget? child;
-
-  static const double _maxContentWidth = 480;
-
-  @override
-  Widget build(BuildContext context) {
-    if (child == null) return const SizedBox.shrink();
-    return Container(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: _maxContentWidth),
-          child: child,
-        ),
-      ),
     );
   }
 }

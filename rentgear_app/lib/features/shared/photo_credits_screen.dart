@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/responsive.dart';
 import '../../widgets/common.dart';
 
 /// Atribusi foto katalog demo (Wikimedia Commons), wajib untuk lisensi CC BY/BY-SA.
@@ -25,8 +26,9 @@ class PhotoCreditsScreen extends StatelessWidget {
             }
             final items = snap.data;
             if (items == null) return const Center(child: CircularProgressIndicator());
-            return ListView.separated(
-              padding: const EdgeInsets.all(16),
+            // Kolom tengah di layar lebar; sisi kosong tetap bisa digulir.
+            return LayoutBuilder(builder: (context, c) => ListView.separated(
+              padding: centeredPadding(c.maxWidth),
               itemCount: items.length + 1,
               separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (context, i) {
@@ -53,7 +55,7 @@ class PhotoCreditsScreen extends StatelessWidget {
                   isThreeLine: true,
                 );
               },
-            );
+            ));
           },
         ),
       );

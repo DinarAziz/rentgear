@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/format.dart';
+import '../../core/responsive.dart';
 import '../../domain/availability.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
@@ -50,10 +51,9 @@ class ProviderEquipmentScreen extends StatelessWidget {
                   child: const Text('Tambah alat'),
                 ),
               )
-            : ListView.separated(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+            : ResponsiveCardList(
+                bottomPadding: 96,
                 itemCount: items.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 10),
                 itemBuilder: (context, i) {
                   final (e, available) = items[i];
                   return FadeSlideIn(

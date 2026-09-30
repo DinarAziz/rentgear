@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/responsive.dart';
 import '../../core/theme.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
@@ -18,8 +19,8 @@ class ProfileScreen extends StatelessWidget {
     if (user == null) return const SizedBox.shrink();
     return Scaffold(
       appBar: AppBar(title: const Text('Profil')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      body: ReadableListView(
+        maxWidth: 640,
         children: [
           Card(
             child: Padding(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/format.dart';
+import '../../core/responsive.dart';
 import '../../domain/availability.dart';
 import '../../domain/guarantee.dart';
 import '../../domain/models.dart';
@@ -195,8 +196,7 @@ class _BookingScreenState extends State<BookingScreen> {
       },
       child: Scaffold(
         appBar: AppBar(title: const Text('Buat Booking')),
-        body: ListView(
-          padding: const EdgeInsets.all(16),
+        body: ReadableListView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
             Card(

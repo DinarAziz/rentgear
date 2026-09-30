@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/format.dart';
+import '../../core/responsive.dart';
 import '../../domain/guarantee.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
@@ -54,8 +55,7 @@ class _Body extends StatelessWidget {
         user.role == UserRole.provider &&
         r.status == RentalStatus.pendingConfirmation;
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
+    return ReadableListView(
       children: [
         Card(
           child: Padding(
@@ -493,16 +493,18 @@ class _ActionBar extends StatelessWidget {
       elevation: 8,
       child: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final (i, a) in actions.indexed) ...[
-                if (i > 0) const SizedBox(height: 8),
-                SizedBox(width: double.infinity, child: a),
+        child: ReadableWidth(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final (i, a) in actions.indexed) ...[
+                  if (i > 0) const SizedBox(height: 8),
+                  SizedBox(width: double.infinity, child: a),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

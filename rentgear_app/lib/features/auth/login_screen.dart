@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/responsive.dart';
 import '../../core/theme.dart';
 import '../../data/local_repository.dart';
 import '../../domain/models.dart';
@@ -49,79 +50,185 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final form = Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: _form(context),
+        ),
+      ),
+    );
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Icon(Icons.landscape_rounded, size: 64, color: AppColors.forest),
-                  const SizedBox(height: 8),
-                  Text('RentGear',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w800, color: AppColors.forest)),
-                  const Text('Sewa alat hiking & camping, aman dan terverifikasi',
-                      textAlign: TextAlign.center, style: TextStyle(color: Colors.black54)),
-                  const SizedBox(height: 32),
-                  TextField(
-                    controller: _email,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    autocorrect: false,
-                    decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.mail_outline)),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _password,
-                    obscureText: true,
-                    textInputAction: TextInputAction.go,
-                    decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock_outline)),
-                    onSubmitted: (_) => _login(),
-                  ),
-                  if (_error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Text(_error!, style: TextStyle(color: Colors.red.shade700)),
+        child: switch (FormFactor.of(context)) {
+          FormFactor.phone => form,
+          // Tablet: form di dalam kartu di atas latar berwarna.
+          FormFactor.tablet => ColoredBox(
+            color: AppColors.forest.withValues(alpha: 0.08),
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(32),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: _form(context),
                     ),
-                  const SizedBox(height: 20),
-                  FilledButton(
-                    onPressed: _loading ? null : _login,
-                    child: _loading
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Text('Masuk'),
                   ),
-                  const SizedBox(height: 32),
-                  const Text('Akun demo (password: password)',
-                      textAlign: TextAlign.center, style: TextStyle(color: Colors.black54)),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: [
-                      for (final (label, email, icon) in _demo)
-                        ActionChip(
-                          avatar: Icon(icon, size: 18),
-                          label: Text(label),
-                          onPressed: () {
-                            _email.text = email;
-                            _password.text = LocalRentGearRepository.demoPassword;
-                            _login();
-                          },
-                        ),
-                    ],
+                ),
+              ),
+            ),
+          ),
+          // Desktop: panel merek di kiri, form di kanan.
+          FormFactor.desktop => Row(
+            children: [
+              const Expanded(child: _BrandPanel()),
+              Expanded(child: form),
+            ],
+          ),
+        },
+      ),
+    );
+  }
+
+  Widget _form(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      const Icon(Icons.landscape_rounded, size: 64, color: AppColors.forest),
+      const SizedBox(height: 8),
+      Text(
+        'RentGear',
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+          fontWeight: FontWeight.w800,
+          color: AppColors.forest,
+        ),
+      ),
+      const Text(
+        'Sewa alat hiking & camping, aman dan terverifikasi',
+        textAlign: TextAlign.center,
+        style: TextStyle(color: Colors.black54),
+      ),
+      const SizedBox(height: 32),
+      TextField(
+        controller: _email,
+        keyboardType: TextInputType.emailAddress,
+        textInputAction: TextInputAction.next,
+        autocorrect: false,
+        decoration: const InputDecoration(
+          labelText: 'Email',
+          prefixIcon: Icon(Icons.mail_outline),
+        ),
+      ),
+      const SizedBox(height: 12),
+      TextField(
+        controller: _password,
+        obscureText: true,
+        textInputAction: TextInputAction.go,
+        decoration: const InputDecoration(
+          labelText: 'Password',
+          prefixIcon: Icon(Icons.lock_outline),
+        ),
+        onSubmitted: (_) => _login(),
+      ),
+      if (_error != null)
+        Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Text(_error!, style: TextStyle(color: Colors.red.shade700)),
+        ),
+      const SizedBox(height: 20),
+      FilledButton(
+        onPressed: _loading ? null : _login,
+        child: _loading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Text('Masuk'),
+      ),
+      const SizedBox(height: 32),
+      const Text(
+        'Akun demo (password: password)',
+        textAlign: TextAlign.center,
+        style: TextStyle(color: Colors.black54),
+      ),
+      const SizedBox(height: 8),
+      Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 8,
+        runSpacing: 4,
+        children: [
+          for (final (label, email, icon) in _demo)
+            ActionChip(
+              avatar: Icon(icon, size: 18),
+              label: Text(label),
+              onPressed: () {
+                _email.text = email;
+                _password.text = LocalRentGearRepository.demoPassword;
+                _login();
+              },
+            ),
+        ],
+      ),
+    ],
+  );
+}
+
+class _BrandPanel extends StatelessWidget {
+  const _BrandPanel();
+
+  static const _points = [
+    (Icons.verified_user_outlined, 'Penyedia terverifikasi admin'),
+    (Icons.badge_outlined, 'Jaminan dokumen tercatat dan dikembalikan'),
+    (Icons.event_available_outlined, 'Stok dicek per tanggal, tanpa bentrok'),
+  ];
+
+  @override
+  Widget build(BuildContext context) => ColoredBox(
+    color: AppColors.forest,
+    child: Padding(
+      padding: const EdgeInsets.all(48),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.landscape_rounded, size: 72, color: Colors.white),
+          const SizedBox(height: 16),
+          Text(
+            'Naik gunung tanpa\nbeli semua alat.',
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              height: 1.15,
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Sewa tenda, carrier, sepatu, dan alat masak dari penyedia lokal.',
+            style: TextStyle(color: Colors.white70, fontSize: 16),
+          ),
+          const SizedBox(height: 32),
+          for (final (icon, text) in _points)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: Row(
+                children: [
+                  Icon(icon, color: Colors.white, size: 22),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      text,
+                      style: const TextStyle(color: Colors.white, fontSize: 15),
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
-        ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }

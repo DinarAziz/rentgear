@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/format.dart';
+import '../../core/responsive.dart';
 import '../../domain/guarantee.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
@@ -88,8 +89,7 @@ class _PolicyFormState extends State<_PolicyForm> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
+    return ReadableListView(
       children: [
         const Text(
           'Penyewa wajib menyerahkan dokumen asli sebagai jaminan saat mengambil alat. '

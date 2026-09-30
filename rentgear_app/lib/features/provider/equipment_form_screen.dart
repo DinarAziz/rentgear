@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/format.dart';
+import '../../core/responsive.dart';
 import '../../domain/equipment_rules.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
@@ -210,8 +211,7 @@ class _EquipmentFormScreenState extends State<EquipmentFormScreen> {
       child: Scaffold(
         appBar: AppBar(title: Text(_initial == null ? 'Tambah Alat' : 'Ubah Alat')),
         body: Form(
-          child: ListView(
-            padding: const EdgeInsets.all(16),
+          child: ReadableListView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
               SectionTitle('Foto (${_photos.length}/$maxEquipmentPhotos)'),

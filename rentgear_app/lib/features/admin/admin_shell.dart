@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/format.dart';
+import '../../core/responsive.dart';
 import '../../domain/guarantee.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
@@ -21,38 +22,30 @@ class _AdminShellState extends State<AdminShell> {
   int _index = 0;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: IndexedStack(
-      index: _index,
-      children: const [
-        AdminDashboardScreen(),
-        AdminProvidersScreen(),
-        AdminRentalsScreen(),
-        ProfileScreen(),
-      ],
-    ),
-    bottomNavigationBar: NavigationBar(
-      selectedIndex: _index,
-      onDestinationSelected: (i) => setState(() => _index = i),
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.dashboard_outlined),
-          label: 'Dashboard',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.storefront_outlined),
-          label: 'Penyedia',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.receipt_long_outlined),
-          label: 'Transaksi',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.person_outline),
-          label: 'Profil',
-        ),
-      ],
-    ),
+  Widget build(BuildContext context) => AdaptiveShell(
+    selectedIndex: _index,
+    onSelect: (i) => setState(() => _index = i),
+    pages: const [
+      AdminDashboardScreen(),
+      AdminProvidersScreen(),
+      AdminRentalsScreen(),
+      ProfileScreen(),
+    ],
+    destinations: const [
+      NavigationDestination(
+        icon: Icon(Icons.dashboard_outlined),
+        label: 'Dashboard',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.storefront_outlined),
+        label: 'Penyedia',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.receipt_long_outlined),
+        label: 'Transaksi',
+      ),
+      NavigationDestination(icon: Icon(Icons.person_outline), label: 'Profil'),
+    ],
   );
 }
 
@@ -99,10 +92,16 @@ class AdminDashboardScreen extends StatelessWidget {
           ];
           // Card height follows the system font scale so large text does not overflow.
           final textScale = MediaQuery.textScalerOf(context).scale(1);
+          // HP 2 kolom, tablet 3, desktop semua statistik dalam satu baris.
+          final columns = switch (FormFactor.of(context)) {
+            FormFactor.phone => 2,
+            FormFactor.tablet => 3,
+            FormFactor.desktop => stats.length,
+          };
           return GridView(
             padding: const EdgeInsets.all(16),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+              crossAxisCount: columns,
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
               mainAxisExtent: 56 + 72 * textScale,
@@ -162,10 +161,8 @@ class AdminProvidersScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Verifikasi Penyedia')),
       body: AsyncView<List<ProviderProfile>>(
         load: state.repo.providers,
-        builder: (context, providers) => ListView.separated(
-          padding: const EdgeInsets.all(16),
+        builder: (context, providers) => ResponsiveCardList(
           itemCount: providers.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 10),
           itemBuilder: (context, i) {
             final p = providers[i];
             Future<void> set(ProviderStatus s) async {
