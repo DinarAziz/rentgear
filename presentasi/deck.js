@@ -113,6 +113,14 @@ function gambarBintang() {
   }
 }
 
+/** Bintang berkelip (<i>) dan satu bintang jatuh (<b>), di atas kanvas bintang yang diam. */
+function bangunKelip() {
+  const r = acak(31);
+  const bintang = Array.from({ length: 34 }, () =>
+    `<i style="left:${(r() * 100).toFixed(1)}vw;top:${(r() * 46).toFixed(1)}vh;--lama:${(1.6 + r() * 2.6).toFixed(2)}s;--tunda:-${(r() * 4).toFixed(2)}s"></i>`);
+  $('.kelip-wrap').innerHTML = bintang.join('') + '<b></b>';
+}
+
 const dunia = {
   lapis: bangunPunggungan(),
   senja: $('.sky-dusk'),
@@ -254,6 +262,28 @@ function bangunAlur() {
 
 /* ---------- adegan: animasi khusus tiap slide ---------- */
 
+/** Tween angka dari `dari` ke `ke` yang ditulis ke `el`, dibulatkan dengan pemisah ribuan. */
+function hitung(el, dari, ke, durasi, ease) {
+  const nilai = { n: dari };
+  return gsap.to(nilai, { n: ke, duration: d(durasi), ease, onUpdate: () => (el.textContent = Math.round(nilai.n).toLocaleString('id-ID')) });
+}
+
+/** Gambar `jalur` sambil menjalankan penanda `jalan` di ujung garisnya.
+    `petakan` mengubah titik pada jalur menjadi posisi penanda. */
+function telusuri(tl, jalur, jalan, durasi, kapan, petakan = (titik) => titik) {
+  const panjang = jalur.getTotalLength();
+  const maju = { t: 0 };
+  const letak = () => {
+    const { x, y } = petakan(jalur.getPointAtLength(panjang * maju.t));
+    jalan.style.transform = `translate(${x}px, ${y}px)`;
+  };
+  letak();
+  tl.from(jalur, { drawSVG: 0, duration: d(durasi), ease: 'power1.inOut' }, kapan)
+    .to(maju, { t: 1, duration: d(durasi), ease: 'power1.inOut', onUpdate: letak }, kapan);
+}
+
+const BAGIAN_LOGO = ['.l-puncak', '.l-dasar', '.l-matahari'];
+
 /** Tiap adegan boleh punya: masuk(tl) saat slide tampil, atur(langkah, seketika, sebelum)
     untuk menyetel keadaan sebuah langkah (maju maupun mundur), dan keluar(). */
 const adegan = {
@@ -270,11 +300,11 @@ const adegan = {
         .from('.l-dasar', { scaleX: 0, transformOrigin: 'left center', duration: d(0.7), ease: 'power3.out' }, 0.7)
         .from('.l-matahari', { autoAlpha: 0, y: geser(120), duration: d(1), ease: 'back.out(1.6)' }, 1);
     },
-    // Tiap langkah menyorot bagian logo yang sedang dijelaskan.
+    // Langkah 0 sampai 2 menyorot satu bagian logo, langkah terakhir menyalakan semuanya.
     atur(langkah, seketika) {
-      const sorot = [['.l-puncak'], ['.l-dasar'], ['.l-matahari'], ['.l-puncak', '.l-dasar', '.l-matahari']][langkah];
-      ['.l-puncak', '.l-dasar', '.l-matahari'].forEach((bagian) => {
-        gsap.to(bagian, { opacity: sorot.includes(bagian) ? 1 : 0.28, duration: d(seketika ? 0 : 0.45), ease: 'power2.out' });
+      BAGIAN_LOGO.forEach((bagian, n) => {
+        const sorot = langkah === n || langkah === BAGIAN_LOGO.length;
+        gsap.to(bagian, { opacity: sorot ? 1 : 0.28, duration: d(seketika ? 0 : 0.45), ease: 'power2.out' });
       });
     },
   },
@@ -286,12 +316,8 @@ const adegan = {
     },
     atur(langkah, seketika, sebelum) {
       if (seketika || tenang || langkah <= sebelum) return;
-      const hitung = (el, dari, ke) => {
-        const nilai = { n: dari };
-        gsap.to(nilai, { n: ke, duration: 1.3, ease: 'power2.out', onUpdate: () => (el.textContent = Math.round(nilai.n).toLocaleString('id-ID')) });
-      };
-      if (langkah === 1) hitung($('#n-rinjani'), 0, 93796);
-      if (langkah === 2) hitung($('#n-basarnas'), 12, 23);
+      if (langkah === 1) hitung($('#n-rinjani'), 0, 93796, 1.3, 'power2.out');
+      if (langkah === 2) hitung($('#n-basarnas'), 12, 23, 1.3, 'power2.out');
     },
   },
 
@@ -320,18 +346,8 @@ const adegan = {
 
   alur: {
     masuk(tl) {
-      const jalur = $('#alur-diagram .jejak');
-      const jalan = $('#alur-diagram .jalan');
-      const panjang = jalur.getTotalLength();
-      const maju = { t: 0 };
-      const letak = () => {
-        const { x, y } = jalur.getPointAtLength(panjang * maju.t);
-        jalan.style.transform = `translate(${x}px, ${y}px)`;
-      };
-      letak();
-      tl.from(jalur, { drawSVG: 0, duration: d(2.4), ease: 'power1.inOut' }, 0.4)
-        .to(maju, { t: 1, duration: d(2.4), ease: 'power1.inOut', onUpdate: letak }, 0.4)
-        .from('#alur-diagram .titik', { autoAlpha: 0, duration: d(0.3), stagger: 0.44 }, 0.4)
+      telusuri(tl, $('#alur-diagram .jejak'), $('#alur-diagram .jalan'), 2.4, 0.4);
+      tl.from('#alur-diagram .titik', { autoAlpha: 0, duration: d(0.3), stagger: 0.44 }, 0.4)
         .from('#alur-diagram .st', { autoAlpha: 0, y: geser(16), duration: d(0.6), ease: 'power3.out', stagger: 0.44 }, 0.45);
     },
   },
@@ -390,9 +406,7 @@ const adegan = {
 
   pengujian: {
     masuk(tl) {
-      const skor = $('#skor');
-      const nilai = { n: 0 };
-      tl.to(nilai, { n: 30, duration: d(1.6), ease: 'power1.out', onUpdate: () => (skor.textContent = Math.round(nilai.n)) }, 0.6)
+      tl.add(hitung($('#skor'), 0, 30, 1.6, 'power1.out'), 0.6)
         .from('.titik-uji i', { autoAlpha: 0, scale: 0.4, duration: d(0.35), ease: 'back.out(2)', stagger: 0.05 }, 0.6);
     },
   },
@@ -405,7 +419,7 @@ const adegan = {
 
   implementasi: {
     masuk(tl) {
-      tl.from('.hp-baris .hp', { autoAlpha: 0, y: geser(90), rotation: (n) => (tenang ? 0 : (n % 2 ? 5 : -5)), duration: d(0.8), ease: 'power3.out', stagger: 0.1 }, 0.35);
+      tl.from('.hp-baris .hp', { autoAlpha: 0, y: geser(90), rotation: (n) => geser(n % 2 ? 5 : -5), duration: d(0.8), ease: 'power3.out', stagger: 0.1 }, 0.35);
     },
   },
 
@@ -413,20 +427,15 @@ const adegan = {
     masuk(tl) {
       const kotak = $('.perjalanan');
       const jalur = $('.perjalanan .jejak');
-      const jalan = $('.perjalanan .jalan');
-      const panjang = jalur.getTotalLength();
-      const maju = { t: 0 };
       // Jalurnya direntangkan (preserveAspectRatio none), jadi titik dipetakan lewat matriks layar.
-      const letak = () => {
-        const titik = jalur.getPointAtLength(panjang * maju.t).matrixTransform(jalur.getScreenCTM());
+      const keKotak = (titik) => {
+        const layar = titik.matrixTransform(jalur.getScreenCTM());
         const batas = kotak.getBoundingClientRect();
         const skalaPanggung = batas.width / kotak.offsetWidth;
-        jalan.style.transform = `translate(${(titik.x - batas.left) / skalaPanggung}px, ${(titik.y - batas.top) / skalaPanggung}px)`;
+        return { x: (layar.x - batas.left) / skalaPanggung, y: (layar.y - batas.top) / skalaPanggung };
       };
-      letak();
-      tl.from(jalur, { drawSVG: 0, duration: d(2), ease: 'power1.inOut' }, 0.7)
-        .to(maju, { t: 1, duration: d(2), ease: 'power1.inOut', onUpdate: letak }, 0.7)
-        .from('.perjalanan .cap', { autoAlpha: 0, scale: 1.6, duration: d(0.45), ease: 'back.out(2)' }, 2.75);
+      telusuri(tl, jalur, $('.perjalanan .jalan'), 2, 0.7, keKotak);
+      tl.from('.perjalanan .cap', { autoAlpha: 0, scale: 1.6, duration: d(0.45), ease: 'back.out(2)' }, 2.75);
     },
   },
 };
@@ -619,10 +628,8 @@ function mulai() {
   bangunTahap();
   bangunAlur();
   bangunRel();
+  bangunKelip();
   $$('.titik-uji').forEach((el) => (el.innerHTML = '<i></i>'.repeat(+el.dataset.n)));
-  const r = acak(31);
-  dunia.kelip.innerHTML = Array.from({ length: 34 }, () =>
-    `<i style="left:${(r() * 100).toFixed(1)}vw;top:${(r() * 46).toFixed(1)}vh;--lama:${(1.6 + r() * 2.6).toFixed(2)}s;--tunda:-${(r() * 4).toFixed(2)}s"></i>`).join('') + '<b></b>';
 
   jumlahLangkah = slides.map((s) => Math.max(0, ...$$('[data-step], [data-hide-at]', s).map((el) => +(el.dataset.step ?? el.dataset.hideAt))));
   // Judul besar dipecah per huruf, judul biasa per baris. Slide harus terukur saat dipecah.
