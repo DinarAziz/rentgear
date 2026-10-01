@@ -306,6 +306,14 @@ opened straight from the file in Chrome, no internet needed (fonts and GSAP are 
 set in `IDENTITAS` at the top of `deck.js`; NIM, class and lecturer are still empty. The rumusan masalah was rewritten
 to match what the app does today; smart matching and the AI features moved to "batasan" and "saran".
 
+Later the same day the deck grew to 21 slides after more demands from the lecturer: logo philosophy, sourced data and
+real cases for the latar belakang (three rental shops from journal papers), innovation, business flow, and a sources
+slide. The algorithm, testing and real-case slides were rewritten to be easier to explain, each with an "Intinya" line.
+
+Work order the user set on 2026-10-01: after the deck, build the **Laravel server** and the **AI features** in this
+project (they are planned work, so the deck lists them as "rencana lanjutan", not "saran"). iOS comes later. The app
+also has **no blacklist and no fines (denda)** yet; both are on the plan after Laravel and AI.
+
 The Lynk.id section above and the Midtrans plan below are kept as history. Step 3 of the Midtrans plan mentions
 `_LynkPaymentCard`; that widget no longer exists, so the "Bayar sekarang" button would replace the bank transfer card.
 

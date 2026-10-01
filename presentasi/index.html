@@ -14,6 +14,7 @@
   <div class="sky-dusk"></div>
   <div class="sky-dawn"></div>
   <canvas class="stars"></canvas>
+  <div class="kelip-wrap"></div>
   <div class="sun"></div>
   <div class="ridges"></div>
   <div class="fog"></div>
@@ -23,7 +24,7 @@
     <svg viewBox="0 0 920 440" preserveAspectRatio="none">
       <path d="M0 440 L120 330 L210 350 L330 250 L420 280 L540 170 L640 210 L760 120 L920 60 L920 440 Z" fill="#050c09"/>
       <path d="M700 150 L700 40" stroke="#050c09" stroke-width="7" stroke-linecap="round"/>
-      <path d="M703 44 L770 62 L703 82 Z" fill="#f08a3c"/>
+      <path class="bendera" d="M703 44 L770 62 L703 82 Z" fill="#f08a3c"/>
     </svg>
   </div>
   <div class="veil"></div>
@@ -44,7 +45,80 @@
     </p>
   </section>
 
+  <section class="slide" id="logo" data-pos="Basecamp" data-label="Filosofi logo">
+    <h2 class="head">Filosofi logo</h2>
+    <div class="logo-wrap">
+      <svg class="logo" viewBox="0 0 1024 1024" role="img" aria-label="Logo RentGear: dua puncak gunung, matahari, dan garis dasar">
+        <rect width="1024" height="1024" rx="190" fill="#2E6B4F"/>
+        <circle class="l-matahari" cx="700" cy="330" r="60" fill="#E07A2F"/>
+        <g class="l-puncak">
+          <path d="M120 780 L420 350 L720 780 Z" fill="#FFFFFF"/>
+          <path d="M420 350 L495 458 L460 440 L420 480 L385 440 L345 458 Z" fill="#B5CBC2"/>
+          <path d="M470 780 L690 490 L910 780 Z" fill="#EAF1ED"/>
+        </g>
+        <rect class="l-dasar" x="120" y="780" width="790" height="40" rx="20" fill="#FFFFFF"/>
+      </svg>
+      <ul class="makna">
+        <li data-in><h3>Dua puncak</h3><p>Penyedia yang punya alat dan penyewa yang butuh alat, dipertemukan dalam satu aplikasi.</p></li>
+        <li data-step="1"><h3>Garis dasar</h3><p>Pijakan yang sama bagi keduanya: jadwal stok yang jelas dan jaminan sewa.</p></li>
+        <li data-step="2"><h3>Matahari</h3><p>Tujuan pendakian, yaitu tiba di puncak saat matahari terbit. Oranye yang sama dipakai untuk penanda status di aplikasi.</p></li>
+        <li data-step="3"><h3>Warna</h3>
+          <p class="warna"><span><i style="background:#2E6B4F"></i>Hijau hutan</span><span><i style="background:#E07A2F"></i>Oranye puncak</span><span><i style="background:#F6F3EC"></i>Putih pasir</span></p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
   <!-- Pos 1 -->
+  <section class="slide" id="data" data-pos="Pos 1" data-label="Latar belakang">
+    <h2 class="head">Pendaki bertambah, cara menyewa belum berubah</h2>
+    <div class="fakta">
+      <figure class="grafik" data-in>
+        <figcaption>Jumlah pendaki Gunung Gede dan Pangrango per tahun</figcaption>
+        <div class="batang-tegak" role="img" aria-label="Diagram batang: 251.222 pendaki pada 2018, 414.330 pada 2019, 278.290 pada 2020">
+          <div><b>251.222</b><i style="--t:201px"></i><span>2018</span></div>
+          <div><b>414.330</b><i style="--t:330px"></i><span>2019</span></div>
+          <div><b>278.290</b><i style="--t:222px"></i><span>2020, pandemi</span></div>
+        </div>
+        <p class="sumber">Sumber: Balai Besar TN Gunung Gede Pangrango (2021), dalam Novianti dkk. (2022)</p>
+      </figure>
+      <ul class="angka-fakta">
+        <li data-step="1"><b class="angka" id="n-rinjani">93.796</b><p>pendaki Gunung Rinjani sepanjang 2024.</p><p class="sumber">Balai TN Gunung Rinjani, dikutip IDN Times, 3 Januari 2025</p></li>
+        <li data-step="2"><b class="angka">12 menjadi <span id="n-basarnas">23</span></b><p>kecelakaan pendakian per tahun dalam catatan Basarnas, dari 2015 ke 2018.</p><p class="sumber">Basarnas, dikutip Kompas.com, 6 Maret 2019</p></li>
+      </ul>
+    </div>
+    <p class="inti" data-step="3"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Intinya: di satu taman nasional saja pendakinya ratusan ribu per tahun, dan tidak semua punya alat sendiri. Kebutuhan sewa alat besar.</p>
+  </section>
+
+  <section class="slide" id="kasus" data-pos="Pos 1" data-label="Latar belakang">
+    <h2 class="head">Sudah datang ke toko, alatnya belum tentu ada</h2>
+    <div class="perjalanan" data-in aria-hidden="true">
+      <span class="ujung kiri"><svg viewBox="0 0 68 68" class="ikon"><path d="M10 32L34 12l24 20"/><path d="M16 28v28h36V28"/><path d="M28 56V40h12v16"/></svg>Rumah</span>
+      <svg class="rute" viewBox="0 0 1100 120" preserveAspectRatio="none"><path class="dasar" d="M10 70 C200 0 330 130 550 60 S900 10 1090 70"/><path class="jejak" d="M10 70 C200 0 330 130 550 60 S900 10 1090 70"/></svg>
+      <i class="jalan"></i>
+      <span class="ujung kanan"><svg viewBox="0 0 68 68" class="ikon"><path d="M8 26l6-16h40l6 16"/><path d="M12 26v32h44V26"/><path d="M27 58V40h14v18"/></svg>Toko sewa</span>
+      <span class="cap">Alat sedang disewa orang lain</span>
+    </div>
+    <ul class="kasus">
+      <li data-step="1">
+        <h3>Opak Adventure</h3><span>Kabupaten Pekalongan, 2019</span>
+        <p>Pelanggan <mark>harus datang langsung</mark>, tetapi alat <mark>belum tentu tersedia</mark> karena pengembalian sering terlambat.</p>
+        <p class="sumber">Musta Dwi N., Khambali, dan Wicaksana, Surya Informatika 7(1)</p>
+      </li>
+      <li data-step="2">
+        <h3>Dahlia Adventure</h3><span>Kota Pekalongan, 2023</span>
+        <p>Pelanggan <mark>diharuskan datang langsung</mark>, dan biasanya alat <mark>masih dipakai pelanggan lain</mark>.</p>
+        <p class="sumber">Artanto dan Musta Dwi, SATESI 3(1)</p>
+      </li>
+      <li data-step="3">
+        <h3>EX Adventure Solo</h3><span>Surakarta, 2021</span>
+        <p>Penyewa <mark>datang dulu hanya untuk tahu</mark> barangnya ada atau tidak. Pesanan <mark>dicatat di buku</mark>.</p>
+        <p class="sumber">Pambudi, Universitas Muhammadiyah Surakarta</p>
+      </li>
+    </ul>
+    <p class="inti" data-step="4"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Intinya: di tiga toko ini penyewa baru tahu stok setelah sampai di toko. Dengan RentGear, ketersediaan pada tanggal yang dipilih bisa dicek dari HP sebelum berangkat.</p>
+  </section>
+
   <section class="slide" id="latar" data-pos="Pos 1" data-label="Latar belakang">
     <h2 class="head">Menyewa alat hiking masih lewat chat dan buku catatan</h2>
     <div class="dua-kolom">
@@ -126,6 +200,24 @@
     </div>
   </section>
 
+  <section class="slide" id="inovasi" data-pos="Pos 3" data-label="Inovasi">
+    <h2 class="head">Yang baru dari RentGear</h2>
+    <ul class="terbaru">
+      <li data-in>
+        <svg viewBox="0 0 68 68" class="ikon"><rect x="8" y="14" width="52" height="44" rx="6"/><path d="M8 28h52M22 8v12M46 8v12M20 40h12M20 48h24"/></svg>
+        <div><h3>Stok dihitung per tanggal</h3><p>Ketersediaan diambil dari puncak pemakaian pada rentang tanggal yang diminta. Booking yang melebihi stok ditolak sebelum tersimpan.</p></div>
+      </li>
+      <li data-step="1">
+        <svg viewBox="0 0 68 68" class="ikon"><rect x="8" y="16" width="52" height="38" rx="6"/><circle cx="25" cy="32" r="6"/><path d="M15 46c2-5 6-7 10-7s8 2 10 7M42 30h10M42 40h10"/></svg>
+        <div><h3>Jaminan mengunci alur sewa</h3><p>Booking tidak bisa dikonfirmasi, alat tidak bisa diserahkan, dan transaksi tidak bisa selesai sebelum status jaminannya sesuai.</p></div>
+      </li>
+      <li data-step="2">
+        <svg viewBox="0 0 68 68" class="ikon"><path d="M6 30l4-14h20l4 14M10 30v24h20V30"/><path d="M38 34l3-10h18l3 10M41 34v20h18V34"/></svg>
+        <div><h3>Banyak penyedia dalam satu katalog</h3><p>Tiga penelitian sejenis yang dikutip di latar belakang masing-masing membuat sistem untuk satu toko. RentGear menampung banyak penyedia yang diverifikasi admin.</p></div>
+      </li>
+    </ul>
+  </section>
+
   <!-- Pos 4 -->
   <section class="slide" id="batasan" data-pos="Pos 4" data-label="Batasan masalah">
     <h2 class="head">Batasan masalah</h2>
@@ -140,12 +232,12 @@
         </ul>
       </div>
       <div class="papan putus" data-step="1">
-        <h3 class="sub">Belum dikerjakan</h3>
-        <ul class="daftar redup">
-          <li><svg viewBox="0 0 38 38" class="ikon pudar"><circle cx="19" cy="19" r="11"/></svg><p>Server Laravel dan database MySQL. Keduanya baru sampai rancangan.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon pudar"><circle cx="19" cy="19" r="11"/></svg><p>Payment gateway dan pencocokan nominal bukti transfer.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon pudar"><circle cx="19" cy="19" r="11"/></svg><p>Rekomendasi paket alat dan pemeriksaan kondisi alat berbantuan AI.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon pudar"><circle cx="19" cy="19" r="11"/></svg><p>Pengiriman alat, dan pengujian di iOS.</p></li>
+        <h3 class="sub">Dikerjakan setelah tahap ini</h3>
+        <ul class="daftar">
+          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Server Laravel dan database MySQL, supaya data dipakai bersama lintas perangkat.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Fitur AI: rekomendasi paket alat dan pemeriksaan kondisi alat.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Denda keterlambatan dan kerusakan, serta blacklist penyewa bermasalah.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Payment gateway dan versi iOS.</p></li>
         </ul>
       </div>
     </div>
@@ -159,6 +251,29 @@
   </section>
 
   <!-- Pos 6 -->
+  <section class="slide" id="bisnis" data-pos="Pos 6" data-label="Perancangan">
+    <h2 class="head">Alur bisnis</h2>
+    <div class="bisnis">
+      <div class="pihak" data-in>
+        <div><h3>Penyedia</h3><p>Mendaftar, diverifikasi admin, lalu memasang alat, stok, dan harga sewa.</p></div>
+        <svg viewBox="0 0 120 60" class="ikon panah"><path d="M6 20h104M96 8l14 12-14 12"/><path d="M114 44H10M24 32L10 44l14 12"/></svg>
+        <div class="tengah"><h3>RentGear</h3><p>Katalog bersama, jadwal stok, jaminan, dan status transaksi.</p></div>
+        <svg viewBox="0 0 120 60" class="ikon panah"><path d="M6 20h104M96 8l14 12-14 12"/><path d="M114 44H10M24 32L10 44l14 12"/></svg>
+        <div><h3>Penyewa</h3><p>Memilih alat dan tanggal, mengirim jaminan, lalu mengambil alat di tempat penyedia.</p></div>
+      </div>
+      <div class="belah rapat">
+        <div class="papan" data-in>
+          <h3 class="sub">Aliran uang saat ini</h3>
+          <p>Penyewa mentransfer biaya sewa dan deposit langsung ke rekening penyedia, lalu mengunggah bukti transfer. Deposit kembali ke penyewa setelah alat dikembalikan.</p>
+        </div>
+        <div class="papan putus" data-step="1">
+          <h3 class="sub">Arah berikutnya</h3>
+          <p>Pembayaran lewat payment gateway. Platform mengambil komisi dari tiap transaksi yang selesai dan meneruskan sisanya ke penyedia. Besaran komisi belum ditetapkan.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="slide" id="aktor" data-pos="Pos 6" data-label="Perancangan">
     <h2 class="head">Tiga peran dalam aplikasi</h2>
     <div class="aktor">
@@ -197,49 +312,73 @@
   </section>
 
   <section class="slide" id="algoritma" data-pos="Pos 6" data-label="Perancangan">
-    <h2 class="head">Mencegah booking dobel dengan puncak pemakaian</h2>
+    <h2 class="head">Mencegah booking dobel</h2>
     <div class="alg">
       <div class="kalender" data-in>
         <h3>Tenda Dome 4 Orang, <b>stok 2 unit</b></h3>
-        <div class="kisi">
+        <div class="slot-kisi">
           <span></span>
           <span class="hari">1 Okt</span><span class="hari">2 Okt</span><span class="hari">3 Okt</span><span class="hari">4 Okt</span><span class="hari">5 Okt</span>
-          <span class="nama" style="grid-column:1">Booking A<small>1 tenda</small></span>
-          <span class="batang a">1 sampai 2 Okt</span>
-          <span class="nama" style="grid-column:1">Booking B<small>1 tenda</small></span>
-          <span class="batang b">4 sampai 5 Okt</span>
-          <span class="nama" style="grid-column:1">Permintaan baru<small>1 tenda</small></span>
-          <span class="batang baru">1 sampai 5 Okt</span>
-          <span class="garis"></span>
-          <span class="nama" style="grid-column:1">Terpakai per hari</span>
+          <span class="nama">Permintaan</span>
+          <span class="minta" data-step="1" data-hide-at="5">1 tenda, 1 sampai 5 Okt</span>
+          <span class="nama">Unit 1</span>
+          <span class="slot"><b class="tk a">A</b></span>
+          <span class="slot"><b class="tk a">A</b></span>
+          <span class="slot"><b class="tk baru">Baru</b></span>
+          <span class="slot"><b class="tk b">B</b></span>
+          <span class="slot"><b class="tk b">B</b></span>
+          <span class="nama">Unit 2</span>
+          <span class="slot"><b class="tk baru">Baru</b></span>
+          <span class="slot"><b class="tk baru">Baru</b></span>
+          <span class="slot"></span>
+          <span class="slot"><b class="tk baru">Baru</b></span>
+          <span class="slot"><b class="tk baru">Baru</b></span>
+          <span class="nama" data-step="3">Terpakai</span>
           <span class="pakai">1</span><span class="pakai">1</span><span class="pakai">0</span><span class="pakai">1</span><span class="pakai">1</span>
+          <span class="hantu">1 tenda<small>Ditolak</small></span>
           <i class="sapu"></i>
         </div>
       </div>
-      <div class="langkah">
-        <div data-step="1">
-          <h3 class="coret">Cara yang keliru</h3>
-          <p class="redup">Jumlahkan semua booking yang beririsan: 1 + 1 = 2. Stok dianggap habis dan permintaan ditolak, padahal A dan B tidak pernah dipakai bersamaan.</p>
+      <div class="narasi">
+        <div data-hide-at="1"><div class="blok" data-in>
+          <h3>Keadaan awal</h3>
+          <p>Stok tenda ini 2 unit. Booking A memakai 1 unit pada 1 sampai 2 Okt. Booking B memakai 1 unit pada 4 sampai 5 Okt.</p>
+        </div></div>
+        <div class="blok" data-step="1" data-hide-at="2">
+          <h3>Ada permintaan baru</h3>
+          <p>1 tenda untuk 1 sampai 5 Okt. Diterima atau ditolak?</p>
         </div>
-        <div data-step="2">
-          <h3>Cara yang dipakai</h3>
-          <p>Sapu hari demi hari dan ambil pemakaian tertinggi. Puncaknya 1 tenda.</p>
+        <div class="blok" data-step="2" data-hide-at="3">
+          <h3>Cara yang keliru</h3>
+          <p>Menghitung jumlah booking: A dan B ada 2, sama dengan stok, jadi stok dianggap habis. Padahal A dan B tidak pernah dipakai di hari yang sama.</p>
         </div>
-        <p class="rumus" data-step="3">tersedia = stok − puncak<br>= 2 − 1 = <em>1 tenda</em></p>
-        <p class="kecil" data-step="3">Permintaan diterima. Untuk sepatu, stok dihitung terpisah per ukuran.</p>
+        <div class="blok" data-step="3" data-hide-at="4">
+          <h3>Cara RentGear</h3>
+          <p>Periksa hari demi hari, lalu ambil hari tersibuk. Paling banyak hanya 1 unit yang terpakai.</p>
+        </div>
+        <div class="blok" data-step="4" data-hide-at="5">
+          <h3>Diterima</h3>
+          <p class="rumus">sisa = stok − hari tersibuk<br>= 2 − 1 = <em>1 unit</em></p>
+          <p>Setiap hari masih ada 1 unit kosong, jadi permintaan baru masuk.</p>
+        </div>
+        <div class="blok" data-step="5">
+          <h3>Permintaan berikutnya ditolak</h3>
+          <p>1 tenda untuk 2 Okt. Hari itu 2 dari 2 unit sudah terpakai, sisanya 0. Aplikasi menolak sebelum booking tersimpan.</p>
+        </div>
       </div>
     </div>
+    <p class="inti" data-step="5"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Intinya: yang dihitung hari tersibuk, bukan jumlah booking. Selama tiap hari yang diminta masih punya unit kosong, booking diterima.</p>
   </section>
 
   <section class="slide" id="susunan" data-pos="Pos 6" data-label="Perancangan">
     <h2 class="head">Susunan aplikasi</h2>
     <div class="susun">
       <ol class="strata">
-        <li data-in><b>Layar</b><span>login, penyewa, penyedia, admin, detail transaksi</span></li>
-        <li data-in><b>AppState</b><span>sesi login dan pembaruan tampilan</span></li>
-        <li data-in><b>Kontrak repository</b><span>daftar operasi data yang boleh dipakai layar</span></li>
-        <li data-in><b>Repository lokal dan aturan domain</b><span>ketersediaan stok, aturan jaminan, mesin status</span></li>
-        <li data-in><b>Penyimpanan di perangkat</b><span>berkas JSON dan foto di HP, localStorage di web</span></li>
+        <li><b>Layar</b><span>login, penyewa, penyedia, admin, detail transaksi</span></li>
+        <li><b>AppState</b><span>sesi login dan pembaruan tampilan</span></li>
+        <li><b>Kontrak repository</b><span>daftar operasi data yang boleh dipakai layar</span></li>
+        <li><b>Repository lokal dan aturan domain</b><span>ketersediaan stok, aturan jaminan, mesin status</span></li>
+        <li><b>Penyimpanan di perangkat</b><span>berkas JSON dan foto di HP, localStorage di web</span></li>
       </ol>
       <div>
         <h3 class="sub" data-in>Data yang disimpan</h3>
@@ -259,11 +398,11 @@
     <h2 class="head">Hasil implementasi</h2>
     <div class="galeri">
       <div class="hp-baris" data-hide-at="1">
-        <figure class="hp" data-in><div class="rangka"><img src="assets/app/katalog.webp" alt="Layar katalog alat"></div><figcaption>Katalog</figcaption></figure>
-        <figure class="hp" data-in><div class="rangka"><img src="assets/app/detail.webp" alt="Layar detail alat"></div><figcaption>Detail alat</figcaption></figure>
-        <figure class="hp" data-in><div class="rangka"><img src="assets/app/booking.webp" alt="Layar booking dengan jaminan"></div><figcaption>Booking dan jaminan</figcaption></figure>
-        <figure class="hp" data-in><div class="rangka"><img src="assets/app/bayar2.webp" alt="Detail transaksi dengan cara bayar transfer"></div><figcaption>Bayar dengan transfer</figcaption></figure>
-        <figure class="hp" data-in><div class="rangka"><img src="assets/app/penyedia.webp" alt="Daftar pesanan penyedia"></div><figcaption>Pesanan penyedia</figcaption></figure>
+        <figure class="hp"><div class="rangka"><img src="assets/app/katalog.webp" alt="Layar katalog alat"></div><figcaption>Katalog</figcaption></figure>
+        <figure class="hp"><div class="rangka"><img src="assets/app/detail.webp" alt="Layar detail alat"></div><figcaption>Detail alat</figcaption></figure>
+        <figure class="hp"><div class="rangka"><img src="assets/app/booking.webp" alt="Layar booking dengan jaminan"></div><figcaption>Booking dan jaminan</figcaption></figure>
+        <figure class="hp"><div class="rangka"><img src="assets/app/bayar2.webp" alt="Detail transaksi dengan cara bayar transfer"></div><figcaption>Bayar dengan transfer</figcaption></figure>
+        <figure class="hp"><div class="rangka"><img src="assets/app/penyedia.webp" alt="Daftar pesanan penyedia"></div><figcaption>Pesanan penyedia</figcaption></figure>
       </div>
       <div class="web" data-step="1">
         <figure class="browser"><div class="rangka"><div class="bar"><i></i><i></i><i></i></div><img src="assets/app/desktop.webp" alt="Katalog pada layar desktop"></div><figcaption>Versi web menyesuaikan lebar layar</figcaption></figure>
@@ -285,31 +424,37 @@
     <div class="uji">
       <div data-in>
         <p class="skor"><b class="angka" id="skor">30</b><span>dari 30</span></p>
-        <p class="teks">tes otomatis lulus, dan analisis kode Flutter tanpa temuan.</p>
-        <ul class="balok">
-          <li><span>Alur sewa dari booking sampai selesai</span><b>14</b><i style="--w:100%"></i></li>
-          <li><span>Aturan ketersediaan dan jaminan</span><b>9</b><i style="--w:64%"></i></li>
-          <li><span>Layar utama tiga peran</span><b>3</b><i style="--w:21%"></i></li>
-          <li><span>Format rupiah</span><b>3</b><i style="--w:21%"></i></li>
-          <li><span>Dialog alasan penolakan</span><b>1</b><i style="--w:7%"></i></li>
-        </ul>
+        <p class="teks">skenario tes otomatis lulus.</p>
+        <p class="kecil jelas">Tes otomatis adalah kode yang menjalankan aplikasi lalu memeriksa sendiri hasilnya. Semuanya dijalankan dengan satu perintah: <code>flutter test</code>.</p>
       </div>
-      <table class="tabel-uji" data-step="1">
-        <caption class="sub">Uji langsung di HP Redmi 17 dan Chrome</caption>
-        <tbody>
-          <tr><td>Sewa lengkap: booking, konfirmasi, bukti transfer, serah terima, pengembalian</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
-          <tr><td>Jaminan ditolak, booking ditolak, lalu stok bisa dipesan lagi</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
-          <tr><td>Admin: dashboard, verifikasi penyedia, daftar transaksi</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
-          <tr><td>Ukuran font sistem 1,3 kali, setelah 3 perbaikan tata letak</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
-          <tr><td>Versi web pada lebar 390, 820, dan 1440 piksel</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
-        </tbody>
-      </table>
+      <div class="narasi">
+        <div data-hide-at="1">
+          <ul class="kelompok" data-in>
+            <li><h3>Alur sewa <b>14</b></h3><div class="titik-uji" data-n="14"></div><p>Contoh: booking dobel ditolak, booking tanpa jaminan ditolak, data tetap ada setelah aplikasi ditutup.</p></li>
+            <li><h3>Aturan stok dan jaminan <b>9</b></h3><div class="titik-uji" data-n="9"></div><p>Contoh: yang dihitung puncak pemakaian, NIK yang salah ditolak, nomor dokumen disamarkan.</p></li>
+            <li><h3>Layar utama <b>3</b></h3><div class="titik-uji" data-n="3"></div><p>Contoh: layar penyedia dan admin tampil, penyedia memeriksa jaminan.</p></li>
+            <li><h3>Format rupiah <b>3</b></h3><div class="titik-uji" data-n="3"></div><p>Contoh: 45000 tampil sebagai Rp 45.000 saat diketik.</p></li>
+            <li><h3>Dialog alasan <b>1</b></h3><div class="titik-uji" data-n="1"></div><p>Tombol Kirim mati selama alasan penolakan masih kosong.</p></li>
+          </ul>
+        </div>
+        <table class="tabel-uji" data-step="1">
+          <caption class="sub">Uji langsung oleh orang, di HP Redmi 17 dan Chrome</caption>
+          <tbody>
+            <tr><td>Sewa lengkap: booking, konfirmasi, bukti transfer, serah terima, pengembalian</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
+            <tr><td>Jaminan ditolak, booking ditolak, lalu stok bisa dipesan lagi</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
+            <tr><td>Admin: dashboard, verifikasi penyedia, daftar transaksi</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
+            <tr><td>Ukuran font sistem 1,3 kali, setelah 3 perbaikan tata letak</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
+            <tr><td>Versi web pada lebar 390, 820, dan 1440 piksel</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
+    <p class="inti" data-step="1"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Intinya: tiap aturan penting punya tes sendiri. Kalau kode diubah dan aturannya rusak, tes langsung gagal. Uji di HP memastikan alurnya juga jalan di tangan pengguna.</p>
   </section>
 
   <!-- Puncak -->
   <section class="slide" id="kesimpulan" data-pos="Puncak" data-label="Kesimpulan">
-    <h2 class="head">Kesimpulan dan saran</h2>
+    <h2 class="head">Kesimpulan dan rencana lanjutan</h2>
     <div class="belah">
       <div class="papan" data-in>
         <h3 class="sub">Kesimpulan</h3>
@@ -320,15 +465,27 @@
         </ol>
       </div>
       <div class="papan putus" data-step="1">
-        <h3 class="sub">Saran</h3>
-        <ul class="daftar">
-          <li><svg viewBox="0 0 38 38" class="ikon"><path d="M8 19h22M21 10l9 9-9 9"/></svg><p>Membangun server Laravel dan MySQL sesuai rancangan agar data bisa dipakai lintas perangkat.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon"><path d="M8 19h22M21 10l9 9-9 9"/></svg><p>Mengganti unggah bukti transfer dengan payment gateway.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon"><path d="M8 19h22M21 10l9 9-9 9"/></svg><p>Menambahkan rekomendasi paket alat dan pemeriksaan kondisi alat berbantuan AI.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon"><path d="M8 19h22M21 10l9 9-9 9"/></svg><p>Menguji aplikasi di iOS dan di browser HP.</p></li>
+        <h3 class="sub">Rencana lanjutan</h3>
+        <ul class="daftar rencana">
+          <li><span class="urut">Berikutnya</span><p>Server Laravel dan MySQL, supaya data dipakai bersama lintas perangkat.</p></li>
+          <li><span class="urut">Berikutnya</span><p>Fitur AI: rekomendasi paket alat dan pemeriksaan kondisi alat.</p></li>
+          <li><span class="urut">Menyusul</span><p>Denda keterlambatan dan kerusakan, serta blacklist penyewa bermasalah.</p></li>
+          <li><span class="urut">Menyusul</span><p>Payment gateway dan versi iOS.</p></li>
         </ul>
       </div>
     </div>
+  </section>
+
+  <section class="slide" id="sumber" data-pos="Puncak" data-label="Sumber data">
+    <h2 class="head">Sumber data</h2>
+    <ol class="pustaka">
+      <li data-in>Novianti, S., Zamilah, F. F., dan Andrianto, T. (2022). Perilaku pendakian gunung di masa kenormalan baru. <em>Journal of Event, Travel and Tour Management</em>, 2(1), 9–18. doi.org/10.34013/jett.v2i1.785. Tabel jumlah pendaki bersumber dari Balai Besar TN Gunung Gede Pangrango (2021).</li>
+      <li data-in>IDN Times NTB (3 Januari 2025). 189.091 wisatawan kunjungi Rinjani. Pernyataan Kepala Balai TN Gunung Rinjani. ntb.idntimes.com</li>
+      <li data-in>Kompas.com (6 Maret 2019). Kecelakaan pendakian gunung di Indonesia meningkat 4 tahun terakhir. Data Basarnas 2015 sampai 2018. travel.kompas.com</li>
+      <li data-in>Musta Dwi N., N., Khambali, A., dan Wicaksana, T. A. (2019). Sistem informasi penyewaan alat outdoor pada Opak Adventure Kabupaten Pekalongan berbasis Android. <em>Surya Informatika</em>, 7(1), 44.</li>
+      <li data-in>Artanto, F. A., dan Musta Dwi, N. (2023). Sistem informasi penyewaan alat camping pada Dahlia Adventure Kota Pekalongan berbasis Android. <em>SATESI</em>, 3(1), 1–5. doi.org/10.54259/satesi.v3i1.1472</li>
+      <li data-in>Pambudi, H. G. S. (2021). Sistem informasi penyewaan alat outdoor berbasis web (studi kasus: EX Adventure Solo). Naskah publikasi, Universitas Muhammadiyah Surakarta. eprints.ums.ac.id/90197</li>
+    </ol>
   </section>
 
   <section class="slide s-terima" id="terima" data-pos="Puncak" data-label="Tanya jawab">

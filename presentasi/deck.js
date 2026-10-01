@@ -118,6 +118,7 @@ const dunia = {
   senja: $('.sky-dusk'),
   fajar: $('.sky-dawn'),
   bintang: $('.stars'),
+  kelip: $('.kelip-wrap'),
   matahari: $('.sun'),
   hangat: $('.warm'),
   kabut: $$('.fog'),
@@ -138,7 +139,9 @@ function gambarDunia() {
   });
   dunia.senja.style.opacity = clamp01(1 - p / 0.5);
   dunia.fajar.style.opacity = fajar;
-  dunia.bintang.style.opacity = (0.5 + 0.5 * clamp01(p / 0.4)) * (1 - 0.88 * fajar);
+  const terangBintang = (0.5 + 0.5 * clamp01(p / 0.4)) * (1 - 0.88 * fajar);
+  dunia.bintang.style.opacity = terangBintang;
+  dunia.kelip.style.opacity = terangBintang;
   dunia.matahari.style.opacity = fajar;
   dunia.matahari.style.transform = `translate3d(0, ${(74 - 38 * fajar) * vh}px, 0)`;
   dunia.hangat.style.opacity = fajar * 0.9;
@@ -260,6 +263,38 @@ const adegan = {
     },
   },
 
+  logo: {
+    masuk(tl) {
+      tl.from('.logo', { autoAlpha: 0, scale: 0.94, duration: d(0.7), ease: 'power3.out' }, 0.2)
+        .from('.l-puncak path', { autoAlpha: 0, y: geser(70), duration: d(0.8), ease: 'power3.out', stagger: 0.12 }, 0.5)
+        .from('.l-dasar', { scaleX: 0, transformOrigin: 'left center', duration: d(0.7), ease: 'power3.out' }, 0.7)
+        .from('.l-matahari', { autoAlpha: 0, y: geser(120), duration: d(1), ease: 'back.out(1.6)' }, 1);
+    },
+    // Tiap langkah menyorot bagian logo yang sedang dijelaskan.
+    atur(langkah, seketika) {
+      const sorot = [['.l-puncak'], ['.l-dasar'], ['.l-matahari'], ['.l-puncak', '.l-dasar', '.l-matahari']][langkah];
+      ['.l-puncak', '.l-dasar', '.l-matahari'].forEach((bagian) => {
+        gsap.to(bagian, { opacity: sorot.includes(bagian) ? 1 : 0.28, duration: d(seketika ? 0 : 0.45), ease: 'power2.out' });
+      });
+    },
+  },
+
+  data: {
+    masuk(tl) {
+      tl.from('.batang-tegak i', { scaleY: 0, duration: d(1.1), ease: 'power3.out', stagger: 0.16 }, 0.6)
+        .from('.batang-tegak b', { autoAlpha: 0, y: geser(14), duration: d(0.5), ease: 'power3.out', stagger: 0.16 }, 1.1);
+    },
+    atur(langkah, seketika, sebelum) {
+      if (seketika || tenang || langkah <= sebelum) return;
+      const hitung = (el, dari, ke) => {
+        const nilai = { n: dari };
+        gsap.to(nilai, { n: ke, duration: 1.3, ease: 'power2.out', onUpdate: () => (el.textContent = Math.round(nilai.n).toLocaleString('id-ID')) });
+      };
+      if (langkah === 1) hitung($('#n-rinjani'), 0, 93796);
+      if (langkah === 2) hitung($('#n-basarnas'), 12, 23);
+    },
+  },
+
   latar: {
     masuk(tl) {
       tl.from('.chat > *', { autoAlpha: 0, y: geser(18), duration: d(0.5), ease: 'power3.out', stagger: 0.38 }, 0.7);
@@ -303,33 +338,42 @@ const adegan = {
 
   algoritma: {
     atur(langkah, seketika, sebelum) {
+      const maju = !seketika && !tenang && langkah > sebelum;
       const sapu = $('.sapu');
-      const sel = $$('.kisi .pakai');
-      const label = $$('.kisi .nama')[3];
-      const hitung = langkah >= 2;
-      gsap.killTweensOf([sapu, ...sel]);
-      sel.forEach((el) => el.classList.toggle('puncak', hitung && el.textContent === '1'));
-      gsap.to(label, { autoAlpha: hitung ? 1 : 0, duration: d(0.3) });
-      if (!hitung) {
+      const hantu = $('.hantu');
+      const sel = $$('.slot-kisi .pakai');
+      const baru = $$('.slot-kisi .tk.baru');
+      // Setelah permintaan baru diterima (langkah 4), tiap hari bertambah satu unit terpakai.
+      const terpakai = langkah >= 4 ? [2, 2, 1, 2, 2] : [1, 1, 0, 1, 1];
+      const puncak = Math.max(...terpakai);
+
+      gsap.killTweensOf([sapu, hantu, ...sel, ...baru]);
+      sel.forEach((el, n) => {
+        el.textContent = terpakai[n];
+        el.classList.toggle('puncak', langkah >= 3 && terpakai[n] === puncak);
+      });
+      gsap.set(sapu, { autoAlpha: 0, x: 0 });
+      gsap.set(sel, { autoAlpha: langkah >= 3 ? 1 : 0, scale: 1 });
+      gsap.set(baru, { autoAlpha: langkah >= 4 ? 1 : 0, y: 0 });
+      gsap.set(hantu, { autoAlpha: langkah >= 5 ? 1 : 0, x: 0 });
+      if (!maju) return;
+
+      if (langkah === 2) {
+        gsap.fromTo('.tk.a, .tk.b', { scale: 1 }, { scale: 1.14, duration: 0.2, yoyo: true, repeat: 3, stagger: 0.05, ease: 'power2.out' });
+      } else if (langkah === 3) {
+        // Garis sapu berjalan melewati lima kolom hari (150px per kolom).
         gsap.set(sel, { autoAlpha: 0 });
-        gsap.set(sapu, { autoAlpha: 0, x: 0 });
-        if (langkah === 1 && !seketika) {
-          gsap.fromTo('.batang.a, .batang.b', { scaleY: 1 }, { scaleY: 1.18, duration: d(0.22), yoyo: true, repeat: 1, stagger: 0.18, ease: 'power2.out' });
-        }
-        return;
+        gsap.timeline()
+          .set(sapu, { autoAlpha: 1 })
+          .to(sapu, { x: 750, duration: 2.6, ease: 'none' })
+          .to(sel, { autoAlpha: 1, duration: 0.25, stagger: 0.52 }, 0.26)
+          .to(sapu, { autoAlpha: 0, duration: 0.3 });
+      } else if (langkah === 4) {
+        gsap.from(baru, { autoAlpha: 0, y: -70, duration: 0.55, ease: 'back.out(1.6)', stagger: 0.12 });
+        gsap.from(sel, { scale: 1.6, duration: 0.45, ease: 'power3.out', stagger: 0.12 });
+      } else if (langkah === 5) {
+        gsap.fromTo(hantu, { x: -10 }, { x: 10, duration: 0.07, ease: 'none', yoyo: true, repeat: 7, onComplete: () => gsap.set(hantu, { x: 0 }) });
       }
-      if (seketika || sebelum >= 2 || tenang) {
-        gsap.set(sel, { autoAlpha: 1 });
-        gsap.set(sapu, { autoAlpha: 0 });
-        return;
-      }
-      // Garis sapu berjalan melewati lima kolom hari (144px per kolom).
-      gsap.set(sel, { autoAlpha: 0 });
-      gsap.timeline()
-        .set(sapu, { autoAlpha: 1, x: 0 })
-        .to(sapu, { x: 720, duration: 2.6, ease: 'none' })
-        .to(sel, { autoAlpha: 1, duration: 0.25, stagger: 0.52 }, 0.26)
-        .to(sapu, { autoAlpha: 0, duration: 0.3 });
     },
   },
 
@@ -348,13 +392,41 @@ const adegan = {
     masuk(tl) {
       const skor = $('#skor');
       const nilai = { n: 0 };
-      tl.to(nilai, { n: 30, duration: d(1.4), ease: 'power2.out', onUpdate: () => (skor.textContent = Math.round(nilai.n)) }, 0.5)
-        .fromTo('.balok i', { '--isi': 0 }, { '--isi': 1, duration: d(0.9), ease: 'power3.out', stagger: 0.08 }, 0.7);
+      tl.to(nilai, { n: 30, duration: d(1.6), ease: 'power1.out', onUpdate: () => (skor.textContent = Math.round(nilai.n)) }, 0.6)
+        .from('.titik-uji i', { autoAlpha: 0, scale: 0.4, duration: d(0.35), ease: 'back.out(2)', stagger: 0.05 }, 0.6);
     },
-    atur(langkah, seketika, sebelum) {
-      if (langkah === 1 && !seketika && sebelum < 1) {
-        gsap.from('.tabel-uji svg path', { drawSVG: 0, duration: d(0.45), ease: 'power2.out', stagger: 0.14, delay: d(0.35) });
-      }
+  },
+
+  susunan: {
+    masuk(tl) {
+      tl.from('.strata li', { autoAlpha: 0, y: geser(-50), duration: d(0.6), ease: 'back.out(1.5)', stagger: 0.14 }, 0.35);
+    },
+  },
+
+  implementasi: {
+    masuk(tl) {
+      tl.from('.hp-baris .hp', { autoAlpha: 0, y: geser(90), rotation: (n) => (tenang ? 0 : (n % 2 ? 5 : -5)), duration: d(0.8), ease: 'power3.out', stagger: 0.1 }, 0.35);
+    },
+  },
+
+  kasus: {
+    masuk(tl) {
+      const kotak = $('.perjalanan');
+      const jalur = $('.perjalanan .jejak');
+      const jalan = $('.perjalanan .jalan');
+      const panjang = jalur.getTotalLength();
+      const maju = { t: 0 };
+      // Jalurnya direntangkan (preserveAspectRatio none), jadi titik dipetakan lewat matriks layar.
+      const letak = () => {
+        const titik = jalur.getPointAtLength(panjang * maju.t).matrixTransform(jalur.getScreenCTM());
+        const batas = kotak.getBoundingClientRect();
+        const skalaPanggung = batas.width / kotak.offsetWidth;
+        jalan.style.transform = `translate(${(titik.x - batas.left) / skalaPanggung}px, ${(titik.y - batas.top) / skalaPanggung}px)`;
+      };
+      letak();
+      tl.from(jalur, { drawSVG: 0, duration: d(2), ease: 'power1.inOut' }, 0.7)
+        .to(maju, { t: 1, duration: d(2), ease: 'power1.inOut', onUpdate: letak }, 0.7)
+        .from('.perjalanan .cap', { autoAlpha: 0, scale: 1.6, duration: d(0.45), ease: 'back.out(2)' }, 2.75);
     },
   },
 };
@@ -414,16 +486,28 @@ function perbaruiRel(i, seketika) {
   $('.hitung').textContent = `${i + 1} / ${slides.length}`;
 }
 
+/** Elemen tampak bila langkahnya sudah tercapai dan batas `data-hide-at` belum terlewati. */
+function tampakPada(el, ke) {
+  const { step, hideAt } = el.dataset;
+  return (!step || +step <= ke) && !(hideAt && ke >= +hideAt);
+}
+
+const garisIkon = (akar) => $$('svg.ikon:not(.pudar) *', akar);
+
 /** Setel elemen berlangkah pada slide aktif ke keadaan `ke`. */
 function aturLangkah(ke, seketika, sebelum) {
   const s = slides[kini];
   const durasi = d(seketika ? 0 : 0.6);
-  $$('[data-step]', s).forEach((el) => {
-    const tampak = +el.dataset.step <= ke;
+  const maju = !seketika && !tenang && ke > sebelum;
+  $$('[data-step], [data-hide-at]', s).forEach((el) => {
+    const tampak = tampakPada(el, ke);
     gsap.to(el, { autoAlpha: tampak ? 1 : 0, y: tampak ? 0 : geser(18), duration: durasi, ease: 'power3.out', overwrite: true });
-  });
-  $$('[data-hide-at]', s).forEach((el) => {
-    gsap.to(el, { autoAlpha: ke >= +el.dataset.hideAt ? 0 : 1, duration: durasi, ease: 'power2.out', overwrite: true });
+    // Blok yang baru muncul: butir daftarnya masuk bergiliran dan ikonnya tergambar.
+    if (!maju || +el.dataset.step !== ke) return;
+    const butir = $$('li, tr', el);
+    if (butir.length) gsap.fromTo(butir, { autoAlpha: 0, x: -18 }, { autoAlpha: 1, x: 0, duration: 0.5, ease: 'power3.out', stagger: 0.08, delay: 0.1, overwrite: true });
+    const garis = garisIkon(el);
+    if (garis.length) gsap.fromTo(garis, { drawSVG: '0%' }, { drawSVG: '100%', duration: 0.7, ease: 'power2.out', stagger: 0.04, delay: 0.15, overwrite: true });
   });
   adegan[s.id]?.atur?.(ke, seketika, sebelum);
 }
@@ -438,14 +522,15 @@ function tampil(i, diAkhir = false) {
   if (lama) {
     adegan[lama.id]?.keluar?.();
     gsap.killTweensOf(lama);
-    gsap.to(lama, { autoAlpha: 0, duration: d(0.28), ease: 'power1.out', onComplete: () => lama.classList.remove('aktif') });
+    // Mendaki: slide lama tertinggal ke bawah. Turun: sebaliknya.
+    gsap.to(lama, { autoAlpha: 0, y: geser(i > kini ? 46 : -46), duration: d(0.32), ease: 'power2.in', onComplete: () => lama.classList.remove('aktif') });
   }
 
   kini = i;
   langkah = diAkhir ? jumlahLangkah[i] : 0;
   s.classList.add('aktif');
   gsap.killTweensOf(s);
-  gsap.set(s, { autoAlpha: 1 });
+  gsap.set(s, { autoAlpha: 1, y: 0 });
 
   const masukan = $$('[data-in]', s);
   gsap.set(masukan, { autoAlpha: 0, y: geser(26) });
@@ -457,6 +542,8 @@ function tampil(i, diAkhir = false) {
       { autoAlpha: 0, y: geser(46), clipPath: 'inset(-10% 0 100% 0)' },
       { autoAlpha: 1, y: 0, clipPath: 'inset(-10% 0 -25% 0)', duration: d(0.95), ease: 'power4.out', stagger: judulSlide[i].length > 4 ? 0.045 : 0.1 }, 0)
     .to(masukan, { autoAlpha: 1, y: 0, duration: d(0.7), ease: 'power3.out', stagger: 0.07 }, 0.3);
+  const ikonAwal = garisIkon(s).filter((el) => !el.closest('[data-step]'));
+  if (ikonAwal.length && !tenang) masuk.fromTo(ikonAwal, { drawSVG: '0%' }, { drawSVG: '100%', duration: 0.8, ease: 'power2.out', stagger: 0.03 }, 0.5);
   adegan[s.id]?.masuk?.(masuk);
 
   const polos = s.id === 'judul' || s.id === 'terima';
@@ -532,8 +619,12 @@ function mulai() {
   bangunTahap();
   bangunAlur();
   bangunRel();
+  $$('.titik-uji').forEach((el) => (el.innerHTML = '<i></i>'.repeat(+el.dataset.n)));
+  const r = acak(31);
+  dunia.kelip.innerHTML = Array.from({ length: 34 }, () =>
+    `<i style="left:${(r() * 100).toFixed(1)}vw;top:${(r() * 46).toFixed(1)}vh;--lama:${(1.6 + r() * 2.6).toFixed(2)}s;--tunda:-${(r() * 4).toFixed(2)}s"></i>`).join('') + '<b></b>';
 
-  jumlahLangkah = slides.map((s) => Math.max(0, ...$$('[data-step]', s).map((el) => +el.dataset.step)));
+  jumlahLangkah = slides.map((s) => Math.max(0, ...$$('[data-step], [data-hide-at]', s).map((el) => +(el.dataset.step ?? el.dataset.hideAt))));
   // Judul besar dipecah per huruf, judul biasa per baris. Slide harus terukur saat dipecah.
   judulSlide = slides.map((s) => {
     s.classList.add('aktif');
