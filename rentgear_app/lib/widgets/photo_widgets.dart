@@ -24,6 +24,8 @@ class ItemPhotoView extends StatelessWidget {
           fit: fit, cacheWidth: decodeWidth, errorBuilder: error, gaplessPlayback: true),
       MemoryPhoto(:final bytes) => Image.memory(bytes,
           fit: fit, cacheWidth: decodeWidth, errorBuilder: error, gaplessPlayback: true),
+      NetworkPhoto(:final url) => Image.network(url,
+          fit: fit, cacheWidth: decodeWidth, errorBuilder: error, gaplessPlayback: true),
     };
   }
 }

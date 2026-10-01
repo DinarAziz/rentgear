@@ -39,6 +39,9 @@ class LocalRentGearRepository implements RentGearRepository {
   }
 
   static const demoPassword = 'password';
+
+  @override
+  bool get isRemote => false;
   static const _schemaVersion = 3;
 
   /// Versi 2 belum punya denda dan blacklist; sisanya sama, jadi tetap dibaca.

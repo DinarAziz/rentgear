@@ -9,7 +9,7 @@ diambil, supaya tiap tahap bisa dikerjakan terpisah.
 |---|---|---|
 | 1 | Denda dan blacklist di aplikasi Flutter (tanpa server) | Selesai, lihat bagian 1 |
 | 2 | Katalog per penyedia: halaman toko, rating, komentar, follow, lokasi di peta | Selesai, lihat bagian 2 |
-| 3 | Server Laravel + MySQL, lalu Flutter bisa memilih data lokal atau server | Belum |
+| 3 | Server Laravel + MySQL, lalu Flutter bisa memilih data lokal atau server | Selesai, lihat bagian 3 |
 | 4 | Daftar dan login dengan akun Google | Belum, butuh tahap 3 |
 | 5 | Fitur AI dengan Gemini | Belum, butuh tahap 3 dan API key |
 | 6 | Payment gateway dan versi iOS | Menyusul |
@@ -48,13 +48,24 @@ tanda risiko untuk blacklist. Sampai saat itu, "janggal" ditentukan aturan tetap
 Belum dibuat: peta yang tertanam di dalam aplikasi (butuh Google Maps API key dan akun penagihan Google Cloud), urutan
 toko berdasarkan jarak dari penyewa, dan balasan penyedia atas ulasan.
 
-## 3. Server Laravel
+## 3. Server Laravel (selesai)
 
-Keputusan: PHP, Composer, dan MySQL dipasang lewat Homebrew di Mac pengembang. Rancangan API, struktur folder, dan
-database tetap mengikuti `04-DATABASE.md` dan `05-TECHSTACK-STRUKTUR-API.md`. Aturan dari tahap 1 disalin ke server.
+Kodenya ada di `rentgear_api/`, cara menjalankannya di `rentgear_api/README.md`, rancangannya di
+`docs/superpowers/specs/2026-10-01-laravel-api-design.md`.
 
-Aplikasi Flutter mendapat repository HTTP di samping repository lokal. Mode dipilih saat build, sehingga demo tetap
-jalan walau server mati.
+- REST `/api/v1` dengan token Sanctum. Satu endpoint untuk tiap operasi aplikasi, jadi layar Flutter tidak berubah.
+- Aturan stok, status, denda, blacklist, dan jaminan disalin ke `app/Domain/` dan diuji dengan kasus yang sama
+  seperti tes Dart.
+- Booking berjalan dalam transaksi database dengan baris alat terkunci, sehingga unit terakhir hanya jatuh ke satu
+  booking.
+- Aplikasi Flutter dibangun dengan `--dart-define=API_URL=...` untuk memakai server. Tanpa itu aplikasi tetap
+  memakai data di perangkat.
+- Dalam mode server, layar memuat ulang tiap 8 detik, sehingga perubahan dari perangkat lain ikut tampil.
+
+Satu penyimpangan dari `04-DATABASE.md`: peran pengguna disimpan di satu kolom `role`, bukan tabel `user_roles`.
+
+Belum dibuat: deploy ke hosting publik (server masih di Mac pengembang, http), panel admin berbasis web, dan
+pencocokan nominal bukti transfer.
 
 ## 4. Login Google
 

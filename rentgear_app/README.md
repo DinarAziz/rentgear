@@ -3,9 +3,11 @@
 Klien Android/iOS (dan web untuk demo) marketplace sewa alat hiking.
 Tiga role: **Penyewa**, **Penyedia**, **Admin**.
 
-Saat ini data berasal dari `MockRentGearRepository` (di memori). Backend
-Laravel `/api/v1` belum dibuat; nanti cukup tambah implementasi
-`RentGearRepository` berbasis HTTP dan ganti di `lib/main.dart`.
+Data bisa berasal dari dua tempat, dipilih saat build:
+
+- Tanpa pengaturan: `LocalRentGearRepository`, data tersimpan di perangkat.
+- Dengan `--dart-define=API_URL=http://alamat:8000`: `HttpRentGearRepository`,
+  data dari server Laravel di `../rentgear_api/` (lihat README di sana).
 
 ## Menjalankan
 

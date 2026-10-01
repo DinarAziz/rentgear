@@ -34,11 +34,15 @@ class LocalCodec {
   Map<String, dynamic> photo(ItemPhoto p) => switch (p) {
         AssetPhoto(:final path) => {'asset': path},
         MemoryPhoto(:final id, :final bytes) => {'id': id, 'file': savePhoto(id, bytes)},
+        // Tidak dipakai repository lokal; hanya agar switch lengkap.
+        NetworkPhoto(:final id, :final url) => {'id': id, 'url': url},
       };
 
   ItemPhoto? photoFrom(Map<String, dynamic> j) {
     final asset = j['asset'] as String?;
     if (asset != null) return AssetPhoto(asset);
+    final url = j['url'] as String?;
+    if (url != null) return NetworkPhoto(j['id'] as String, url);
     final bytes = loadPhoto(j['file'] as String?);
     return bytes == null ? null : MemoryPhoto(j['id'] as String, bytes);
   }

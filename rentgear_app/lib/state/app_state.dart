@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../data/local_repository.dart';
@@ -13,6 +15,11 @@ class AppState extends ChangeNotifier {
   final RentGearRepository repo;
   AppUser? _user;
   int _revision = 0;
+  Timer? _poll;
+
+  /// Jeda muat ulang saat data ada di server, supaya perubahan dari
+  /// perangkat lain (mis. penyedia mengonfirmasi booking) ikut tampil.
+  static const pollInterval = Duration(seconds: 8);
 
   AppUser? get user => _user;
   AppUser get currentUser => _user!;
@@ -22,12 +29,23 @@ class AppState extends ChangeNotifier {
   Future<void> bootstrap() async {
     await repo.runScheduledJobs();
     _user = await repo.restoreSession();
+    if (repo.isRemote) {
+      _poll = Timer.periodic(pollInterval, (_) {
+        if (_user != null) refresh();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _poll?.cancel();
+    super.dispose();
   }
 
   /// Dipanggil saat aplikasi kembali ke depan (resume).
   Future<void> refresh() async {
     final changed = await repo.runScheduledJobs();
-    if (changed > 0) {
+    if (changed > 0 || repo.isRemote) {
       _revision++;
       notifyListeners();
     }

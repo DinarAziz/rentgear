@@ -1,8 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Mode server (API_URL) butuh jaringan. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="RentGear"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true">
+        <!-- usesCleartextTraffic: server pengembangan di jaringan lokal memakai http, bukan https. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"

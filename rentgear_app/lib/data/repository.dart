@@ -8,6 +8,10 @@ import '../domain/models.dart';
 /// (data tersimpan di HP). Nanti bisa diganti implementasi HTTP ke Laravel
 /// `/api/v1` tanpa mengubah layar.
 abstract class RentGearRepository {
+  /// `true` bila data berada di server dan bisa berubah dari perangkat lain,
+  /// sehingga layar perlu memuat ulang secara berkala.
+  bool get isRemote;
+
   Future<AppUser> login(String email, String password);
 
   /// Pengguna yang masih login dari sesi sebelumnya, atau `null`.

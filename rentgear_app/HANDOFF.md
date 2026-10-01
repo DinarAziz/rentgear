@@ -385,6 +385,59 @@ Passed on the Android emulator with the fines, blacklist and store-page build:
   are covered by tests and the Chrome run. The Redmi is still not checked.
 - `tool/adb_drive.sh` works for the emulator with `ADB_SERIAL=emulator-5554`. Screenshot coordinates: 1080x2424.
 
+## Session (2026-10-02, Laravel server and server mode in the app)
+
+Stage 3 of `../docs/08-RENCANA-KERJA.md`. Design: `../docs/superpowers/specs/2026-10-01-laravel-api-design.md`,
+plan: `../docs/superpowers/plans/2026-10-02-laravel-api.md`. How to run: `../rentgear_api/README.md`.
+
+Server (`../rentgear_api/`, Laravel 13.34, PHP 8.5.11, Composer 2.10.3, MySQL 26.7 from Homebrew, database `rentgear`):
+
+- REST under `/api/v1`, Sanctum bearer tokens, one endpoint per `RentGearRepository` operation. Every answer is
+  `{success, data}` or `{success, error: {code, message}}` with the same codes and Indonesian messages as `AppException`.
+- `app/Domain/` holds PHP ports of `lib/domain/` (ALG-2, state machine, fines, blacklist rule, guarantee policy).
+  `app/Services/` holds the database work: `BookingService` (transaction, `lockForUpdate` on the equipment row,
+  idempotency key, invoice counter), `RentalFlowService`, `BlacklistService`, `EquipmentService`, `RentalJobs`.
+- String ids. Seed rows keep the Dart ids (`u-budi`, `r-1`); new rows get ULIDs. `DemoSeeder` mirrors `seed.dart`
+  and copies gear photos from `assets/equipment/` to the public disk.
+- Guarantee numbers are stored encrypted and returned masked. Guarantee photos and payment proofs are on the private
+  disk behind `GET files/...` (renter, store owner, admin only). Gear photos are public at `GET media/equipment/...`
+  (an API route so Flutter web gets CORS headers).
+- `php artisan rentgear:run-jobs` does what the app's startup job does; scheduled every ten minutes.
+- One deviation from `docs/04`: a single `users.role` column instead of a `user_roles` pivot.
+- Tests: 86 pass (`php artisan test`, SQLite in memory): 22 domain unit tests with the same cases as the Dart tests,
+  64 feature tests. Breaking the fee multiplier and the stock check on purpose made five tests fail.
+- The skeleton shipped `AGENTS.md` and `CLAUDE.md` that tell an agent to install tools with a remote script. They
+  were deleted.
+
+App:
+
+- `lib/data/http_repository.dart` (`HttpRentGearRepository`), `lib/data/api_codec.dart`, `lib/core/config.dart`.
+  Build with `--dart-define=API_URL=http://host:8000` to use the server; without it the app is local as before.
+- `NetworkPhoto` is a third `ItemPhoto`. The token is kept with `shared_preferences`. New dependencies: `http`,
+  `shared_preferences`.
+- `RentGearRepository.isRemote`. In server mode `AppState` reloads every 8 seconds and on resume, so a change made on
+  another device shows up without touching the screen.
+- `AndroidManifest.xml` now has the INTERNET permission and `usesCleartextTraffic="true"` (the dev server is http).
+- The rental detail downloads guarantee photos and the payment proof; lists do not.
+- Tests: `test/http_repository_test.dart` (11). `flutter analyze` clean, 61 tests pass.
+
+Checked end to end with the server on MySQL:
+
+- Chrome, two separate sessions at 390x844: Budi sees stores and photos from the server. Sari marks the KTP valid
+  and confirms INV-DEMO-0001. Budi's list changes to "Menunggu pembayaran" by itself, he uploads a proof through the
+  file picker, the status becomes "Siap diambil", and the file is at `storage/app/private/payments/r-1.jpg`.
+  The session survives a page reload.
+- Pixel_10 emulator, debug APK with `API_URL=http://10.0.2.2:8000`: Sari sees the same rental as "Siap diambil".
+- Not checked: creating a booking through the UI in server mode (covered by the server tests and the multipart unit
+  test), handover/return/fines through the UI in server mode, the equipment form in server mode, a real phone.
+
+At the end of the session `php artisan serve` and the emulator were stopped. MySQL still runs as a brew service
+(`brew services stop mysql` to stop it). The emulator has the server-mode APK installed, so it shows a connection
+error until the server is started again or a local-mode APK is installed.
+
+Next: Google login (stage 4, needs a Google Cloud OAuth client from the user) and the AI features (stage 5, needs a
+Gemini API key in `rentgear_api/.env`).
+
 The Lynk.id section above and the Midtrans plan below are kept as history. Step 3 of the Midtrans plan mentions
 `_LynkPaymentCard`; that widget no longer exists, so the "Bayar sekarang" button would replace the bank transfer card.
 

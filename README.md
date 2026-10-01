@@ -1,6 +1,6 @@
 # Dokumen Rancangan Sistem — Marketplace Penyewaan Alat Hiking/Camping
 
-Status: **Implementasi dimulai.** Aplikasi Flutter ada di [`rentgear_app/`](rentgear_app/README.md) (data mock, backend Laravel belum dibuat).
+Status: **Implementasi berjalan.** Aplikasi Flutter ada di [`rentgear_app/`](rentgear_app/README.md), server Laravel di [`rentgear_api/`](rentgear_api/README.md), presentasi sidang di [`presentasi/`](presentasi/README.md). Urutan kerja selanjutnya: [`docs/08-RENCANA-KERJA.md`](docs/08-RENCANA-KERJA.md).
 
 ## Daftar Dokumen
 

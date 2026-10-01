@@ -87,7 +87,8 @@ class Category {
   final String name;
 }
 
-/// Foto alat: bawaan aplikasi (asset) atau diunggah penyedia (bytes).
+/// Foto alat: bawaan aplikasi (asset), diunggah penyedia (bytes), atau dari
+/// server (URL).
 sealed class ItemPhoto {
   const ItemPhoto();
 }
@@ -101,6 +102,14 @@ class MemoryPhoto extends ItemPhoto {
   const MemoryPhoto(this.id, this.bytes);
   final String id;
   final Uint8List bytes;
+}
+
+/// Foto yang disimpan di server. [id] dipakai saat penyedia mengubah alat,
+/// untuk memberi tahu server foto mana yang dipertahankan.
+class NetworkPhoto extends ItemPhoto {
+  const NetworkPhoto(this.id, this.url);
+  final String id;
+  final String url;
 }
 
 /// Stok per ukuran, dipakai alat berukuran seperti sepatu.
