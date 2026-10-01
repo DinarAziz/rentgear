@@ -65,7 +65,7 @@ class ProviderProfile {
   final double rating;
   GuaranteePolicy policy;
 
-  /// Rekening penyedia untuk pencairan dana dari platform, mis. "BCA 1234567890 a.n. Arjuna Outdoor".
+  /// Rekening tujuan transfer, mis. "BCA 1234567890 a.n. Arjuna Outdoor".
   final String? bankAccount;
 }
 

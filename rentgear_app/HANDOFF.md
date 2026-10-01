@@ -286,10 +286,34 @@ Open items:
   turned off in the phone's settings. This is a device setting, not an app bug.
 - The amount on the receipt is still not matched against the bill automatically; that needs the Laravel webhook.
 
+## Session (2026-10-01, back to bank transfer + proof)
+
+The user asked to go back to payment by bank transfer with an uploaded proof. The Lynk.id code from commit `948858b`
+is undone in the working tree (not committed yet):
+
+- `rental_detail_screen.dart`: the customer's "Cara bayar" card shows the provider's bank account again
+  ("Transfer Rp ... ke: BCA ..."), and the labels say "bukti transfer" again. `_LynkPaymentCard` and `_CopyRow` are gone.
+- Removed `lib/core/payment.dart`, `test/lynk_payment_test.dart`, the `url_launcher` dependency and the https `<queries>`
+  intent in `AndroidManifest.xml`. `ProviderProfile.bankAccount` is the transfer destination again.
+- `flutter analyze` clean, 30 tests pass. Not rechecked on the Redmi (no phone connected); the APK on the phone and
+  `../webapp/` have not been rebuilt in this session. `../webapp/` was built before the Lynk.id change, so it already
+  shows the bank transfer card.
+
+Also this session: the lecturer wants the presentation in "sidang" format, and the user asked for a web page instead
+of a .pptx. It is in `../presentasi/` (`index.html`, `deck.css`, `deck.js`, see `../presentasi/README.md`): 15 slides,
+opened straight from the file in Chrome, no internet needed (fonts and GSAP are vendored). The app screenshots in
+`../presentasi/assets/app/` were captured from `../webapp/` with Playwright at 390x844. The name on the title slide is
+set in `IDENTITAS` at the top of `deck.js`; NIM, class and lecturer are still empty. The rumusan masalah was rewritten
+to match what the app does today; smart matching and the AI features moved to "batasan" and "saran".
+
+The Lynk.id section above and the Midtrans plan below are kept as history. Step 3 of the Midtrans plan mentions
+`_LynkPaymentCard`; that widget no longer exists, so the "Bayar sekarang" button would replace the bank transfer card.
+
 ## Next: switch payment to Midtrans (decided 2026-09-30, not started)
 
-The user compared Lynk.id, Midtrans, Xendit, Tripay and DOKU and chose **Midtrans Sandbox (Snap)**. Lynk.id stays in the
-app only until Midtrans works. Lynk.id has no API for per-invoice amounts, and the user's page has no product.
+The user compared Lynk.id, Midtrans, Xendit, Tripay and DOKU and chose **Midtrans Sandbox (Snap)**. Lynk.id has no API
+for per-invoice amounts, and the user's page has no product. As of 2026-10-01 the app uses bank transfer + proof and
+Lynk.id is removed.
 
 Plan:
 1. The user signs up at dashboard.sandbox.midtrans.com and gets the Server Key and Client Key (Settings > Access Keys).

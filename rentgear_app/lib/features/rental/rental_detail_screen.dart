@@ -1,10 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/format.dart';
-import '../../core/payment.dart';
 import '../../core/responsive.dart';
 import '../../domain/guarantee.dart';
 import '../../domain/models.dart';
@@ -25,12 +24,17 @@ class RentalDetailScreen extends StatelessWidget {
     final state = context.read<AppState>();
     return Scaffold(
       appBar: AppBar(title: const Text('Detail Transaksi')),
-      body: AsyncView<Rental>(
-        load: () => state.repo.rental(rentalId),
-        builder: (context, rental) => Column(
+      body: AsyncView<(Rental, ProviderProfile)>(
+        load: () async {
+          final r = await state.repo.rental(rentalId);
+          return (r, await state.repo.provider(r.providerId));
+        },
+        builder: (context, data) => Column(
           children: [
-            Expanded(child: _Body(rental: rental)),
-            _ActionBar(rental: rental),
+            Expanded(
+              child: _Body(rental: data.$1, provider: data.$2),
+            ),
+            _ActionBar(rental: data.$1),
           ],
         ),
       ),
@@ -39,8 +43,9 @@ class RentalDetailScreen extends StatelessWidget {
 }
 
 class _Body extends StatelessWidget {
-  const _Body({required this.rental});
+  const _Body({required this.rental, required this.provider});
   final Rental rental;
+  final ProviderProfile provider;
 
   @override
   Widget build(BuildContext context) {
@@ -119,9 +124,33 @@ class _Body extends StatelessWidget {
           ),
         ),
         if (r.status == RentalStatus.awaitingPayment &&
-            user.role == UserRole.customer) ...[
+            user.role == UserRole.customer &&
+            provider.bankAccount != null) ...[
           const SectionTitle('Cara bayar'),
-          _LynkPaymentCard(rental: r),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Transfer ${rupiah(r.grandTotal)} ke:'),
+                  const SizedBox(height: 6),
+                  SelectableText(
+                    provider.bankAccount!,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Lalu unggah foto bukti transfer lewat tombol di bawah.',
+                    style: TextStyle(fontSize: 13, color: Colors.black54),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
         if (r.paymentProof != null) ...[
           const SectionTitle('Bukti bayar'),
@@ -142,7 +171,7 @@ class _Body extends StatelessWidget {
                   cacheWidth: 150,
                 ),
               ),
-              title: const Text('Lihat bukti bayar'),
+              title: const Text('Lihat bukti transfer'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.push(
                 context,
@@ -483,13 +512,10 @@ class _ActionBar extends StatelessWidget {
   }
 }
 
-/// Pilih foto bukti bayar lalu tampilkan pratinjau. "Ganti" membuka
+/// Pilih foto bukti transfer lalu tampilkan pratinjau. "Ganti" membuka
 /// pemilih lagi; `null` bila dibatalkan.
 Future<Uint8List?> _pickPaymentProof(BuildContext context, double total) async {
-  final bytes = await pickPhoto(
-    context,
-    title: 'Screenshot bukti bayar Lynk.id',
-  );
+  final bytes = await pickPhoto(context, title: 'Foto bukti transfer');
   if (bytes == null || !context.mounted) return null;
   final ok = await showDialog<bool>(
     context: context,
@@ -529,102 +555,4 @@ Future<Uint8List?> _pickPaymentProof(BuildContext context, double total) async {
   if (ok) return bytes;
   if (!context.mounted) return null;
   return _pickPaymentProof(context, total);
-}
-
-/// Langkah bayar lewat Lynk.id: salin nominal & kode invoice, buka halaman
-/// Lynk.id, lalu unggah screenshot struknya lewat tombol di bawah.
-class _LynkPaymentCard extends StatelessWidget {
-  const _LynkPaymentCard({required this.rental});
-
-  final Rental rental;
-
-  Future<void> _copy(BuildContext context, String label, String value) async {
-    await Clipboard.setData(ClipboardData(text: value));
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('$label disalin.')));
-  }
-
-  Future<void> _open(BuildContext context) async {
-    final opened = await launchUrl(
-      Uri.parse(lynkPaymentUrl),
-      mode: LaunchMode.inAppBrowserView,
-    );
-    if (opened || !context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Tidak bisa membuka Lynk.id. Coba lagi.')),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final r = rental;
-    const hint = TextStyle(fontSize: 13, color: Colors.black54);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text('Bayar lewat Lynk.id (QRIS, e-wallet, VA bank).'),
-            const SizedBox(height: 8),
-            _CopyRow(
-              label: 'Nominal',
-              value: rupiah(r.grandTotal),
-              onCopy: () =>
-                  _copy(context, 'Nominal', r.grandTotal.round().toString()),
-            ),
-            _CopyRow(
-              label: 'Kode invoice',
-              value: r.invoiceCode,
-              onCopy: () => _copy(context, 'Kode invoice', r.invoiceCode),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              '1. Buka Lynk.id, isi nominal persis sama.\n'
-              '2. Tulis kode invoice di catatan pembayaran.\n'
-              '3. Setelah lunas, unggah screenshot struknya lewat tombol di bawah.',
-              style: hint,
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.open_in_new),
-              label: const Text('Buka Lynk.id'),
-              onPressed: () => _open(context),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CopyRow extends StatelessWidget {
-  const _CopyRow({
-    required this.label,
-    required this.value,
-    required this.onCopy,
-  });
-
-  final String label;
-  final String value;
-  final VoidCallback onCopy;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(label, style: const TextStyle(color: Colors.black54)),
-        ),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
-        IconButton(
-          tooltip: 'Salin $label',
-          icon: const Icon(Icons.copy, size: 18),
-          onPressed: onCopy,
-        ),
-      ],
-    );
-  }
 }
