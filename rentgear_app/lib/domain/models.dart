@@ -53,8 +53,9 @@ class ProviderProfile {
     required this.city,
     required this.address,
     required this.status,
-    required this.rating,
     required this.policy,
+    required this.latitude,
+    required this.longitude,
     this.bankAccount,
   });
 
@@ -64,8 +65,17 @@ class ProviderProfile {
   final String city;
   final String address;
   ProviderStatus status;
-  final double rating;
   GuaranteePolicy policy;
+
+  /// Lokasi toko, untuk dibuka di Google Maps.
+  final double latitude;
+  final double longitude;
+
+  /// Rata-rata bintang, jumlah ulasan, dan jumlah pengikut. Dihitung ulang
+  /// oleh repository setiap kali ulasan atau pengikut berubah.
+  double rating = 0;
+  int reviewCount = 0;
+  int followerCount = 0;
 
   /// Rekening tujuan transfer, mis. "BCA 1234567890 a.n. Arjuna Outdoor".
   final String? bankAccount;
@@ -293,6 +303,9 @@ class Rental {
   /// Catatan keputusan admin.
   String? reviewNote;
 
+  /// Ulasan penyewa untuk toko, diisi setelah transaksi selesai.
+  Review? review;
+
   int get durationDays => inclusiveDays(startDate, endDate);
 
   /// Mis. "Sepatu Hiking × 1 (ukuran 42)".
@@ -319,6 +332,33 @@ class Rental {
   /// Keberatan hanya untuk denda kerusakan yang belum pernah ditinjau admin.
   bool get canObjectToDamageFee =>
       status == RentalStatus.returned && damageFee > 0 && damageReview == DamageReview.none;
+}
+
+/// Ulasan penyewa untuk sebuah toko.
+class Review {
+  const Review({
+    required this.id,
+    required this.providerId,
+    required this.customerName,
+    required this.rating,
+    required this.comment,
+    required this.at,
+    this.rentalId,
+    this.equipmentName,
+  });
+
+  final String id;
+  final String providerId;
+  final String customerName;
+
+  /// 1 sampai 5 bintang.
+  final int rating;
+  final String comment;
+  final DateTime at;
+
+  /// Kosong untuk ulasan bawaan data demo.
+  final String? rentalId;
+  final String? equipmentName;
 }
 
 /// Penyewa yang tidak boleh membuat booking baru.

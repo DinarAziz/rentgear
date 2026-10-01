@@ -30,7 +30,8 @@ class SeedData {
           city: 'Malang',
           address: 'Jl. Soekarno Hatta No. 12, Malang',
           status: ProviderStatus.verified,
-          rating: 4.8,
+          latitude: -7.9396,
+          longitude: 112.6289,
           bankAccount: 'BCA 0231 4455 67 a.n. Arjuna Outdoor',
           policy: const GuaranteePolicy(
             acceptedTypes: {GuaranteeType.ktp, GuaranteeType.sim, GuaranteeType.ktm, GuaranteeType.kartuKeluarga},
@@ -43,7 +44,8 @@ class SeedData {
           city: 'Lumajang',
           address: 'Jl. Raya Senduro No. 5, Lumajang',
           status: ProviderStatus.verified,
-          rating: 4.9,
+          latitude: -8.1049,
+          longitude: 113.0868,
           bankAccount: 'BRI 0012 01 000456 30 1 a.n. Dewi Lestari',
           policy: const GuaranteePolicy(
             acceptedTypes: {GuaranteeType.ktp, GuaranteeType.ktm, GuaranteeType.ijazah, GuaranteeType.paspor},
@@ -57,10 +59,26 @@ class SeedData {
           city: 'Batu',
           address: 'Jl. Panglima Sudirman No. 88, Batu',
           status: ProviderStatus.pending,
-          rating: 0,
+          latitude: -7.8707,
+          longitude: 112.5269,
           policy: const GuaranteePolicy(acceptedTypes: {GuaranteeType.ktp, GuaranteeType.sim}),
         ),
       ];
+
+  /// Ulasan dari penyewa lama, supaya halaman toko tidak kosong saat demo.
+  List<Review> reviews() => [
+        Review(id: 'rv-1', providerId: 'p-arjuna', customerName: 'Andi Prasetyo', rating: 5, comment: 'Tenda bersih dan kering, pasak lengkap. Serah terima cepat.', at: day(-6), equipmentName: 'Tenda Dome 4 Orang'),
+        Review(id: 'rv-2', providerId: 'p-arjuna', customerName: 'Sinta Maharani', rating: 4, comment: 'Carrier nyaman dipakai. Rain cover agak kotor waktu diambil.', at: day(-15), equipmentName: 'Carrier 60L'),
+        Review(id: 'rv-3', providerId: 'p-arjuna', customerName: 'Yoga Firmansyah', rating: 5, comment: 'Kompor menyala normal dan gasnya masih penuh.', at: day(-28), equipmentName: 'Kompor Portable + 1 Gas'),
+        Review(id: 'rv-4', providerId: 'p-semeru', customerName: 'Raka Aditya', rating: 5, comment: 'Tenda ultralight ringan sekali, cocok untuk pendakian cepat.', at: day(-4), equipmentName: 'Tenda Ultralight 2 Orang'),
+        Review(id: 'rv-5', providerId: 'p-semeru', customerName: 'Laras Wijayanti', rating: 5, comment: 'Sepatu sesuai ukuran dan tidak bau. Pemilik ramah.', at: day(-12), equipmentName: 'Sepatu Hiking Waterproof'),
+        Review(id: 'rv-6', providerId: 'p-semeru', customerName: 'Fajar Nugroho', rating: 4, comment: 'Headlamp terang. Baterai cadangan tidak disertakan.', at: day(-20), equipmentName: 'Headlamp 300 Lumen'),
+      ];
+
+  /// Toko yang sudah diikuti penyewa demo.
+  Map<String, Set<String>> follows() => {
+        'u-rina': {'p-arjuna'},
+      };
 
   final categories = const [
     Category('tenda', 'Tenda'),

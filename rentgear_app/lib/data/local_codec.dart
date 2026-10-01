@@ -200,6 +200,28 @@ class LocalCodec {
   static T? _byName<T extends Enum>(List<T> values, Object? name) =>
       name == null ? null : values.byName(name as String);
 
+  Map<String, dynamic> review(Review r) => {
+        'id': r.id,
+        'providerId': r.providerId,
+        'customerName': r.customerName,
+        'rating': r.rating,
+        'comment': r.comment,
+        'at': _date(r.at),
+        'rentalId': r.rentalId,
+        'equipmentName': r.equipmentName,
+      };
+
+  Review reviewFrom(Map<String, dynamic> j) => Review(
+        id: j['id'] as String,
+        providerId: j['providerId'] as String,
+        customerName: j['customerName'] as String,
+        rating: j['rating'] as int,
+        comment: j['comment'] as String,
+        at: _parse(j['at'])!,
+        rentalId: j['rentalId'] as String?,
+        equipmentName: j['equipmentName'] as String?,
+      );
+
   Map<String, dynamic> blacklist(BlacklistEntry b) =>
       {'reason': b.reason, 'by': b.by, 'at': _date(b.at)};
 

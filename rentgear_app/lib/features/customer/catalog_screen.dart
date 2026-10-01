@@ -11,8 +11,11 @@ import '../../widgets/blacklist_notice.dart';
 import '../../widgets/common.dart';
 import '../../widgets/motion.dart';
 import '../../widgets/photo_widgets.dart';
-import 'equipment_detail_screen.dart';
+import 'equipment_cards.dart';
+import 'provider_store_screen.dart';
 
+/// Halaman awal penyewa. Tanpa kata kunci: daftar toko, seperti di aplikasi
+/// belanja. Saat mengetik atau memilih kategori: alat dari semua toko.
 class CatalogScreen extends StatefulWidget {
   const CatalogScreen({super.key});
 
@@ -25,6 +28,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
   Timer? _debounce;
   String _query = '';
   String? _categoryId;
+
+  static const double _maxWidth = 1280;
+
+  bool get _searching => _query.isNotEmpty || _categoryId != null;
 
   @override
   void dispose() {
@@ -92,44 +99,16 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     scrollDirection: Axis.horizontal,
                     padding: EdgeInsets.symmetric(horizontal: gutter.left),
                     children: [
-                      _chip('Semua', null),
+                      _chip('Toko', null),
                       for (final c in cats) _chip(c.name, c.id),
                     ],
                   ),
                 ),
               ),
               Expanded(
-                child: AsyncView<List<Equipment>>(
-                  deps: (_query, _categoryId),
-                  load: () => state.repo.searchEquipment(
-                    query: _query,
-                    categoryId: _categoryId,
-                  ),
-                  builder: (context, items) {
-                    if (items.isEmpty) {
-                      return EmptyState(
-                        icon: Icons.search_off,
-                        message: _query.isEmpty
-                            ? 'Belum ada alat di kategori ini.'
-                            : 'Tidak ada alat yang cocok dengan "$_query".',
-                      );
-                    }
-                    if (FormFactor.fromWidth(c.maxWidth) != FormFactor.phone) {
-                      return _grid(context, items, gutter, c.maxWidth);
-                    }
-                    return ListView.separated(
-                      padding: const EdgeInsets.all(16),
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
-                      itemCount: items.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 10),
-                      itemBuilder: (context, i) => FadeSlideIn(
-                        delay: FadeSlideIn.stagger(i),
-                        child: _EquipmentCard(items[i]),
-                      ),
-                    );
-                  },
-                ),
+                child: _searching
+                    ? _results(state, gutter, c.maxWidth)
+                    : _StoreList(gutter: gutter),
               ),
             ],
           );
@@ -138,37 +117,29 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
   }
 
-  static const double _maxWidth = 1280;
-
-  /// Tablet dan desktop: grid kartu berfoto besar, 2–5 kolom sesuai lebar.
-  Widget _grid(
-    BuildContext context,
-    List<Equipment> items,
-    EdgeInsets gutter,
-    double width,
-  ) {
-    const gap = 14.0;
-    final inner = width - gutter.horizontal;
-    final columns = ((inner + gap) / (220 + gap)).floor().clamp(2, 5);
-    final cellWidth = (inner - gap * (columns - 1)) / columns;
-    // Foto 4:3 + blok teks yang ikut membesar dengan ukuran huruf sistem.
-    final textScale = MediaQuery.textScalerOf(context).scale(1);
-    return GridView.builder(
-      padding: EdgeInsets.fromLTRB(gutter.left, 8, gutter.right, 24),
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: columns,
-        mainAxisSpacing: gap,
-        crossAxisSpacing: gap,
-        mainAxisExtent: cellWidth * 3 / 4 + 112 * textScale,
-      ),
-      itemCount: items.length,
-      itemBuilder: (context, i) => FadeSlideIn(
-        delay: FadeSlideIn.stagger(i),
-        child: _EquipmentTile(items[i]),
-      ),
-    );
-  }
+  Widget _results(AppState state, EdgeInsets gutter, double width) =>
+      AsyncView<List<Equipment>>(
+        deps: (_query, _categoryId),
+        load: () =>
+            state.repo.searchEquipment(query: _query, categoryId: _categoryId),
+        builder: (context, items) {
+          if (items.isEmpty) {
+            return EmptyState(
+              icon: Icons.search_off,
+              message: _query.isEmpty
+                  ? 'Belum ada alat di kategori ini.'
+                  : 'Tidak ada alat yang cocok dengan "$_query".',
+            );
+          }
+          return EquipmentCollection(
+            items: items,
+            width: width,
+            padding: FormFactor.fromWidth(width) == FormFactor.phone
+                ? const EdgeInsets.all(16)
+                : EdgeInsets.fromLTRB(gutter.left, 8, gutter.right, 24),
+          );
+        },
+      );
 
   Widget _chip(String label, String? id) => Padding(
     padding: const EdgeInsets.only(right: 8),
@@ -180,157 +151,147 @@ class _CatalogScreenState extends State<CatalogScreen> {
   );
 }
 
-void _openDetail(BuildContext context, Equipment e) {
-  dismissKeyboard();
-  Navigator.push(
-    context,
-    MaterialPageRoute<void>(
-      builder: (_) => EquipmentDetailScreen(equipmentId: e.id),
-    ),
-  );
-}
+typedef _Stores = (List<ProviderProfile>, List<Equipment>, Set<String>);
 
-const _muted = TextStyle(fontSize: 13, color: Colors.black54);
+class _StoreList extends StatelessWidget {
+  const _StoreList({required this.gutter});
 
-Widget _price(BuildContext context, Equipment e) => Text.rich(
-  TextSpan(
-    children: [
-      TextSpan(
-        text: rupiah(e.pricePerDay),
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 15,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-      ),
-      const TextSpan(text: ' /hari', style: _muted),
-    ],
-  ),
-);
+  final EdgeInsets gutter;
 
-Widget _meta(Equipment e) => Wrap(
-  spacing: 10,
-  children: [
-    if (e.rating > 0)
-      Text(
-        '★ ${e.rating.toStringAsFixed(1)}',
-        style: const TextStyle(fontSize: 13),
-      ),
-    Text(
-      e.hasSizes ? 'Ukuran ${e.sizeRange}' : 'Stok ${e.stockTotal}',
-      style: _muted,
-    ),
-  ],
-);
+  Future<_Stores> _load(AppState state) async {
+    final providers = await state.repo.providers();
+    final followed = await state.repo.followedProviders(state.currentUser.id);
+    // Toko yang diikuti tampil lebih dulu, lalu urut rating.
+    int byFollowThenRating(ProviderProfile a, ProviderProfile b) {
+      final aFollowed = followed.contains(a.id);
+      if (aFollowed != followed.contains(b.id)) return aFollowed ? -1 : 1;
+      return b.rating.compareTo(a.rating);
+    }
 
-/// Kartu vertikal untuk grid tablet/desktop: foto di atas, info di bawah.
-class _EquipmentTile extends StatelessWidget {
-  const _EquipmentTile(this.e);
-  final Equipment e;
+    final stores =
+        providers.where((p) => p.status == ProviderStatus.verified).toList()
+          ..sort(byFollowThenRating);
+    return (stores, await state.repo.searchEquipment(), followed);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final photo = e.photos.firstOrNull;
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _openDetail(context, e),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AspectRatio(
-              aspectRatio: 4 / 3,
-              child: photo == null
-                  ? Center(
-                      child: EquipmentThumb(categoryId: e.categoryId, size: 96),
-                    )
-                  : LayoutBuilder(
-                      builder: (context, c) => ItemPhotoView(
-                        photo,
-                        decodeWidth:
-                            (c.maxWidth *
-                                    MediaQuery.devicePixelRatioOf(context))
-                                .round(),
-                      ),
-                    ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      e.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
-                    ),
-                    Text(
-                      e.brand,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: _muted,
-                    ),
-                    const SizedBox(height: 4),
-                    _meta(e),
-                    const Spacer(),
-                    _price(context, e),
-                  ],
-                ),
+    final state = context.read<AppState>();
+    return AsyncView<_Stores>(
+      load: () => _load(state),
+      builder: (context, data) {
+        final (stores, equipment, followed) = data;
+        if (stores.isEmpty) {
+          return const EmptyState(
+            icon: Icons.storefront_outlined,
+            message: 'Belum ada toko yang terverifikasi.',
+          );
+        }
+        return ResponsiveCardList(
+          itemCount: stores.length,
+          minItemWidth: 380,
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          itemBuilder: (context, i) {
+            final store = stores[i];
+            return FadeSlideIn(
+              delay: FadeSlideIn.stagger(i),
+              child: _StoreCard(
+                store: store,
+                equipment: equipment
+                    .where((e) => e.providerId == store.id)
+                    .toList(),
+                followed: followed.contains(store.id),
               ),
-            ),
-          ],
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }
 
-class _EquipmentCard extends StatelessWidget {
-  const _EquipmentCard(this.e);
-  final Equipment e;
+class _StoreCard extends StatelessWidget {
+  const _StoreCard({
+    required this.store,
+    required this.equipment,
+    required this.followed,
+  });
+
+  final ProviderProfile store;
+  final List<Equipment> equipment;
+  final bool followed;
 
   @override
   Widget build(BuildContext context) {
+    final p = store;
+    const muted = TextStyle(fontSize: 13, color: Colors.black54);
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => _openDetail(context, e),
+        onTap: () => openProviderStore(context, p.id),
         child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ItemThumb(
-                photo: e.photos.firstOrNull,
-                categoryId: e.categoryId,
-                size: 88,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      e.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
+                    child: const Icon(Icons.storefront_outlined),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          p.businessName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(p.city, style: muted),
+                      ],
                     ),
-                    Text(e.brand, style: _muted),
-                    const SizedBox(height: 4),
-                    _meta(e),
-                    const SizedBox(height: 6),
-                    _price(context, e),
+                  ),
+                  if (followed)
+                    Pill(
+                      'Diikuti',
+                      color: Theme.of(context).colorScheme.primary,
+                      icon: Icons.check,
+                    ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                p.reviewCount == 0
+                    ? 'Belum ada ulasan'
+                    : '★ ${bintang(p.rating)} dari ${p.reviewCount} ulasan',
+                style: const TextStyle(fontSize: 13),
+              ),
+              Text(
+                '${p.followerCount} pengikut, ${equipment.length} alat',
+                style: muted,
+              ),
+              if (equipment.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    for (final e in equipment.take(4)) ...[
+                      ItemThumb(
+                        photo: e.photos.firstOrNull,
+                        categoryId: e.categoryId,
+                        size: 64,
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                   ],
                 ),
-              ),
+              ],
             ],
           ),
         ),

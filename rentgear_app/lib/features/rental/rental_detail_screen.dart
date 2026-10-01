@@ -13,6 +13,7 @@ import '../../widgets/common.dart';
 import '../../widgets/guarantee_widgets.dart';
 import '../../widgets/motion.dart';
 import '../../widgets/photo_widgets.dart';
+import '../customer/provider_store_screen.dart';
 import 'fine_widgets.dart';
 
 /// Detail transaksi untuk semua role. Tombol aksi menyesuaikan role & status.
@@ -209,6 +210,10 @@ class _Body extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ],
+        if (r.review case final review?) ...[
+          const SectionTitle('Ulasan penyewa'),
+          ReviewTile(review),
+        ],
         const SectionTitle('Riwayat status'),
         Card(
           child: Padding(
@@ -372,6 +377,27 @@ class _ActionBar extends StatelessWidget {
               );
             },
             child: const Text('Batalkan'),
+          ),
+        );
+      }
+      if (r.status == RentalStatus.completed && r.review == null) {
+        actions.add(
+          FilledButton.icon(
+            icon: const Icon(Icons.star_outline),
+            label: const Text('Beri ulasan'),
+            onPressed: () async {
+              final review = await askReview(context, r.providerName);
+              if (review == null || !context.mounted) return;
+              await act(
+                () => state.repo.submitReview(
+                  r.id,
+                  user,
+                  rating: review.rating,
+                  comment: review.comment,
+                ),
+                'Terima kasih, ulasan Anda tersimpan.',
+              );
+            },
           ),
         );
       }

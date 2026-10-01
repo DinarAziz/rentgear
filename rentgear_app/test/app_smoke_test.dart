@@ -24,6 +24,22 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Halo, Budi'), findsOneWidget);
 
+    // Halaman awal menampilkan toko yang terverifikasi, bukan langsung alat.
+    expect(find.text('Arjuna Outdoor'), findsOneWidget);
+    expect(find.text('Semeru Camp Rent'), findsOneWidget);
+    expect(find.text('Puncak Outdoor'), findsNothing);
+    expect(find.text('Tenda Dome 4 Orang'), findsNothing);
+
+    await tester.tap(find.text('Arjuna Outdoor'));
+    await tester.pumpAndSettle();
+    expect(find.text('Buka di Google Maps'), findsOneWidget);
+    await tester.tap(find.text('Ikuti'));
+    await tester.pumpAndSettle();
+    expect(find.text('Mengikuti'), findsOneWidget);
+    // Tunggu snackbar "Mengikuti ..." hilang supaya tidak menutupi tombol di layar berikutnya.
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Tenda Dome 4 Orang'));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Jaminan yang diterima'), 300,
@@ -41,6 +57,31 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('Pilih tanggal sewa'), findsOneWidget);
     expect(find.textContaining('pilih jenis dokumen'), findsOneWidget);
+  });
+
+  testWidgets('customer searches gear across stores and reviews a finished rental', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Penyewa · Budi'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Carrier'));
+    await tester.pumpAndSettle();
+    expect(find.text('Carrier 60L'), findsOneWidget);
+    expect(find.text('Arjuna Outdoor'), findsNothing);
+
+    await tester.tap(find.text('Sewa Saya'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('INV-DEMO-0005'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Beri ulasan'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('4 bintang'));
+    await tester.enterText(find.byType(TextField), 'Sleeping bag hangat');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kirim ulasan'));
+    await tester.pumpAndSettle();
+    expect(find.text('Beri ulasan'), findsNothing);
+    expect(find.text('Ulasan penyewa'), findsOneWidget);
   });
 
   testWidgets('provider verifies guarantee on pending order', (tester) async {

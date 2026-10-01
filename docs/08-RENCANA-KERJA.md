@@ -8,14 +8,11 @@ diambil, supaya tiap tahap bisa dikerjakan terpisah.
 | Tahap | Isi | Status |
 |---|---|---|
 | 1 | Denda dan blacklist di aplikasi Flutter (tanpa server) | Selesai, lihat bagian 1 |
-| 2 | Katalog per penyedia: halaman toko, rating, komentar, follow, lokasi di peta | Belum |
+| 2 | Katalog per penyedia: halaman toko, rating, komentar, follow, lokasi di peta | Selesai, lihat bagian 2 |
 | 3 | Server Laravel + MySQL, lalu Flutter bisa memilih data lokal atau server | Belum |
 | 4 | Daftar dan login dengan akun Google | Belum, butuh tahap 3 |
 | 5 | Fitur AI dengan Gemini | Belum, butuh tahap 3 dan API key |
 | 6 | Payment gateway dan versi iOS | Menyusul |
-
-Urutan tahap 2 sampai 5 masih usulan. Pemilik proyek semula menyebut Laravel dan AI lebih dulu; tahap 2 ditaruh di
-depan karena bisa dikerjakan tanpa server.
 
 ## 1. Denda dan blacklist (selesai)
 
@@ -36,21 +33,20 @@ Aturan yang dipakai, semuanya ada di `rentgear_app/lib/domain/fines.dart`:
 Yang menunggu tahap 5: AI ikut memeriksa denda kerusakan (membandingkan foto sebelum dan sesudah sewa) dan memberi
 tanda risiko untuk blacklist. Sampai saat itu, "janggal" ditentukan aturan tetap di atas.
 
-## 2. Katalog per penyedia
+## 2. Katalog per penyedia (selesai)
 
-Permintaan pemilik proyek:
+- Halaman awal penyewa menampilkan daftar toko yang terverifikasi. Toko yang diikuti tampil lebih dulu, lalu urut
+  rating. Mengetik di pencarian atau memilih kategori menampilkan alat dari semua toko.
+- Halaman toko berisi alamat, rating, jumlah pengikut, tombol ikuti, tombol "Buka di Google Maps", daftar alat, dan
+  ulasan.
+- Rating toko adalah rata-rata bintang dari ulasannya. Ulasan hanya bisa diisi penyewa transaksi itu, setelah
+  transaksi selesai, satu kali, lewat tombol "Beri ulasan" di detail transaksi.
+- Lokasi dibuka lewat tautan Google Maps dari koordinat toko, tanpa API key. Koordinat tiga toko demo adalah titik
+  perkiraan di kota masing-masing, karena tokonya fiktif.
+- Enam ulasan awal di data demo adalah contoh buatan, supaya halaman toko tidak kosong.
 
-- Halaman awal penyewa menampilkan daftar penyedia lebih dulu, seperti toko di e-commerce. Alat dilihat setelah masuk
-  ke halaman satu penyedia.
-- Tiap penyedia punya rating, komentar dari penyewa, dan tombol follow.
-- Lokasi penyedia bisa dibuka di Google Maps.
-
-Catatan teknis yang perlu diputuskan saat tahap ini dimulai:
-
-- Peta tertanam di dalam aplikasi butuh Google Maps API key dan akun penagihan Google Cloud. Tombol "Buka di Google
-  Maps" dengan koordinat penyedia tidak butuh keduanya.
-- Rating dan komentar sebaiknya hanya bisa diisi penyewa yang transaksinya sudah selesai (rancangan F-34 di
-  `01-KONSEP-DAN-ANALISIS.md`).
+Belum dibuat: peta yang tertanam di dalam aplikasi (butuh Google Maps API key dan akun penagihan Google Cloud), urutan
+toko berdasarkan jarak dari penyewa, dan balasan penyedia atas ulasan.
 
 ## 3. Server Laravel
 

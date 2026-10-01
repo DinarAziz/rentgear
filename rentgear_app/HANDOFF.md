@@ -345,6 +345,46 @@ Google Maps, a catalog that lists providers first (store pages with rating, comm
 a Google account. Decisions already made: Homebrew PHP + Composer + MySQL for Laravel, Gemini with the user's own API
 key, and a Flutter build that can choose local data or the server.
 
+## Session (2026-10-01, store pages)
+
+Stage 2 of `../docs/08-RENCANA-KERJA.md`, local repository only.
+
+- The customer home (`catalog_screen.dart`) lists verified stores first: followed stores on top, then by rating. Typing
+  in the search box or picking a category chip shows gear from all stores, as before. The first chip is now "Toko".
+- `provider_store_screen.dart`: store page with address, rating, follower count, "Ikuti"/"Mengikuti", "Buka di Google
+  Maps" (`lib/core/maps.dart` builds the link, opened with `url_launcher`, no API key), gear list and reviews. It also
+  holds `StarRow`, `ReviewTile` and the `askReview` dialog. The provider card on the gear detail page opens it.
+- `equipment_cards.dart`: `EquipmentCollection` (list on phone, grid on wider screens), `EquipmentTile`,
+  `EquipmentCard`, moved out of the catalog so the store page can reuse them.
+- Reviews: `Review` model, `Rental.review`, `submitReview` (renter only, completed rentals only, once, 1-5 stars),
+  `providerReviews`. The customer gets "Beri ulasan" on a completed rental. `ProviderProfile.rating`, `reviewCount` and
+  `followerCount` are recomputed by the repository (`_refreshStoreStats`); `rating` is no longer a seed constant.
+- Follow: `followedProviders`, `setFollow`. Seed: Rina follows Arjuna Outdoor.
+- `ProviderProfile` has `latitude`/`longitude`. The three demo stores use approximate points in their cities.
+- Seed has six sample reviews (three per verified store). User reviews and follows are saved in the local store as
+  optional keys; schema version stays 3.
+- `url_launcher` is back in `pubspec.yaml`, with the https VIEW intent in `AndroidManifest.xml` `<queries>`.
+- Tests: `test/store_test.dart` (5) and one more widget test. `flutter analyze` clean, 50 tests pass.
+- Checked in Chrome on a release web build at 390x844 and 1440x900: store list, store page, follow, reviews, category
+  results. The Google Maps button itself was not clicked in the automated run. Not checked on the Redmi.
+- The deck screenshots `katalog.webp`, `toko.webp` and `desktop.webp` in `../presentasi/assets/app/` were retaken
+  from this build. `../webapp/` and the APK on the phone are still the older build.
+
+## Emulator check (2026-10-02, Pixel_10, debug APK)
+
+Passed on the Android emulator with the fines, blacklist and store-page build:
+
+- Data saved by the older build (schema version 2) loaded without a reset; the admin "Penyewa" tab showed it.
+- After "Reset data demo": store list, store page, "Ikuti" (followers 1 to 2, "Diikuti" pill on the list), and
+  "Buka di Google Maps" opened the Maps app on a pin at -7.9396, 112.6289. The app kept its state after returning.
+- Budi reviewed INV-DEMO-0005 (4 stars and a comment); the review card appears and "Beri ulasan" is gone.
+- Provider Semeru received INV-DEMO-0006 as "Rusak berat" with Rp40.000. The clock passed midnight during the test,
+  so the late fee went from 2 days (Rp60.000) to 3 days (Rp90.000). Result: "Ditinjau admin", shortfall Rp80.000,
+  completion button disabled. The state survived a force-stop and relaunch. No Flutter errors in logcat.
+- Not checked on the emulator: admin decision dialog, customer objection, blacklist notice on the catalog. These
+  are covered by tests and the Chrome run. The Redmi is still not checked.
+- `tool/adb_drive.sh` works for the emulator with `ADB_SERIAL=emulator-5554`. Screenshot coordinates: 1080x2424.
+
 The Lynk.id section above and the Midtrans plan below are kept as history. Step 3 of the Midtrans plan mentions
 `_LynkPaymentCard`; that widget no longer exists, so the "Bayar sekarang" button would replace the bank transfer card.
 

@@ -10,6 +10,7 @@ import '../../state/app_state.dart';
 import '../../widgets/common.dart';
 import '../../widgets/photo_widgets.dart';
 import 'booking_screen.dart';
+import 'provider_store_screen.dart';
 
 class EquipmentDetailScreen extends StatelessWidget {
   const EquipmentDetailScreen({super.key, required this.equipmentId});
@@ -113,13 +114,17 @@ class EquipmentDetailScreen extends StatelessWidget {
             ],
             const SectionTitle('Penyedia'),
             Card(
+              clipBehavior: Clip.antiAlias,
               child: ListTile(
                 leading: const Icon(Icons.storefront_outlined),
                 title: Text(p.businessName),
                 subtitle: Text(p.address),
-                trailing: p.rating > 0
-                    ? Text('★ ${p.rating.toStringAsFixed(1)}')
-                    : null,
+                trailing: Text(
+                  p.reviewCount == 0
+                      ? 'Lihat toko'
+                      : '★ ${bintang(p.rating)} (${p.reviewCount})',
+                ),
+                onTap: () => openProviderStore(context, p.id),
               ),
             ),
             const SectionTitle('Jaminan yang diterima'),

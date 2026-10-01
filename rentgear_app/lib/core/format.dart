@@ -36,6 +36,9 @@ class RibuanInputFormatter extends TextInputFormatter {
   }
 }
 
+/// Rata-rata bintang dengan koma desimal: 4.67 → "4,7".
+String bintang(double rating) => rating.toStringAsFixed(1).replaceAll('.', ',');
+
 String tanggal(DateTime d) => DateFormat('d MMM yyyy', 'id_ID').format(d);
 
 String tanggalJam(DateTime d) => DateFormat('d MMM yyyy, HH:mm', 'id_ID').format(d);

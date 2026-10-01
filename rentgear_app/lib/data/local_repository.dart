@@ -21,7 +21,9 @@ class LocalRentGearRepository implements RentGearRepository {
         _categories = seed.categories,
         _equipment = List.of(seed.equipment),
         _providers = seed.providers(),
-        _rentals = seed.rentals();
+        _rentals = seed.rentals(),
+        _reviews = seed.reviews(),
+        _follows = seed.follows();
 
   /// [store] `null` = hanya di memori (dipakai unit test).
   factory LocalRentGearRepository.open({
@@ -32,6 +34,7 @@ class LocalRentGearRepository implements RentGearRepository {
     final repo = LocalRentGearRepository._(SeedData(now ?? DateTime.now()), store, latency);
     final saved = store?.read();
     if (saved != null) repo._restore(saved);
+    repo._refreshStoreStats();
     return repo;
   }
 
@@ -48,6 +51,10 @@ class LocalRentGearRepository implements RentGearRepository {
   List<Equipment> _equipment;
   List<ProviderProfile> _providers;
   List<Rental> _rentals;
+  List<Review> _reviews;
+
+  /// Id penyewa -> id toko yang diikutinya.
+  Map<String, Set<String>> _follows;
   final Map<String, String> _idempotency = {};
   final Map<String, BlacklistEntry> _blacklist = {};
 
@@ -86,6 +93,12 @@ class LocalRentGearRepository implements RentGearRepository {
       'idempotency': _idempotency,
       'blacklist': {for (final b in _blacklist.entries) b.key: codec.blacklist(b.value)},
       'violationBaseline': _violationBaseline,
+      // Ulasan bawaan demo dibuat ulang dari seed; yang disimpan hanya ulasan penyewa.
+      'reviews': [
+        for (final r in _reviews)
+          if (r.rentalId != null) codec.review(r),
+      ],
+      'follows': {for (final f in _follows.entries) f.key: f.value.toList()},
       'providers': {
         for (final p in _providers)
           p.id: {'status': p.status.name, 'policy': codec.policy(p.policy)},
@@ -121,6 +134,28 @@ class LocalRentGearRepository implements RentGearRepository {
     _rentals = [
       for (final r in data['rentals'] as List) codec.rentalFrom(r as Map<String, dynamic>),
     ];
+    for (final saved in (data['reviews'] as List?) ?? const []) {
+      final review = codec.reviewFrom(saved as Map<String, dynamic>);
+      _reviews.add(review);
+      _rentals.where((r) => r.id == review.rentalId).firstOrNull?.review = review;
+    }
+    final follows = data['follows'] as Map<String, dynamic>?;
+    if (follows != null) {
+      _follows = {for (final f in follows.entries) f.key: {...(f.value as List).cast<String>()}};
+    }
+  }
+
+  /// Hitung ulang rating, jumlah ulasan, dan jumlah pengikut tiap toko.
+  void _refreshStoreStats() {
+    for (final p in _providers) {
+      final reviews = _reviews.where((r) => r.providerId == p.id);
+      p
+        ..reviewCount = reviews.length
+        ..rating = reviews.isEmpty
+            ? 0
+            : reviews.fold(0, (sum, r) => sum + r.rating) / reviews.length
+        ..followerCount = _follows.values.where((ids) => ids.contains(p.id)).length;
+    }
   }
 
   /// Menghapus semua perubahan dan kembali ke data demo awal.
@@ -130,6 +165,9 @@ class LocalRentGearRepository implements RentGearRepository {
         _providers = fresh.providers();
         _equipment = List.of(fresh.equipment);
         _rentals = fresh.rentals();
+        _reviews = fresh.reviews();
+        _follows = fresh.follows();
+        _refreshStoreStats();
         _idempotency.clear();
         _blacklist.clear();
         _violationBaseline.clear();
@@ -708,6 +746,65 @@ class LocalRentGearRepository implements RentGearRepository {
         _requireAdmin(actor);
         final p = _providerById(providerId);
         p.status = status;
+        return p;
+      });
+
+  // ---------------------------------------------------------------- toko
+
+  @override
+  Future<List<Review>> providerReviews(String providerId) => _delay(() =>
+      _reviews.where((r) => r.providerId == providerId).toList()
+        ..sort((a, b) => b.at.compareTo(a.at)));
+
+  @override
+  Future<Rental> submitReview(String rentalId, AppUser actor,
+          {required int rating, String comment = ''}) =>
+      _mutate(() {
+        final r = _rentalById(rentalId);
+        _requireRenter(r, actor);
+        if (r.status != RentalStatus.completed) {
+          throw const AppException('INVALID_STATE', 'Ulasan hanya untuk transaksi yang sudah selesai.');
+        }
+        if (r.review != null) {
+          throw const AppException('ALREADY_REVIEWED', 'Transaksi ini sudah Anda ulas.');
+        }
+        if (rating < 1 || rating > 5) {
+          throw const AppException('VALIDATION', 'Pilih 1 sampai 5 bintang.');
+        }
+        final review = Review(
+          id: 'rv-${r.id}',
+          providerId: r.providerId,
+          customerName: actor.name,
+          rating: rating,
+          comment: comment.trim(),
+          at: DateTime.now(),
+          rentalId: r.id,
+          equipmentName: r.equipmentName,
+        );
+        r.review = review;
+        _reviews.add(review);
+        _refreshStoreStats();
+        return r;
+      });
+
+  @override
+  Future<Set<String>> followedProviders(String customerId) =>
+      _delay(() => {...?_follows[customerId]});
+
+  @override
+  Future<ProviderProfile> setFollow(String providerId, AppUser actor, {required bool follow}) =>
+      _mutate(() {
+        if (actor.role != UserRole.customer) {
+          throw const AppException('FORBIDDEN', 'Hanya penyewa yang bisa mengikuti toko.');
+        }
+        final p = _providerById(providerId);
+        final followed = _follows.putIfAbsent(actor.id, () => {});
+        if (follow) {
+          followed.add(p.id);
+        } else {
+          followed.remove(p.id);
+        }
+        _refreshStoreStats();
         return p;
       });
 

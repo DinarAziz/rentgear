@@ -80,6 +80,18 @@ abstract class RentGearRepository {
   Future<ProviderProfile> setProviderStatus(
       String providerId, ProviderStatus status, AppUser actor);
 
+  /// Ulasan sebuah toko, terbaru lebih dulu.
+  Future<List<Review>> providerReviews(String providerId);
+
+  /// Penyewa memberi ulasan untuk transaksi yang sudah selesai (sekali saja).
+  Future<Rental> submitReview(String rentalId, AppUser actor,
+      {required int rating, String comment = ''});
+
+  /// Id toko yang diikuti seorang penyewa.
+  Future<Set<String>> followedProviders(String customerId);
+
+  Future<ProviderProfile> setFollow(String providerId, AppUser actor, {required bool follow});
+
   /// Riwayat semua penyewa, untuk admin.
   Future<List<CustomerRecord>> customers(AppUser actor);
 
