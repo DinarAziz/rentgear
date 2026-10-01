@@ -228,6 +228,7 @@
           <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Aplikasi Flutter untuk Android dan web, dengan tiga peran pengguna.</p></li>
           <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Katalog, booking, jaminan dokumen, dan alur status sampai selesai.</p></li>
           <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Pembayaran lewat transfer bank dengan unggah foto bukti transfer.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Denda keterlambatan dan kerusakan, serta blacklist penyewa.</p></li>
           <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Data disimpan di perangkat pengguna. Alat diambil di tempat penyedia.</p></li>
         </ul>
       </div>
@@ -236,8 +237,8 @@
         <ul class="daftar">
           <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Server Laravel dan database MySQL, supaya data dipakai bersama lintas perangkat.</p></li>
           <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Fitur AI: rekomendasi paket alat dan pemeriksaan kondisi alat.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Denda keterlambatan dan kerusakan, serta blacklist penyewa bermasalah.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Payment gateway dan versi iOS.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Halaman toko penyedia: rating, komentar, follow, dan lokasi di peta.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Login dengan akun Google, payment gateway, dan versi iOS.</p></li>
         </ul>
       </div>
     </div>
@@ -292,14 +293,14 @@
           <li>Mengelola alat, foto, dan stok per ukuran</li>
           <li>Mengatur dokumen jaminan yang diterima</li>
           <li>Memeriksa jaminan, lalu konfirmasi atau tolak</li>
-          <li>Serah terima dan terima pengembalian</li>
+          <li>Serah terima, terima pengembalian, dan mengisi denda</li>
         </ul>
       </div>
       <div data-step="2">
         <header><svg viewBox="0 0 68 68" class="ikon"><path d="M34 6l22 9v16c0 15-9 24-22 30-13-6-22-15-22-30V15z"/><path d="M23 34l8 8 14-15"/></svg><h3>Admin</h3></header>
         <ul>
           <li>Memverifikasi atau menolak penyedia baru</li>
-          <li>Melihat semua transaksi</li>
+          <li>Meninjau denda yang janggal dan mengelola blacklist penyewa</li>
           <li>Memantau dashboard: transaksi aktif, jaminan dipegang, nilai sewa</li>
         </ul>
       </div>
@@ -423,7 +424,7 @@
     <h2 class="head">Pengujian</h2>
     <div class="uji">
       <div data-in>
-        <p class="skor"><b class="angka" id="skor">30</b><span>dari 30</span></p>
+        <p class="skor"><b class="angka" id="skor">44</b><span>dari 44</span></p>
         <p class="teks">skenario tes otomatis lulus.</p>
         <p class="kecil jelas">Tes otomatis adalah kode yang menjalankan aplikasi lalu memeriksa sendiri hasilnya. Semuanya dijalankan dengan satu perintah: <code>flutter test</code>.</p>
       </div>
@@ -432,7 +433,8 @@
           <ul class="kelompok" data-in>
             <li><h3>Alur sewa <b>14</b></h3><div class="titik-uji" data-n="14"></div><p>Contoh: booking dobel ditolak, booking tanpa jaminan ditolak, data tetap ada setelah aplikasi ditutup.</p></li>
             <li><h3>Aturan stok dan jaminan <b>9</b></h3><div class="titik-uji" data-n="9"></div><p>Contoh: yang dihitung puncak pemakaian, NIK yang salah ditolak, nomor dokumen disamarkan.</p></li>
-            <li><h3>Layar utama <b>3</b></h3><div class="titik-uji" data-n="3"></div><p>Contoh: layar penyedia dan admin tampil, penyedia memeriksa jaminan.</p></li>
+            <li><h3>Denda dan blacklist <b>13</b></h3><div class="titik-uji" data-n="13"></div><p>Contoh: telat 3 hari dihitung 1,5 kali tarif, denda besar menunggu admin, penyewa blacklist tidak bisa booking.</p></li>
+            <li><h3>Layar utama <b>4</b></h3><div class="titik-uji" data-n="4"></div><p>Contoh: layar penyedia dan admin tampil, admin memasukkan penyewa ke blacklist.</p></li>
             <li><h3>Format rupiah <b>3</b></h3><div class="titik-uji" data-n="3"></div><p>Contoh: 45000 tampil sebagai Rp 45.000 saat diketik.</p></li>
             <li><h3>Dialog alasan <b>1</b></h3><div class="titik-uji" data-n="1"></div><p>Tombol Kirim mati selama alasan penolakan masih kosong.</p></li>
           </ul>
@@ -444,6 +446,7 @@
             <tr><td>Jaminan ditolak, booking ditolak, lalu stok bisa dipesan lagi</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
             <tr><td>Admin: dashboard, verifikasi penyedia, daftar transaksi</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
             <tr><td>Ukuran font sistem 1,3 kali, setelah 3 perbaikan tata letak</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
+            <tr><td>Denda dan blacklist di Chrome: telat, rusak berat, tinjauan admin</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
             <tr><td>Versi web pada lebar 390, 820, dan 1440 piksel</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
           </tbody>
         </table>
@@ -461,7 +464,7 @@
         <ol class="daftar">
           <li><span class="angka">1</span><p>Penyewa melihat katalog beberapa penyedia dan mengecek ketersediaan pada tanggal pilihannya di aplikasi.</p></li>
           <li><span class="angka">2</span><p>Booking yang melebihi stok ditolak oleh algoritma puncak pemakaian. Tes otomatis untuk booking dobel lulus.</p></li>
-          <li><span class="angka">3</span><p>Setiap sewa memakai jaminan dokumen, dan tiap perubahan status tercatat di riwayat transaksi.</p></li>
+          <li><span class="angka">3</span><p>Setiap sewa memakai jaminan dokumen dan tercatat statusnya. Keterlambatan dan kerusakan dikenai denda yang dipotong dari deposit.</p></li>
         </ol>
       </div>
       <div class="papan putus" data-step="1">
@@ -469,8 +472,8 @@
         <ul class="daftar rencana">
           <li><span class="urut">Berikutnya</span><p>Server Laravel dan MySQL, supaya data dipakai bersama lintas perangkat.</p></li>
           <li><span class="urut">Berikutnya</span><p>Fitur AI: rekomendasi paket alat dan pemeriksaan kondisi alat.</p></li>
-          <li><span class="urut">Menyusul</span><p>Denda keterlambatan dan kerusakan, serta blacklist penyewa bermasalah.</p></li>
-          <li><span class="urut">Menyusul</span><p>Payment gateway dan versi iOS.</p></li>
+          <li><span class="urut">Menyusul</span><p>Halaman toko penyedia: rating, komentar, follow, dan lokasi di peta.</p></li>
+          <li><span class="urut">Menyusul</span><p>Login dengan akun Google, payment gateway, dan versi iOS.</p></li>
         </ul>
       </div>
     </div>

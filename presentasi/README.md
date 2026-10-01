@@ -38,11 +38,12 @@ terbit.
 ## Catatan
 
 - Rumusan masalah, tujuan, dan kesimpulan ditulis untuk fitur yang sudah ada di aplikasi. Server Laravel, fitur AI,
-  denda, blacklist, payment gateway, dan iOS ditulis sebagai rencana kerja ("dikerjakan setelah tahap ini"), bukan
-  saran. Urutannya: Laravel dan AI lebih dulu, sisanya menyusul.
+  halaman toko penyedia, login Google, payment gateway, dan iOS ditulis sebagai rencana kerja ("dikerjakan setelah tahap ini"), bukan
+  saran. Denda dan blacklist sudah dibuat. Rencana lengkapnya ada di `../docs/08-RENCANA-KERJA.md`.
 - Data latar belakang punya sumber, dan daftarnya ada di slide "Sumber data". Jumlah pendaki Gede Pangrango, kasus
   Opak Adventure, Dahlia Adventure, dan EX Adventure Solo dibaca langsung dari PDF jurnalnya. Angka Rinjani (IDN Times)
   dan Basarnas (Kompas.com) dibaca dari artikel berita; buka lagi tautannya sebelum sidang.
 - Belum ada sumber untuk klaim "penyewa tidak tahu tempat sewa". Klaim itu tidak ada di slide.
 - Makna logo dan "arah berikutnya" di slide alur bisnis (komisi per transaksi) adalah usulan, belum keputusan.
-- Angka pengujian (30 tes, hasil uji di Redmi 17) berasal dari `../rentgear_app/HANDOFF.md`.
+- Angka pengujian (44 tes, hasil uji di Redmi 17 dan Chrome) berasal dari `../rentgear_app/HANDOFF.md`. Kalau jumlah tes
+  berubah, perbarui slide Pengujian dan angka di `adegan.pengujian` pada `deck.js`.
