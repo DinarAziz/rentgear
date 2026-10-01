@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../domain/fines.dart';
 import '../domain/guarantee.dart';
 import '../domain/models.dart';
 
@@ -53,7 +54,23 @@ abstract class RentGearRepository {
 
   /// Provider menerima dokumen asli jaminan lalu menyerahkan alat.
   Future<Rental> handover(String rentalId, AppUser actor);
-  Future<Rental> receiveReturn(String rentalId, AppUser actor);
+
+  /// Penyedia menerima alat kembali. Denda keterlambatan dihitung otomatis;
+  /// denda kerusakan diisi penyedia dan ditinjau admin bila nominalnya besar.
+  Future<Rental> receiveReturn(
+    String rentalId,
+    AppUser actor, {
+    ReturnCondition condition = ReturnCondition.good,
+    double damageFee = 0,
+    String? damageNote,
+  });
+
+  /// Penyewa meminta admin meninjau denda kerusakan.
+  Future<Rental> objectToDamageFee(String rentalId, AppUser actor, String reason);
+
+  /// Admin menetapkan nominal akhir denda kerusakan (0 = denda dibatalkan).
+  Future<Rental> decideDamageFee(String rentalId, AppUser actor,
+      {required double amount, String? note});
 
   /// Provider mengembalikan dokumen asli jaminan dan menutup transaksi.
   Future<Rental> returnGuaranteesAndComplete(String rentalId, AppUser actor);
@@ -62,4 +79,14 @@ abstract class RentGearRepository {
       String providerId, GuaranteePolicy policy, AppUser actor);
   Future<ProviderProfile> setProviderStatus(
       String providerId, ProviderStatus status, AppUser actor);
+
+  /// Riwayat semua penyewa, untuk admin.
+  Future<List<CustomerRecord>> customers(AppUser actor);
+
+  /// Data blacklist seorang penyewa, atau `null` bila tidak di-blacklist.
+  Future<BlacklistEntry?> blacklistOf(String userId);
+
+  /// Admin memasukkan penyewa ke blacklist ([reason] wajib) atau mencabutnya.
+  Future<void> setBlacklist(String customerId, AppUser actor,
+      {required bool blocked, String? reason});
 }

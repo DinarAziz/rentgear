@@ -13,6 +13,7 @@ Status: **Implementasi dimulai.** Aplikasi Flutter ada di [`rentgear_app/`](rent
 | [05-TECHSTACK-STRUKTUR-API.md](docs/05-TECHSTACK-STRUKTUR-API.md) | Perbandingan & rekomendasi tech stack, struktur folder lengkap, arsitektur API | 14–16 |
 | [06-KEAMANAN-PRIORITAS-ROADMAP.md](docs/06-KEAMANAN-PRIORITAS-ROADMAP.md) | 9 kelompok risiko keamanan + solusi, MoSCoW, roadmap 12 sprint, risiko teknis, **REKOMENDASI FINAL ARCHITECTURE** | 17–20 |
 | [07-JAMINAN-SEWA.md](docs/07-JAMINAN-SEWA.md) | Jaminan sewa wajib (KTP, SIM, KTM, ijazah, dll.): aturan, status, tabel, endpoint, privasi | tambahan |
+| [08-RENCANA-KERJA.md](docs/08-RENCANA-KERJA.md) | Urutan kerja setelah aplikasi lokal: denda dan blacklist (selesai), halaman toko penyedia, server Laravel, login Google, fitur AI | tambahan |
 
 ## Tiga Inti Teknis
 

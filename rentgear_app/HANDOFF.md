@@ -314,6 +314,37 @@ Work order the user set on 2026-10-01: after the deck, build the **Laravel serve
 project (they are planned work, so the deck lists them as "rencana lanjutan", not "saran"). iOS comes later. The app
 also has **no blacklist and no fines (denda)** yet; both are on the plan after Laravel and AI.
 
+## Session (2026-10-01, fines and blacklist)
+
+Stage 1 of `../docs/08-RENCANA-KERJA.md`. All of it runs in the local repository, no server.
+
+- Rules live in `lib/domain/fines.dart`: late fee = late days x daily price x qty x 1.5, damage fee capped at the
+  deposit, admin review when the damage fee is above 50% of the deposit, automatic blacklist after 3 violations.
+- `Rental` has `returnedAt`, `returnCondition`, `lateFee`, `damageFee`, `damageNote`, `damageReview`, `reviewReason`,
+  `reviewNote`, plus `fineTotal`, `depositRefund` and `fineShortfall`.
+- Repository: `receiveReturn` takes a condition, damage fee and note; new `objectToDamageFee` (customer),
+  `decideDamageFee` (admin), `customers`, `blacklistOf`, `setBlacklist`. A blacklisted customer gets `BLACKLISTED` on
+  `createBooking`. A rental with a pending review cannot be completed (`DAMAGE_REVIEW_PENDING`).
+- Local store schema is version 3. Version 2 data is still read (the new fields default to empty), so nothing on the
+  phone is reset.
+- UI: `lib/features/rental/fine_widgets.dart` (fine section on the rental detail, return-check dialog, admin decision
+  dialog), `lib/features/admin/admin_customers_screen.dart` (new "Penyewa" tab with history and blacklist buttons),
+  a "Denda ditinjau" stat on the admin dashboard, `lib/widgets/blacklist_notice.dart` above the customer catalog.
+- Seed has a sixth rental, INV-DEMO-0006 (Rina, 2 headlamps, ended 2 days ago). The job at startup marks it
+  "Terlambat", so the late fee can be demoed: 2 days x Rp10.000 x 2 x 1.5 = Rp60.000 against a Rp50.000 deposit.
+- Tests: `test/fines_test.dart` (13) and one more widget test. `flutter analyze` clean, 44 tests pass.
+- Checked in Chrome on a release web build at 390x844: provider Semeru opens INV-DEMO-0006, sees the running fine,
+  receives the return as "Rusak berat" with Rp40.000, the rental shows "Ditinjau admin" and a Rp50.000 shortfall, the
+  admin "Penyewa" tab shows Rina with 1 violation, and the admin decision dialog opens. Not checked on the Redmi.
+  `../webapp/` and the APK on the phone are not rebuilt.
+- Not done: the AI part the user asked for (AI checks damage fines, AI risk hint for the blacklist). It needs the
+  Laravel server and a Gemini key, see stage 5 of the plan.
+
+New requests from the user in this session, all recorded in `../docs/08-RENCANA-KERJA.md`: provider location on
+Google Maps, a catalog that lists providers first (store pages with rating, comments, follow), and sign-up/login with
+a Google account. Decisions already made: Homebrew PHP + Composer + MySQL for Laravel, Gemini with the user's own API
+key, and a Flutter build that can choose local data or the server.
+
 The Lynk.id section above and the Midtrans plan below are kept as history. Step 3 of the Midtrans plan mentions
 `_LynkPaymentCard`; that widget no longer exists, so the "Bayar sekarang" button would replace the bank transfer card.
 

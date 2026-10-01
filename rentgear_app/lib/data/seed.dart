@@ -191,6 +191,22 @@ class SeedData {
           (RentalStatus.returned, RentalStatus.completed, 'Arjuna Outdoor'),
         ],
       ),
+      // Sudah lewat tanggal selesai: job otomatis menandainya "Terlambat" saat aplikasi
+      // dibuka, sehingga denda keterlambatan bisa didemokan.
+      r(
+        id: 'r-6', invoice: 'INV-DEMO-0006', customer: rina, equipmentId: 'e-headlamp', qty: 2,
+        startOffset: -5, endOffset: -2, status: RentalStatus.pickedUp,
+        guarantees: [
+          Guarantee(id: 'g-6', type: GuaranteeType.ktp, holderName: rina.name, documentNumber: '3578014507030002', status: GuaranteeStatus.held)
+            ..heldAt = day(-5),
+        ],
+        history: [
+          (null, RentalStatus.pendingConfirmation, rina.name),
+          (RentalStatus.pendingConfirmation, RentalStatus.awaitingPayment, 'Semeru Camp Rent'),
+          (RentalStatus.awaitingPayment, RentalStatus.paid, rina.name),
+          (RentalStatus.paid, RentalStatus.pickedUp, 'Semeru Camp Rent'),
+        ],
+      ),
     ];
   }
 }

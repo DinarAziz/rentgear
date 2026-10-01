@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import '../domain/availability.dart';
 import '../domain/equipment_rules.dart';
+import '../domain/fines.dart';
 import '../domain/guarantee.dart';
 import '../domain/models.dart';
 import '../domain/rental_state_machine.dart';
@@ -35,7 +36,10 @@ class LocalRentGearRepository implements RentGearRepository {
   }
 
   static const demoPassword = 'password';
-  static const _schemaVersion = 2;
+  static const _schemaVersion = 3;
+
+  /// Versi 2 belum punya denda dan blacklist; sisanya sama, jadi tetap dibaca.
+  static const _readableVersions = {2, 3};
 
   final LocalStore? _store;
   final Duration latency;
@@ -45,6 +49,10 @@ class LocalRentGearRepository implements RentGearRepository {
   List<ProviderProfile> _providers;
   List<Rental> _rentals;
   final Map<String, String> _idempotency = {};
+  final Map<String, BlacklistEntry> _blacklist = {};
+
+  /// Jumlah pelanggaran tiap penyewa saat admin terakhir mencabut blacklist-nya.
+  final Map<String, int> _violationBaseline = {};
   int _sequence = 0;
   String? _sessionUserId;
 
@@ -76,6 +84,8 @@ class LocalRentGearRepository implements RentGearRepository {
       'sequence': _sequence,
       'session': _sessionUserId,
       'idempotency': _idempotency,
+      'blacklist': {for (final b in _blacklist.entries) b.key: codec.blacklist(b.value)},
+      'violationBaseline': _violationBaseline,
       'providers': {
         for (final p in _providers)
           p.id: {'status': p.status.name, 'policy': codec.policy(p.policy)},
@@ -86,11 +96,17 @@ class LocalRentGearRepository implements RentGearRepository {
   }
 
   void _restore(Map<String, dynamic> data) {
-    if (data['version'] != _schemaVersion) return; // format lama: pakai seed
+    if (!_readableVersions.contains(data['version'])) return; // format lama: pakai seed
     final codec = _codec!;
     _sequence = data['sequence'] as int;
     _sessionUserId = data['session'] as String?;
     _idempotency.addAll((data['idempotency'] as Map).cast<String, String>());
+    final blacklist = (data['blacklist'] as Map?)?.cast<String, dynamic>() ?? const {};
+    _blacklist.addAll({
+      for (final b in blacklist.entries)
+        b.key: codec.blacklistFrom(b.value as Map<String, dynamic>),
+    });
+    _violationBaseline.addAll((data['violationBaseline'] as Map?)?.cast<String, int>() ?? const {});
     final providers = data['providers'] as Map<String, dynamic>;
     for (final p in _providers) {
       final saved = providers[p.id] as Map<String, dynamic>?;
@@ -115,6 +131,8 @@ class LocalRentGearRepository implements RentGearRepository {
         _equipment = List.of(fresh.equipment);
         _rentals = fresh.rentals();
         _idempotency.clear();
+        _blacklist.clear();
+        _violationBaseline.clear();
         _sequence = 0;
         _sessionUserId = null;
       });
@@ -177,6 +195,39 @@ class LocalRentGearRepository implements RentGearRepository {
     if (actor.role != UserRole.admin) {
       throw const AppException('FORBIDDEN', 'Hanya admin yang boleh melakukan aksi ini.');
     }
+  }
+
+  // ---------------------------------------------------------------- pelanggaran
+
+  CustomerRecord _recordOf(AppUser customer) {
+    final rentals = _rentals.where((r) => r.customerId == customer.id).toList();
+    return CustomerRecord(
+      user: customer,
+      rentalCount: rentals.length,
+      lateCount: rentals.where((r) => r.lateFee > 0).length,
+      noShowCount: rentals.where((r) => r.status == RentalStatus.noShow).length,
+      // Denda yang masih ditinjau admin belum dihitung sebagai pelanggaran.
+      damageCount: rentals
+          .where((r) => r.damageFee > 0 && r.damageReview != DamageReview.pending)
+          .length,
+      fineTotal: rentals.fold(0, (sum, r) => sum + r.fineTotal),
+      blacklist: _blacklist[customer.id],
+    );
+  }
+
+  /// Dipanggil setiap kali pelanggaran penyewa bisa bertambah.
+  void _autoBlacklist(String customerId) {
+    if (_blacklist.containsKey(customerId)) return;
+    final record = _recordOf(_users.firstWhere((u) => u.id == customerId));
+    final baseline = _violationBaseline[customerId] ?? 0;
+    if (!shouldAutoBlacklist(violations: record.violations, baseline: baseline)) return;
+    _blacklist[customerId] = BlacklistEntry(
+      reason: 'Otomatis: ${record.violations - baseline} pelanggaran '
+          '(terlambat ${record.lateCount}, tidak diambil ${record.noShowCount}, '
+          'merusak alat ${record.damageCount}).',
+      by: 'Sistem',
+      at: DateTime.now(),
+    );
   }
 
   /// [actor] `null` = job sistem.
@@ -244,6 +295,7 @@ class LocalRentGearRepository implements RentGearRepository {
               apply(r, RentalStatus.cancelled, 'Tidak dibayar dalam 24 jam');
             case RentalStatus.paid when today.isAfter(r.startDate):
               apply(r, RentalStatus.noShow, 'Alat tidak diambil sampai tanggal mulai lewat');
+              _autoBlacklist(r.customerId);
             case RentalStatus.pickedUp when today.isAfter(r.endDate):
               apply(r, RentalStatus.overdue, 'Melewati tanggal selesai');
             default:
@@ -307,6 +359,11 @@ class LocalRentGearRepository implements RentGearRepository {
         final customer = _users.firstWhere((u) => u.id == req.customerId);
         if (customer.role != UserRole.customer) {
           throw const AppException('FORBIDDEN', 'Hanya penyewa yang bisa membuat booking.');
+        }
+        final blocked = _blacklist[customer.id];
+        if (blocked != null) {
+          throw AppException('BLACKLISTED',
+              'Akun Anda masuk blacklist dan tidak bisa membuat booking. Alasan: ${blocked.reason}');
         }
         final e = _equipmentById(req.equipmentId);
         final p = _providerById(e.providerId);
@@ -493,10 +550,71 @@ class LocalRentGearRepository implements RentGearRepository {
       });
 
   @override
-  Future<Rental> receiveReturn(String rentalId, AppUser actor) => _mutate(() {
+  Future<Rental> receiveReturn(
+    String rentalId,
+    AppUser actor, {
+    ReturnCondition condition = ReturnCondition.good,
+    double damageFee = 0,
+    String? damageNote,
+  }) =>
+      _mutate(() {
         final r = _rentalById(rentalId);
         _requireOwner(r, actor);
-        _transition(r, RentalStatus.returned, actor);
+        final error = damageFeeError(condition, damageFee, r.depositTotal);
+        if (error != null) throw AppException('VALIDATION', error);
+
+        final now = DateTime.now();
+        final days = lateDays(r.endDate, now);
+        final lateFee = lateFeeFor(pricePerDay: r.pricePerDaySnapshot, qty: r.qty, days: days);
+        final needsReview = needsAdminReview(damageFee, r.depositTotal);
+        _transition(r, RentalStatus.returned, actor,
+            note: [
+              'Kondisi alat: ${condition.label}',
+              if (days > 0) 'Terlambat $days hari',
+            ].join('. '));
+        r
+          ..returnedAt = now
+          ..returnCondition = condition
+          ..lateFee = lateFee
+          ..damageFee = damageFee
+          ..damageNote = damageNote?.trim()
+          ..damageReview = needsReview ? DamageReview.pending : DamageReview.none
+          ..reviewReason = needsReview ?'Denda kerusakan lebih dari separuh deposit.' : null;
+        _autoBlacklist(r.customerId);
+        return r;
+      });
+
+  @override
+  Future<Rental> objectToDamageFee(String rentalId, AppUser actor, String reason) =>
+      _mutate(() {
+        final r = _rentalById(rentalId);
+        _requireRenter(r, actor);
+        if (!r.canObjectToDamageFee) {
+          throw const AppException('INVALID_STATE', 'Denda ini tidak bisa diajukan keberatan.');
+        }
+        r
+          ..damageReview = DamageReview.pending
+          ..reviewReason = 'Keberatan penyewa: ${reason.trim()}';
+        return r;
+      });
+
+  @override
+  Future<Rental> decideDamageFee(String rentalId, AppUser actor,
+          {required double amount, String? note}) =>
+      _mutate(() {
+        _requireAdmin(actor);
+        final r = _rentalById(rentalId);
+        if (r.damageReview != DamageReview.pending) {
+          throw const AppException('INVALID_STATE', 'Tidak ada denda yang menunggu tinjauan.');
+        }
+        if (amount < 0 || amount > r.depositTotal) {
+          throw const AppException('VALIDATION', 'Nominal harus antara 0 dan jumlah deposit.');
+        }
+        r
+          ..damageFee = amount
+          ..damageReview = DamageReview.decided
+          ..reviewNote = note?.trim();
+        _autoBlacklist(r.customerId);
         return r;
       });
 
@@ -507,6 +625,10 @@ class LocalRentGearRepository implements RentGearRepository {
         _requireOwner(r, actor);
         if (r.status != RentalStatus.returned) {
           throw const AppException('INVALID_STATE', 'Alat belum dikembalikan.');
+        }
+        if (r.damageReview == DamageReview.pending) {
+          throw const AppException(
+              'DAMAGE_REVIEW_PENDING', 'Denda kerusakan masih ditinjau admin.');
         }
         final now = DateTime.now();
         for (final g in r.guarantees) {
@@ -587,5 +709,40 @@ class LocalRentGearRepository implements RentGearRepository {
         final p = _providerById(providerId);
         p.status = status;
         return p;
+      });
+
+  // ---------------------------------------------------------------- blacklist
+
+  @override
+  Future<List<CustomerRecord>> customers(AppUser actor) => _delay(() {
+        _requireAdmin(actor);
+        return [
+          for (final u in _users)
+            if (u.role == UserRole.customer) _recordOf(u),
+        ];
+      });
+
+  @override
+  Future<BlacklistEntry?> blacklistOf(String userId) => _delay(() => _blacklist[userId]);
+
+  @override
+  Future<void> setBlacklist(String customerId, AppUser actor,
+          {required bool blocked, String? reason}) =>
+      _mutate(() {
+        _requireAdmin(actor);
+        final customer = _users.firstWhere(
+          (u) => u.id == customerId && u.role == UserRole.customer,
+          orElse: () => throw const AppException('NOT_FOUND', 'Penyewa tidak ditemukan.'),
+        );
+        if (!blocked) {
+          _blacklist.remove(customer.id);
+          _violationBaseline[customer.id] = _recordOf(customer).violations;
+          return;
+        }
+        final text = reason?.trim() ?? '';
+        if (text.isEmpty) {
+          throw const AppException('VALIDATION', 'Alasan blacklist wajib diisi.');
+        }
+        _blacklist[customer.id] = BlacklistEntry(reason: text, by: actor.name, at: DateTime.now());
       });
 }

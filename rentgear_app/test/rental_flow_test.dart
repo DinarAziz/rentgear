@@ -148,12 +148,13 @@ void main() {
     // Data demo dibuat 2 hari lalu, lalu aplikasi baru dibuka hari ini.
     final old = LocalRentGearRepository.open(
         now: DateTime.now().subtract(const Duration(days: 2)), latency: Duration.zero);
-    expect(await old.runScheduledJobs(), 4);
+    expect(await old.runScheduledJobs(), 5);
     Future<RentalStatus> status(String id) async => (await old.rental(id)).status;
     expect(await status('r-1'), RentalStatus.expired);
     expect(await status('r-2'), RentalStatus.cancelled);
     expect(await status('r-3'), RentalStatus.noShow);
     expect(await status('r-4'), RentalStatus.overdue);
+    expect(await status('r-6'), RentalStatus.overdue);
     expect((await old.rental('r-4')).logs.last.actorName, 'Sistem');
     expect(await old.runScheduledJobs(), 0);
   });

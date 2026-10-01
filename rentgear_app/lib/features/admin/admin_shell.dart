@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/format.dart';
 import '../../core/responsive.dart';
+import '../../domain/fines.dart';
 import '../../domain/guarantee.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
@@ -10,6 +11,7 @@ import '../../widgets/common.dart';
 import '../../widgets/motion.dart';
 import '../customer/my_rentals_screen.dart';
 import '../shared/profile_screen.dart';
+import 'admin_customers_screen.dart';
 
 class AdminShell extends StatefulWidget {
   const AdminShell({super.key});
@@ -28,6 +30,7 @@ class _AdminShellState extends State<AdminShell> {
     pages: const [
       AdminDashboardScreen(),
       AdminProvidersScreen(),
+      AdminCustomersScreen(),
       AdminRentalsScreen(),
       ProfileScreen(),
     ],
@@ -40,6 +43,7 @@ class _AdminShellState extends State<AdminShell> {
         icon: Icon(Icons.storefront_outlined),
         label: 'Penyedia',
       ),
+      NavigationDestination(icon: Icon(Icons.group_outlined), label: 'Penyewa'),
       NavigationDestination(
         icon: Icon(Icons.receipt_long_outlined),
         label: 'Transaksi',
@@ -82,12 +86,16 @@ class AdminDashboardScreen extends StatelessWidget {
           final pending = providers
               .where((p) => p.status == ProviderStatus.pending)
               .length;
+          final fineReviews = rentals
+              .where((r) => r.damageReview == DamageReview.pending)
+              .length;
 
           final stats = [
             ('Total transaksi', '${rentals.length}', Icons.receipt_long),
             ('Transaksi aktif', '${active.length}', Icons.sync),
             ('Jaminan dipegang', '$held dokumen', Icons.badge),
             ('Penyedia menunggu', '$pending', Icons.hourglass_top),
+            ('Denda ditinjau', '$fineReviews', Icons.gavel_outlined),
             ('Nilai sewa selesai', rupiah(revenue), Icons.payments_outlined),
           ];
           // Card height follows the system font scale so large text does not overflow.

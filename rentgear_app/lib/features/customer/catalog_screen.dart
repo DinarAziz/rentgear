@@ -7,6 +7,7 @@ import '../../core/format.dart';
 import '../../core/responsive.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
+import '../../widgets/blacklist_notice.dart';
 import '../../widgets/common.dart';
 import '../../widgets/motion.dart';
 import '../../widgets/photo_widgets.dart';
@@ -53,6 +54,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
           final gutter = centeredPadding(c.maxWidth, maxWidth: _maxWidth);
           return Column(
             children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: gutter.left),
+                child: const BlacklistNotice(),
+              ),
               Padding(
                 padding: EdgeInsets.fromLTRB(gutter.left, 0, gutter.right, 8),
                 child: ListenableBuilder(

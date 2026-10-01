@@ -1,6 +1,8 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'availability.dart';
+import 'fines.dart';
 import 'guarantee.dart';
 
 enum UserRole {
@@ -277,6 +279,20 @@ class Rental {
   Uint8List? paymentProof;
   String? cancelReason;
 
+  /// Terisi saat penyedia menerima alat kembali, bersama kondisi dan dendanya.
+  DateTime? returnedAt;
+  ReturnCondition? returnCondition;
+  double lateFee = 0;
+  double damageFee = 0;
+  String? damageNote;
+  DamageReview damageReview = DamageReview.none;
+
+  /// Kenapa denda kerusakan ditinjau admin (nominal besar atau keberatan penyewa).
+  String? reviewReason;
+
+  /// Catatan keputusan admin.
+  String? reviewNote;
+
   int get durationDays => inclusiveDays(startDate, endDate);
 
   /// Mis. "Sepatu Hiking × 1 (ukuran 42)".
@@ -284,6 +300,59 @@ class Rental {
   double get subtotal => pricePerDaySnapshot * qty * durationDays;
   double get depositTotal => depositSnapshot * qty;
   double get grandTotal => subtotal + depositTotal;
+
+  double get fineTotal => lateFee + damageFee;
+
+  /// Deposit yang kembali ke penyewa setelah dipotong denda.
+  double get depositRefund => max(0, depositTotal - fineTotal);
+
+  /// Denda yang tidak tertutup deposit dan harus dibayar penyewa.
+  double get fineShortfall => max(0, fineTotal - depositTotal);
+
+  /// Hari terlambat sampai [at]; setelah alat kembali, sampai tanggal kembalinya.
+  int lateDaysAt(DateTime at) => lateDays(endDate, returnedAt ?? at);
+
+  /// Denda terlambat untuk [lateDaysAt]; perkiraan selama alat belum kembali.
+  double lateFeeAt(DateTime at) =>
+      lateFeeFor(pricePerDay: pricePerDaySnapshot, qty: qty, days: lateDaysAt(at));
+
+  /// Keberatan hanya untuk denda kerusakan yang belum pernah ditinjau admin.
+  bool get canObjectToDamageFee =>
+      status == RentalStatus.returned && damageFee > 0 && damageReview == DamageReview.none;
+}
+
+/// Penyewa yang tidak boleh membuat booking baru.
+class BlacklistEntry {
+  const BlacklistEntry({required this.reason, required this.by, required this.at});
+
+  final String reason;
+
+  /// Nama admin, atau "Sistem" untuk blacklist otomatis.
+  final String by;
+  final DateTime at;
+}
+
+/// Ringkasan riwayat satu penyewa untuk admin.
+class CustomerRecord {
+  const CustomerRecord({
+    required this.user,
+    required this.rentalCount,
+    required this.lateCount,
+    required this.noShowCount,
+    required this.damageCount,
+    required this.fineTotal,
+    this.blacklist,
+  });
+
+  final AppUser user;
+  final int rentalCount;
+  final int lateCount;
+  final int noShowCount;
+  final int damageCount;
+  final double fineTotal;
+  final BlacklistEntry? blacklist;
+
+  int get violations => lateCount + noShowCount + damageCount;
 }
 
 class BookingRequest {

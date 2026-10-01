@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/format.dart';
 import '../../core/responsive.dart';
+import '../../domain/fines.dart';
 import '../../domain/guarantee.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
@@ -12,6 +13,7 @@ import '../../widgets/common.dart';
 import '../../widgets/guarantee_widgets.dart';
 import '../../widgets/motion.dart';
 import '../../widgets/photo_widgets.dart';
+import 'fine_widgets.dart';
 
 /// Detail transaksi untuk semua role. Tombol aksi menyesuaikan role & status.
 class RentalDetailScreen extends StatelessWidget {
@@ -123,6 +125,8 @@ class _Body extends StatelessWidget {
             ),
           ),
         ),
+        if (r.status == RentalStatus.overdue || r.returnedAt != null)
+          FineSection(rental: r),
         if (r.status == RentalStatus.awaitingPayment &&
             user.role == UserRole.customer &&
             provider.bankAccount != null) ...[
@@ -371,6 +375,47 @@ class _ActionBar extends StatelessWidget {
           ),
         );
       }
+      if (r.canObjectToDamageFee) {
+        actions.add(
+          OutlinedButton(
+            onPressed: () async {
+              final reason = await askReason(
+                context,
+                title: 'Keberatan atas denda kerusakan',
+                hint: 'Jelaskan kenapa denda ini tidak sesuai',
+              );
+              if (reason == null || !context.mounted) return;
+              await act(
+                () => state.repo.objectToDamageFee(r.id, user, reason),
+                'Keberatan terkirim. Admin akan meninjau denda ini.',
+              );
+            },
+            child: const Text('Ajukan keberatan denda'),
+          ),
+        );
+      }
+    }
+
+    if (user.role == UserRole.admin && r.damageReview == DamageReview.pending) {
+      actions.add(
+        FilledButton.icon(
+          icon: const Icon(Icons.gavel_outlined),
+          label: const Text('Putuskan denda kerusakan'),
+          onPressed: () async {
+            final decision = await askDamageDecision(context, r);
+            if (decision == null || !context.mounted) return;
+            await act(
+              () => state.repo.decideDamageFee(
+                r.id,
+                user,
+                amount: decision.amount,
+                note: decision.note,
+              ),
+              'Denda kerusakan ditetapkan ${rupiah(decision.amount)}.',
+            );
+          },
+        ),
+      );
     }
 
     if (user.role == UserRole.provider) {
@@ -446,19 +491,26 @@ class _ActionBar extends StatelessWidget {
               icon: const Icon(Icons.assignment_return_outlined),
               label: const Text('Terima pengembalian alat'),
               onPressed: () async {
-                final ok = await confirmDialog(
-                  context,
-                  title: 'Terima pengembalian',
-                  message:
-                      'Pastikan ${r.itemLabel} sudah kembali dan kondisinya sudah Anda periksa.',
-                  confirmLabel: 'Sudah diterima',
-                );
-                if (!ok || !context.mounted) return;
+                final check = await askReturnCheck(context, r);
+                if (check == null || !context.mounted) return;
                 await act(
-                  () => state.repo.receiveReturn(r.id, user),
+                  () => state.repo.receiveReturn(
+                    r.id,
+                    user,
+                    condition: check.condition,
+                    damageFee: check.damageFee,
+                    damageNote: check.note,
+                  ),
                   'Alat diterima kembali.',
                 );
               },
+            ),
+          );
+        case RentalStatus.returned when r.damageReview == DamageReview.pending:
+          actions.add(
+            const FilledButton(
+              onPressed: null,
+              child: Text('Menunggu tinjauan denda oleh admin'),
             ),
           );
         case RentalStatus.returned:
@@ -467,11 +519,14 @@ class _ActionBar extends StatelessWidget {
               icon: const Icon(Icons.verified_outlined),
               label: const Text('Kembalikan jaminan & selesaikan'),
               onPressed: () async {
+                final settlement = r.fineShortfall > 0
+                    ? 'Tagih kekurangan denda ${rupiah(r.fineShortfall)}.'
+                    : 'Kembalikan deposit ${rupiah(r.depositRefund)}.';
                 final ok = await confirmDialog(
                   context,
                   title: 'Kembalikan jaminan',
                   message:
-                      'Serahkan semua dokumen asli jaminan ke ${r.customerName}. Transaksi akan ditutup.',
+                      'Serahkan semua dokumen asli jaminan ke ${r.customerName}. $settlement Transaksi akan ditutup.',
                   confirmLabel: 'Sudah dikembalikan',
                 );
                 if (!ok || !context.mounted) return;

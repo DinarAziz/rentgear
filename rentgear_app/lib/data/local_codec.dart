@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../domain/fines.dart';
 import '../domain/guarantee.dart';
 import '../domain/models.dart';
 
@@ -130,6 +131,14 @@ class LocalCodec {
         'createdAt': _date(r.createdAt),
         'cancelReason': r.cancelReason,
         'paymentProof': r.paymentProof == null ? null : savePhoto('${r.id}-payment', r.paymentProof!),
+        'returnedAt': _date(r.returnedAt),
+        'returnCondition': r.returnCondition?.name,
+        'lateFee': r.lateFee,
+        'damageFee': r.damageFee,
+        'damageNote': r.damageNote,
+        'damageReview': r.damageReview.name,
+        'reviewReason': r.reviewReason,
+        'reviewNote': r.reviewNote,
         'guarantees': [for (final g in r.guarantees) guarantee(g)],
         'logs': [
           for (final l in r.logs)
@@ -177,5 +186,26 @@ class LocalCodec {
         ],
       )
         ..cancelReason = j['cancelReason'] as String?
-        ..paymentProof = loadPhoto(j['paymentProof'] as String?);
+        ..paymentProof = loadPhoto(j['paymentProof'] as String?)
+        // Kolom denda belum ada di data versi 2, jadi semuanya boleh kosong.
+        ..returnedAt = _parse(j['returnedAt'])
+        ..returnCondition = _byName(ReturnCondition.values, j['returnCondition'])
+        ..lateFee = (j['lateFee'] as num?)?.toDouble() ?? 0
+        ..damageFee = (j['damageFee'] as num?)?.toDouble() ?? 0
+        ..damageNote = j['damageNote'] as String?
+        ..damageReview = _byName(DamageReview.values, j['damageReview']) ?? DamageReview.none
+        ..reviewReason = j['reviewReason'] as String?
+        ..reviewNote = j['reviewNote'] as String?;
+
+  static T? _byName<T extends Enum>(List<T> values, Object? name) =>
+      name == null ? null : values.byName(name as String);
+
+  Map<String, dynamic> blacklist(BlacklistEntry b) =>
+      {'reason': b.reason, 'by': b.by, 'at': _date(b.at)};
+
+  BlacklistEntry blacklistFrom(Map<String, dynamic> j) => BlacklistEntry(
+        reason: j['reason'] as String,
+        by: j['by'] as String,
+        at: _parse(j['at'])!,
+      );
 }

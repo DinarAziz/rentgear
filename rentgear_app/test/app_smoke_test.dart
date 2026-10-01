@@ -71,4 +71,25 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Verifikasi'), findsOneWidget);
   });
+
+  testWidgets('admin sees customer history and can blacklist', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Admin'));
+    await tester.pumpAndSettle();
+    expect(find.text('Denda ditinjau'), findsOneWidget);
+
+    await tester.tap(find.text('Penyewa'));
+    await tester.pumpAndSettle();
+    expect(find.text('Budi Santoso'), findsOneWidget);
+    expect(find.text('Bersih'), findsWidgets);
+
+    await tester.tap(find.text('Masukkan blacklist').first);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Tidak mengembalikan alat');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kirim'));
+    await tester.pumpAndSettle();
+    expect(find.text('Blacklist'), findsOneWidget);
+    expect(find.text('Cabut blacklist'), findsOneWidget);
+  });
 }
