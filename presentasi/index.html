@@ -230,16 +230,15 @@
           <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Booking, jaminan dokumen, dan alur status sampai selesai.</p></li>
           <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Pembayaran lewat transfer bank dengan unggah foto bukti transfer.</p></li>
           <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Denda keterlambatan dan kerusakan, serta blacklist penyewa.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Data disimpan di perangkat. Alat diambil di tempat penyedia.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Server Laravel dan MySQL. Aplikasi bisa memakai data di perangkat atau di server.</p></li>
         </ul>
       </div>
       <div class="papan putus" data-step="1">
         <h3 class="sub">Dikerjakan setelah tahap ini</h3>
         <ul class="daftar">
-          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Server Laravel dan database MySQL, supaya data dipakai bersama lintas perangkat.</p></li>
           <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Fitur AI: rekomendasi paket alat dan pemeriksaan kondisi alat.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Peta yang tertanam di dalam aplikasi.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Login dengan akun Google, payment gateway, dan versi iOS.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Login dengan akun Google, dan peta yang tertanam di aplikasi.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Payment gateway dan versi iOS.</p></li>
         </ul>
       </div>
     </div>
@@ -249,7 +248,7 @@
   <section class="slide" id="metode" data-pos="Pos 5" data-label="Metode">
     <h2 class="head">Metode pengerjaan</h2>
     <div class="tahap" id="tahap"></div>
-    <p class="kecil alat" data-step="1">Alat yang dipakai: Flutter, Dart, Provider untuk state, dan penyimpanan JSON di perangkat.</p>
+    <p class="kecil alat" data-step="1">Alat yang dipakai: Flutter dan Dart untuk aplikasi, Laravel dan MySQL untuk server.</p>
   </section>
 
   <!-- Pos 6 -->
@@ -379,8 +378,8 @@
         <li><b>Layar</b><span>login, penyewa, penyedia, admin, detail transaksi</span></li>
         <li><b>AppState</b><span>sesi login dan pembaruan tampilan</span></li>
         <li><b>Kontrak repository</b><span>daftar operasi data yang boleh dipakai layar</span></li>
-        <li><b>Repository lokal dan aturan domain</b><span>ketersediaan stok, aturan jaminan, mesin status</span></li>
-        <li><b>Penyimpanan di perangkat</b><span>berkas JSON dan foto di HP, localStorage di web</span></li>
+        <li><b>Repository lokal atau HTTP</b><span>dipilih saat build; aturan stok, jaminan, dan status sama di keduanya</span></li>
+        <li><b>Perangkat atau server</b><span>berkas JSON di HP, atau API Laravel dengan MySQL</span></li>
       </ol>
       <div>
         <h3 class="sub" data-in>Data yang disimpan</h3>
@@ -388,8 +387,8 @@
           <li>Pengguna</li><li>Profil penyedia</li><li>Alat</li><li>Stok per ukuran</li><li>Transaksi sewa</li><li>Jaminan</li><li>Riwayat status</li>
         </ul>
         <div class="papan putus" data-step="1">
-          <h3 class="sub">Tahap berikutnya</h3>
-          <p>Repository lokal diganti repository HTTP ke API Laravel dan MySQL. Kontraknya tetap, jadi layar tidak perlu diubah.</p>
+          <h3 class="sub">Mode server</h3>
+          <p>Repository HTTP memakai API Laravel, sehingga booking dari satu HP muncul di HP penyedia. Kontraknya sama, jadi layar tidak diubah.</p>
         </div>
       </div>
     </div>
@@ -425,30 +424,30 @@
     <h2 class="head">Pengujian</h2>
     <div class="uji">
       <div data-in>
-        <p class="skor"><b class="angka" id="skor">50</b><span>dari 50</span></p>
-        <p class="teks">skenario tes otomatis lulus.</p>
-        <p class="kecil jelas">Tes otomatis adalah kode yang menjalankan aplikasi lalu memeriksa sendiri hasilnya. Semuanya dijalankan dengan satu perintah: <code>flutter test</code>.</p>
+        <p class="skor"><b class="angka" id="skor">147</b><span>dari 147</span></p>
+        <p class="teks">skenario tes otomatis lulus: 61 di aplikasi, 86 di server.</p>
+        <p class="kecil jelas">Tes otomatis adalah kode yang menjalankan aplikasi lalu memeriksa sendiri hasilnya. Dijalankan dengan <code>flutter test</code> dan <code>php artisan test</code>.</p>
       </div>
       <div class="narasi">
         <div data-hide-at="1">
           <ul class="kelompok" data-in>
-            <li><h3>Alur sewa <b>14</b></h3><div class="titik-uji" data-n="14"></div><p>Contoh: booking dobel ditolak, booking tanpa jaminan ditolak, data tetap ada setelah aplikasi ditutup.</p></li>
-            <li><h3>Aturan stok dan jaminan <b>9</b></h3><div class="titik-uji" data-n="9"></div><p>Contoh: yang dihitung puncak pemakaian, NIK yang salah ditolak, nomor dokumen disamarkan.</p></li>
-            <li><h3>Denda dan blacklist <b>13</b></h3><div class="titik-uji" data-n="13"></div><p>Contoh: telat 3 hari dihitung 1,5 kali tarif, denda besar menunggu admin, penyewa blacklist tidak bisa booking.</p></li>
-            <li><h3>Toko, ulasan, follow <b>5</b></h3><div class="titik-uji" data-n="5"></div><p>Contoh: rating toko adalah rata-rata ulasan, ulasan hanya untuk transaksi selesai.</p></li>
-            <li><h3>Layar utama <b>5</b></h3><div class="titik-uji" data-n="5"></div><p>Contoh: halaman awal menampilkan toko, admin memasukkan penyewa ke blacklist.</p></li>
-            <li><h3>Format rupiah <b>3</b></h3><div class="titik-uji" data-n="3"></div><p>Contoh: 45000 tampil sebagai Rp 45.000 saat diketik.</p></li>
-            <li><h3>Dialog alasan <b>1</b></h3><div class="titik-uji" data-n="1"></div><p>Tombol Kirim mati selama alasan penolakan masih kosong.</p></li>
+            <li><h3>Aplikasi: sewa, stok, jaminan <b>23</b></h3><div class="titik-uji" data-n="23"></div><p>Contoh: booking dobel ditolak, booking tanpa jaminan ditolak, NIK yang salah ditolak.</p></li>
+            <li><h3>Aplikasi: denda, blacklist, toko <b>18</b></h3><div class="titik-uji" data-n="18"></div><p>Contoh: telat 3 hari dihitung 1,5 kali tarif, rating toko adalah rata-rata ulasan.</p></li>
+            <li><h3>Aplikasi: layar dan format <b>9</b></h3><div class="titik-uji" data-n="9"></div><p>Contoh: halaman awal menampilkan toko, 45000 tampil sebagai Rp 45.000.</p></li>
+            <li><h3>Aplikasi: sambungan ke server <b>11</b></h3><div class="titik-uji" data-n="11"></div><p>Contoh: galat dari server tampil dengan pesan yang sama, server mati tidak membuat aplikasi macet.</p></li>
+            <li><h3>Server: aturan inti <b>22</b></h3><div class="titik-uji" data-n="22"></div><p>Kasus yang sama dengan tes aplikasi, untuk membuktikan dua sisi menghitung angka yang sama.</p></li>
+            <li><h3>Server: API <b>64</b></h3><div class="titik-uji" data-n="64"></div><p>Contoh: unit terakhir hanya jatuh ke satu booking, toko lain ditolak, foto KTP tidak bisa dibuka orang lain.</p></li>
           </ul>
         </div>
         <table class="tabel-uji" data-step="1">
-          <caption class="sub">Uji langsung oleh orang, di HP Redmi 17 dan Chrome</caption>
+          <caption class="sub">Uji langsung di HP Redmi 17, emulator, dan Chrome</caption>
           <tbody>
             <tr><td>Sewa lengkap: booking, konfirmasi, bukti transfer, serah terima, pengembalian</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
             <tr><td>Jaminan ditolak, booking ditolak, lalu stok bisa dipesan lagi</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
             <tr><td>Admin: dashboard, verifikasi penyedia, daftar transaksi</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
             <tr><td>Ukuran font sistem 1,3 kali, setelah 3 perbaikan tata letak</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
             <tr><td>Denda dan blacklist di Chrome: telat, rusak berat, tinjauan admin</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
+            <tr><td>Dua perangkat lewat server: konfirmasi di satu, bukti transfer di lain</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
             <tr><td>Versi web pada lebar 390, 820, dan 1440 piksel</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
           </tbody>
         </table>
@@ -472,10 +471,10 @@
       <div class="papan putus" data-step="1">
         <h3 class="sub">Rencana lanjutan</h3>
         <ul class="daftar rencana">
-          <li><span class="urut">Berikutnya</span><p>Server Laravel dan MySQL, supaya data dipakai bersama lintas perangkat.</p></li>
           <li><span class="urut">Berikutnya</span><p>Fitur AI: rekomendasi paket alat dan pemeriksaan kondisi alat.</p></li>
+          <li><span class="urut">Berikutnya</span><p>Login dengan akun Google.</p></li>
           <li><span class="urut">Menyusul</span><p>Peta yang tertanam di dalam aplikasi.</p></li>
-          <li><span class="urut">Menyusul</span><p>Login dengan akun Google, payment gateway, dan versi iOS.</p></li>
+          <li><span class="urut">Menyusul</span><p>Payment gateway dan versi iOS.</p></li>
         </ul>
       </div>
     </div>

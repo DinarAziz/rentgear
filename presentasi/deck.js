@@ -200,7 +200,7 @@ function bangunTahap() {
   const tahap = [
     ['Analisis', 'Masalah penyewa dan penyedia, peran pengguna, daftar fitur.'],
     ['Perancangan', 'Algoritma, alur status, use case, rancangan database dan API.'],
-    ['Implementasi', 'Aplikasi Flutter untuk Android dan web.'],
+    ['Implementasi', 'Aplikasi Flutter untuk Android dan web, server Laravel.'],
     ['Pengujian', 'Tes otomatis dan uji langsung di HP.'],
   ];
   const titik = [[120, 420], [520, 320], [910, 210], [1300, 100]];
@@ -406,7 +406,7 @@ const adegan = {
 
   pengujian: {
     masuk(tl) {
-      tl.add(hitung($('#skor'), 0, 50, 1.6, 'power1.out'), 0.6)
+      tl.add(hitung($('#skor'), 0, 147, 1.6, 'power1.out'), 0.6)
         .from('.titik-uji i', { autoAlpha: 0, scale: 0.4, duration: d(0.35), ease: 'back.out(2)', stagger: 0.05 }, 0.6);
     },
   },
