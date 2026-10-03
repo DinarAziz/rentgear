@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Domain\Fines\BlacklistPolicy;
 use App\Models\Equipment;
 use App\Models\Rental;
 use App\Models\User;
@@ -134,15 +135,25 @@ final class AiAdvisor
     public function customerRisk(User $customer): array
     {
         $record = $this->blacklist->recordOf($customer);
-        $history = Rental::where('customer_id', $customer->id)->orderBy('created_at')->get()->map(fn (Rental $r) => [
-            'status' => $r->status, 'denda_terlambat' => (float) $r->late_fee, 'denda_kerusakan' => (float) $r->damage_fee,
+        $rentals = Rental::where('customer_id', $customer->id)->orderBy('created_at')->get();
+        // Denda kerusakan yang masih ditinjau admin belum menjadi pelanggaran, jadi nominalnya tidak dikirim.
+        $history = $rentals->map(fn (Rental $r) => [
+            'status' => $r->status, 'denda_terlambat' => (float) $r->late_fee,
+            'denda_kerusakan' => $r->damage_review === 'pending' ? 0.0 : (float) $r->damage_fee,
+            'denda_kerusakan_masih_ditinjau' => $r->damage_review === 'pending',
             'kondisi_kembali' => $this->conditionLabel($r->return_condition),
         ])->all();
-        // Tanpa nama, email, atau nomor dokumen.
+        $violations = BlacklistService::violations($record);
+        // Tanpa nama, email, atau nomor dokumen. Semua hitungan dibuat server, bukan AI.
         $facts = json_encode([
             'jumlah_sewa' => $record['rentalCount'], 'terlambat' => $record['lateCount'],
             'tidak_diambil' => $record['noShowCount'], 'merusak_alat' => $record['damageCount'],
-            'total_denda' => $record['fineTotal'], 'sedang_blacklist' => $record['blacklist'] !== null,
+            'jumlah_pelanggaran' => $violations,
+            'pelanggaran_lagi_sebelum_blacklist_otomatis' => max(0,
+                BlacklistPolicy::AUTO_BLACKLIST_AFTER - ($violations - $customer->violation_baseline)),
+            'total_denda_yang_sudah_ditetapkan' => (float) $rentals
+                ->sum(fn (Rental $r) => $r->late_fee + ($r->damage_review === 'pending' ? 0 : $r->damage_fee)),
+            'sedang_blacklist' => $record['blacklist'] !== null,
             'riwayat' => $history,
         ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
@@ -152,6 +163,9 @@ final class AiAdvisor
 
             Riwayat penyewa (tanpa identitas):
             $facts
+
+            Pakai angka pada data apa adanya dan jangan menghitung ulang. Denda yang masih ditinjau belum menjadi
+            pelanggaran dan tidak boleh disebut sebagai kerusakan yang terbukti.
 
             Tentukan tingkat risiko: "rendah", "sedang", atau "tinggi". "ringkasan" paling banyak dua kalimat.
             "faktor": paling banyak 3 hal konkret dari riwayat yang mendasari penilaian. Bahasa Indonesia, tanpa
@@ -170,7 +184,7 @@ final class AiAdvisor
             'level' => (string) ($answer['tingkat'] ?? 'sedang'),
             'summary' => (string) ($answer['ringkasan'] ?? ''),
             'factors' => $this->firstStrings($answer['faktor'] ?? []),
-            'violations' => BlacklistService::violations($record),
+            'violations' => $violations,
         ];
     }
 

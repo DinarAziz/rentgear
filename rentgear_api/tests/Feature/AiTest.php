@@ -84,6 +84,16 @@ class AiTest extends ApiTestCase
         $this->assertEquals(150000, $opinion['suggestedFee']);
         $this->assertEquals(100000, $opinion['proposedFee']);
 
+        // Denda yang masih ditinjau belum dihitung sebagai pelanggaran di data yang dikirim ke AI.
+        $this->gemini(['tingkat' => 'rendah', 'ringkasan' => '-', 'faktor' => []]);
+        $this->postJson('/api/v1/ai/customers/u-budi/risk')->assertOk();
+        Http::assertSent(function (Request $request) {
+            $prompt = $request['contents'][0]['parts'][0]['text'];
+
+            return str_contains($prompt, '"denda_kerusakan_masih_ditinjau": true') && ! str_contains($prompt, '100000')
+                && str_contains($prompt, '"pelanggaran_lagi_sebelum_blacklist_otomatis"');
+        });
+
         // Pendapat AI tidak mengubah transaksi.
         $this->assertEquals(100000, $this->getJson('/api/v1/rentals/r-4')->json('data.damageFee'));
         $this->assertApiError($this->postJson('/api/v1/ai/rentals/r-1/fine-opinion'), 'INVALID_STATE', 409);

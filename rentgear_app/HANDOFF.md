@@ -655,3 +655,22 @@ State at the end: the Redmi has the server-mode APK (with the Google client ID),
 with `adb reverse`, and a server-mode web build is served from the scratchpad on port 8081 for the Google test.
 `../webapp/` holds the local-mode build. The server database has test data from this day (INV-DEMO-0004 returned with
 a fine under review); `php artisan migrate:fresh --seed` resets it.
+
+## Emulator check (2026-10-03, Pixel_10, server-mode debug APK)
+
+The user asked to use the Android Studio emulator for now. Started with
+`~/Library/Android/sdk/emulator/emulator -avd Pixel_10`, then `adb -s emulator-5554 reverse tcp:8000 tcp:8000`.
+Screenshots are 1080x2424.
+
+Passed with the real Gemini: "Saran AI" for "Camping keluarga di Ranu Kumbolo" (4 people, 2 days: 4 items,
+Rp390.000 rent, Rp420.000 deposit; tapping an item opens its detail page), "Analisis risiko AI" on Budi, and
+"Minta pendapat AI" on INV-DEMO-0004.
+
+Found and fixed: the risk answer said "merusak alat 2 kali" and "one more violation leads to the blacklist" while the
+record had 1 violation. The prompt carried the damage fee of a rental still under admin review, and the model did its
+own counting. `AiAdvisor::customerRisk` now sends 0 for a fee under review with a `denda_kerusakan_masih_ditinjau`
+flag, sends the violation count and the number of violations left before the automatic blacklist as computed by the
+server, and tells the model to use the numbers as given. Rechecked twice against Gemini: the counts are right. The
+level itself ("tinggi" for one violation plus one case under review) is the model's judgment.
+
+Not checked on the emulator: Google sign-in (no Google account was set up on it).
