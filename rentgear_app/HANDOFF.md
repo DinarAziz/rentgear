@@ -674,3 +674,11 @@ server, and tells the model to use the numbers as given. Rechecked twice against
 level itself ("tinggi" for one violation plus one case under review) is the model's judgment.
 
 Not checked on the emulator: Google sign-in (no Google account was set up on it).
+
+Later on the emulator (2026-10-04, same server-mode build), three checks that were still open:
+
+- The risk dialog after the fix: "satu pelanggaran", one case still under review, two violations left before the
+  automatic blacklist. The counts match the record.
+- The audit trail in server mode: the admin's AI requests and the logins are listed, newest first.
+- A customer's view of a store reply: Budi opens Arjuna Outdoor and sees "Balasan toko, 3 Okt 2026" under Sinta
+  Maharani's review, with no "Balas" button.
