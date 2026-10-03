@@ -12,7 +12,8 @@ diambil, supaya tiap tahap bisa dikerjakan terpisah.
 | 3 | Server Laravel + MySQL, lalu Flutter bisa memilih data lokal atau server | Selesai, lihat bagian 3 |
 | 4 | Daftar dan login dengan akun Google, dan jejak audit admin | Kode selesai; login Google menunggu client ID, lihat bagian 4 |
 | 5 | Fitur AI dengan Gemini | Tiga saran AI selesai, pemeriksaan foto belum, lihat bagian 5 |
-| 6 | Payment gateway dan versi iOS | Menyusul |
+| 6 | Aturan denda yang bisa diatur penyedia | Belum, lihat bagian 6 |
+| 7 | Payment gateway dan versi iOS | Menyusul |
 
 ## 1. Denda dan blacklist (selesai)
 
@@ -146,3 +147,26 @@ Aturan yang dipegang:
 Belum dibuat: pemeriksaan kondisi alat dari foto sebelum dan sesudah sewa (ALG-3). Itu butuh foto kondisi saat
 serah terima dan saat kembali, yang belum ada di aplikasi. Skor dan penyusunan paket yang sepenuhnya deterministik
 seperti di `02-ALGORITMA.md` (ALG-1) juga belum; saat ini pemilihan alat dilakukan AI lalu diperiksa server.
+
+## 6. Aturan denda yang bisa diatur penyedia (belum dibuat)
+
+Permintaan pemilik proyek pada 3 Oktober 2026: aturan denda jangan kaku, dan penyedia bisa mengaturnya sendiri.
+
+Saat ini semua toko memakai angka yang sama dan angkanya tertulis di kode (`rentgear_app/lib/domain/fines.dart` dan
+`rentgear_api/app/Domain/Fines/`): denda terlambat 1,5 kali tarif harian, denda kerusakan paling tinggi sebesar
+deposit, tinjauan admin bila denda di atas 50% deposit, dan blacklist otomatis setelah 3 pelanggaran.
+
+Rencananya aturan denda menjadi bagian dari pengaturan toko, seperti aturan jaminan sekarang. Yang perlu diputuskan
+sebelum dikerjakan:
+
+- Apa saja yang boleh diatur penyedia: pengali denda terlambat, masa tenggang, pedoman denda per tingkat kerusakan
+  (rusak ringan, rusak berat, hilang).
+- Batas dari platform supaya penyewa tetap terlindungi, misalnya pengali paling tinggi dan denda kerusakan tetap
+  tidak boleh melebihi deposit.
+- Apakah ambang tinjauan admin dan blacklist otomatis tetap diatur platform. Usulannya tetap di platform, karena
+  keduanya melindungi penyewa dari toko.
+- Aturan mana yang berlaku untuk sewa yang sedang berjalan. Usulannya aturan dikunci saat booking dibuat, seperti
+  harga dan deposit.
+
+Penyewa harus bisa melihat aturan denda toko sebelum memesan. Pedoman denda per tingkat kerusakan juga akan dipakai
+sebagai acuan pendapat AI atas denda, yang sekarang menilai tanpa pedoman.
