@@ -20,11 +20,16 @@ class AsyncView<T> extends StatefulWidget {
     required this.load,
     required this.builder,
     this.deps,
+    this.frame,
   });
 
   final Future<T> Function() load;
   final Object? deps;
   final Widget Function(BuildContext context, T data) builder;
+
+  /// Pembungkus untuk tampilan memuat dan galat, bila [builder] membuat
+  /// Scaffold sendiri dan AsyncView ini tidak berada di dalam Scaffold.
+  final Widget Function(Widget child)? frame;
 
   @override
   State<AsyncView<T>> createState() => _AsyncViewState<T>();
@@ -51,13 +56,16 @@ class _AsyncViewState<T> extends State<AsyncView<T>> {
     return FutureBuilder<T>(
       future: _future,
       builder: (context, snap) {
+        final frame = widget.frame ?? (child) => child;
         if (snap.hasError) {
-          return EmptyState(
-            icon: Icons.error_outline,
-            message: snap.error.toString(),
-            action: TextButton(
-              onPressed: () => setState(() => _future = widget.load()),
-              child: const Text('Coba lagi'),
+          return frame(
+            EmptyState(
+              icon: Icons.error_outline,
+              message: snap.error.toString(),
+              action: TextButton(
+                onPressed: () => setState(() => _future = widget.load()),
+                child: const Text('Coba lagi'),
+              ),
             ),
           );
         }
@@ -65,7 +73,7 @@ class _AsyncViewState<T> extends State<AsyncView<T>> {
         // Saat memuat ulang, tetap tampilkan data lama agar layar tidak berkedip.
         final data = snap.hasData ? snap.data : _last;
         if (data == null) {
-          return const Center(child: CircularProgressIndicator());
+          return frame(const Center(child: CircularProgressIndicator()));
         }
         return widget.builder(context, data);
       },

@@ -76,8 +76,11 @@ class ReadableWidth extends StatelessWidget {
   final Widget child;
   final double maxWidth;
 
+  // heightFactor 1: setinggi isinya saja, juga saat dipasang sebagai
+  // bottomNavigationBar yang tingginya tidak dibatasi.
   @override
   Widget build(BuildContext context) => Center(
+    heightFactor: 1,
     child: ConstrainedBox(
       constraints: BoxConstraints(maxWidth: maxWidth),
       child: child,

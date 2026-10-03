@@ -499,6 +499,11 @@ Fixed this session:
 - "Kembalikan jaminan" dialog: the confirm label is "Selesaikan", so both buttons fit on one line.
 - Provider profile: the status pill sits under the address, so the shop name stays on one line. A rejected shop is red.
 - "bukti bayar" is "bukti transfer" everywhere, in the app and in the server's status note.
+- Rental detail: the snackbar covered the action button for a few seconds after an action. The action bar is now the
+  Scaffold's `bottomNavigationBar`, so the snackbar shows above it. `AsyncView` has a `frame` parameter for its loading
+  and error states, and `ReadableWidth` keeps the height of its child. Checked in WebKit at 390x844 (return received,
+  snackbar above "Kembalikan jaminan & selesaikan"). The APK with this fix is installed on the Redmi but not checked
+  there, because the phone was locked.
 
 Other changes: `../webapp/` and `../rentgear-web.zip` are rebuilt from this code (local mode). The Redmi has the
 local-mode debug APK. `tool/webkit_drive.mjs` drives the web build in WebKit the way `tool/adb_drive.sh` drives the
@@ -509,7 +514,6 @@ Not done:
 - The real Safari app only loaded the page (title "RentGear"). Driving it needs Safari > Settings > Developer >
   "Allow remote automation", which asks for the Mac password, and screenshots need the Screen Recording permission.
   The interaction checks ran in Playwright WebKit instead.
-- The snackbar covers the bottom action button for a few seconds after an action on the rental detail page.
 - On the Redmi the local data still holds this session's test results (INV-DEMO-0004 finished, Puncak Outdoor
   rejected). "Reset data demo" in Profil clears them. The server database holds INV-20261003-0001 and the test item
   "Tenda Keluarga Uji"; `php artisan migrate:fresh --seed` clears them.

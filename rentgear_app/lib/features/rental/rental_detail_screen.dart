@@ -25,21 +25,22 @@ class RentalDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.read<AppState>();
-    return Scaffold(
+    // Tombol aksi dipasang sebagai bottomNavigationBar, supaya SnackBar muncul
+    // di atasnya dan tidak menutupi tombol.
+    Widget page(Widget body, [Widget? actions]) => Scaffold(
       appBar: AppBar(title: const Text('Detail Transaksi')),
-      body: AsyncView<(Rental, ProviderProfile)>(
-        load: () async {
-          final r = await state.repo.rental(rentalId);
-          return (r, await state.repo.provider(r.providerId));
-        },
-        builder: (context, data) => Column(
-          children: [
-            Expanded(
-              child: _Body(rental: data.$1, provider: data.$2),
-            ),
-            _ActionBar(rental: data.$1),
-          ],
-        ),
+      body: body,
+      bottomNavigationBar: actions,
+    );
+    return AsyncView<(Rental, ProviderProfile)>(
+      load: () async {
+        final r = await state.repo.rental(rentalId);
+        return (r, await state.repo.provider(r.providerId));
+      },
+      frame: page,
+      builder: (context, data) => page(
+        _Body(rental: data.$1, provider: data.$2),
+        _ActionBar(rental: data.$1),
       ),
     );
   }
