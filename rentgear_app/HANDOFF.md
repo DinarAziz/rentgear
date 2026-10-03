@@ -502,8 +502,8 @@ Fixed this session:
 - Rental detail: the snackbar covered the action button for a few seconds after an action. The action bar is now the
   Scaffold's `bottomNavigationBar`, so the snackbar shows above it. `AsyncView` has a `frame` parameter for its loading
   and error states, and `ReadableWidth` keeps the height of its child. Checked in WebKit at 390x844 (return received,
-  snackbar above "Kembalikan jaminan & selesaikan"). The APK with this fix is installed on the Redmi but not checked
-  there, because the phone was locked.
+  snackbar above "Kembalikan jaminan & selesaikan") and on the Redmi (Budi books Tenda Dome 20-21 Oct,
+  INV-20261003-0003: "Booking terkirim" shows above "Batalkan"; the booking was then cancelled).
 
 Other changes: `../webapp/` and `../rentgear-web.zip` are rebuilt from this code (local mode). The Redmi has the
 local-mode debug APK. `tool/webkit_drive.mjs` drives the web build in WebKit the way `tool/adb_drive.sh` drives the
