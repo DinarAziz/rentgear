@@ -104,8 +104,11 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               children: [
                 ListTile(leading: const Icon(Icons.mail_outline), title: Text(user.email)),
-                ListTile(leading: const Icon(Icons.phone_outlined), title: Text(user.phone)),
-                ListTile(leading: const Icon(Icons.location_on_outlined), title: Text(user.city)),
+                // Akun dari Google belum punya nomor HP dan kota.
+                if (user.phone.isNotEmpty)
+                  ListTile(leading: const Icon(Icons.phone_outlined), title: Text(user.phone)),
+                if (user.city.isNotEmpty)
+                  ListTile(leading: const Icon(Icons.location_on_outlined), title: Text(user.city)),
               ],
             ),
           ),

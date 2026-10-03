@@ -10,7 +10,7 @@ diambil, supaya tiap tahap bisa dikerjakan terpisah.
 | 1 | Denda dan blacklist di aplikasi Flutter (tanpa server) | Selesai, lihat bagian 1 |
 | 2 | Katalog per penyedia: halaman toko, rating, komentar, follow, lokasi di peta | Selesai, lihat bagian 2 |
 | 3 | Server Laravel + MySQL, lalu Flutter bisa memilih data lokal atau server | Selesai, lihat bagian 3 |
-| 4 | Daftar dan login dengan akun Google | Belum, butuh tahap 3 |
+| 4 | Daftar dan login dengan akun Google, dan jejak audit admin | Kode selesai; login Google menunggu client ID, lihat bagian 4 |
 | 5 | Fitur AI dengan Gemini | Belum, butuh tahap 3 dan API key |
 | 6 | Payment gateway dan versi iOS | Menyusul |
 
@@ -83,15 +83,44 @@ Satu penyimpangan dari `04-DATABASE.md`: peran pengguna disimpan di satu kolom `
 Belum dibuat: deploy ke hosting publik (server masih di Mac pengembang, http), panel admin berbasis web, dan
 pencocokan nominal bukti transfer.
 
-## 4. Login Google
+## 4. Login Google dan jejak audit
 
-Daftar dan login dengan akun Google. Butuh proyek Google Cloud dengan OAuth client untuk Android dan web, dan server
-yang memeriksa token. Kredensial ini disiapkan pemilik proyek.
+### Login Google (kode selesai, menunggu client ID)
+
+- Tombol "Masuk dengan Google" di layar login. Tombol hanya tampil bila aplikasi memakai server dan dibangun dengan
+  `--dart-define=GOOGLE_CLIENT_ID=...`.
+- Aplikasi hanya mengambil ID token dari Google. Server yang memeriksanya (`POST /api/v1/auth/google`): token harus
+  dibuat untuk client ID yang terdaftar di `GOOGLE_CLIENT_IDS`, belum kedaluwarsa, dan emailnya sudah terverifikasi.
+- Akun Google yang belum dikenal menjadi akun penyewa baru. Akun lama dikenali dari emailnya dan perannya tetap.
+- Akun admin tidak bisa masuk dengan Google, hanya dengan password.
+- Rute masuk dibatasi 20 percobaan per menit.
+
+Belum diuji dengan akun Google sungguhan, karena client ID belum dibuat. Cara membuatnya ada di
+`rentgear_api/README.md`, bagian "Login Google". Yang sudah diuji: sisi server dengan jawaban Google tiruan (5 tes).
+
+### Jejak audit (selesai)
+
+- Yang dicatat: masuk, masuk dan daftar dengan Google, gagal masuk, perubahan status penyedia, keputusan denda
+  kerusakan, masuk blacklist (oleh admin atau otomatis oleh sistem), dan pencabutan blacklist.
+- Tiap baris berisi waktu, pelaku dan perannya, aksi, sasaran, dan rincian. Password tidak pernah dicatat. Server juga
+  menyimpan alamat IP.
+- Admin membacanya dari tombol "Jejak audit" di Dashboard, dengan saringan aksi admin, masuk dan daftar, dan sistem.
+- Jejak hanya bisa ditambah. Tidak ada layar atau rute API untuk mengubah atau menghapusnya (`GET /api/v1/audit` saja).
+  Di mode data lokal, "Reset data demo" ikut mengosongkannya, karena itu menghapus semua data di perangkat.
+
+### Kunci dan rahasia
+
+- Kunci API Gemini hanya ada di `rentgear_api/.env` (`GEMINI_API_KEY`). File itu diabaikan git dan hanya bisa dibaca
+  pemilik akun di komputer server. Kunci tidak pernah masuk ke APK, build web, atau repositori.
+- Client ID Google bukan rahasia, jadi boleh ada di aplikasi.
+- Bila kunci pernah terkirim lewat chat, email, atau tangkapan layar, buat kunci baru di aistudio.google.com dan
+  hapus yang lama.
 
 ## 5. Fitur AI
 
 Keputusan: Gemini. API key dibuat pemilik proyek di aistudio.google.com dan disimpan di `.env` server, tidak pernah
-di dalam APK. Cakupan:
+di dalam APK. Kuncinya sudah terpasang di server pada 3 Oktober 2026 dan diterima Google; fiturnya belum dibuat.
+Cakupan:
 
 - Rekomendasi paket alat dari kebutuhan perjalanan (ALG-1 di `02-ALGORITMA.md`).
 - Pemeriksaan kondisi alat dari foto (ALG-3), yang juga memberi tanda pada denda kerusakan yang janggal.

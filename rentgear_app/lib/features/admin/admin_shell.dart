@@ -12,6 +12,7 @@ import '../../widgets/motion.dart';
 import '../customer/my_rentals_screen.dart';
 import '../rental/rental_detail_screen.dart';
 import '../shared/profile_screen.dart';
+import 'admin_audit_screen.dart';
 import 'admin_customers_screen.dart';
 
 class AdminShell extends StatefulWidget {
@@ -74,7 +75,20 @@ class AdminDashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.read<AppState>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard Admin')),
+      appBar: AppBar(
+        title: const Text('Dashboard Admin'),
+        actions: [
+          TextButton.icon(
+            icon: const Icon(Icons.manage_search),
+            label: const Text('Jejak audit'),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(builder: (_) => const AdminAuditScreen()),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: AsyncView<(List<Rental>, List<ProviderProfile>)>(
         load: () async =>
             (await state.repo.allRentals(), await state.repo.providers()),

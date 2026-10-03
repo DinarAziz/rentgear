@@ -21,6 +21,7 @@ class ApiException extends RuntimeException
         'SLOT_UNAVAILABLE' => 409,
         'ALREADY_REVIEWED' => 409,
         'DAMAGE_REVIEW_PENDING' => 409,
+        'GOOGLE_NOT_CONFIGURED' => 503,
     ];
 
     public function __construct(public readonly string $errorCode, string $message)

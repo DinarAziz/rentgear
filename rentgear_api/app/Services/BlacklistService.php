@@ -7,6 +7,7 @@ use App\Models\BlacklistEntry;
 use App\Models\Rental;
 use App\Models\User;
 use App\Support\ApiException;
+use App\Support\Audit;
 
 /** Riwayat pelanggaran penyewa dan blacklist (manual oleh admin, atau otomatis). */
 final class BlacklistService
@@ -53,6 +54,7 @@ final class BlacklistService
             'by' => 'Sistem',
             'at' => now(),
         ]);
+        Audit::record(null, Audit::BLACKLIST_ADDED, $customer->name, "Otomatis: $new pelanggaran.");
     }
 
     public function block(User $customer, User $admin, ?string $reason): void

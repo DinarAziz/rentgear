@@ -73,8 +73,15 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Future<void> login(String email, String password) async {
-    _user = await repo.login(email, password);
+  Future<void> login(String email, String password) async =>
+      _startSession(await repo.login(email, password));
+
+  /// [idToken] berasal dari tombol "Masuk dengan Google".
+  Future<void> loginWithGoogle(String idToken) async =>
+      _startSession(await repo.loginWithGoogle(idToken));
+
+  Future<void> _startSession(AppUser user) async {
+    _user = user;
     await repo.runScheduledJobs();
     _revision++;
     notifyListeners();

@@ -442,3 +442,55 @@ class AppException implements Exception {
   @override
   String toString() => message;
 }
+
+/// Satu baris jejak audit: siapa melakukan apa, kapan, pada apa.
+class AuditEntry {
+  const AuditEntry({
+    required this.id,
+    required this.at,
+    required this.actorName,
+    required this.actorRole,
+    required this.action,
+    this.target,
+    this.detail,
+  });
+
+  final String id;
+  final DateTime at;
+
+  /// Nama pelaku, "Sistem" untuk aksi otomatis, atau "Tidak dikenal" untuk
+  /// percobaan masuk yang gagal.
+  final String actorName;
+
+  /// `customer`, `provider`, `admin`, atau `system`.
+  final String actorRole;
+
+  /// Salah satu kode di [AuditAction].
+  final String action;
+  final String? target;
+  final String? detail;
+}
+
+/// Kode aksi yang dicatat. Sama dengan konstanta `Audit` di server.
+abstract final class AuditAction {
+  static const login = 'login';
+  static const loginGoogle = 'login_google';
+  static const registerGoogle = 'register_google';
+  static const loginFailed = 'login_failed';
+  static const providerStatus = 'provider_status';
+  static const damageFeeDecided = 'damage_fee_decided';
+  static const blacklistAdded = 'blacklist_added';
+  static const blacklistRemoved = 'blacklist_removed';
+
+  static String label(String action) => switch (action) {
+    login => 'Masuk',
+    loginGoogle => 'Masuk dengan Google',
+    registerGoogle => 'Daftar dengan Google',
+    loginFailed => 'Gagal masuk',
+    providerStatus => 'Status penyedia diubah',
+    damageFeeDecided => 'Denda kerusakan diputuskan',
+    blacklistAdded => 'Masuk blacklist',
+    blacklistRemoved => 'Blacklist dicabut',
+    _ => action,
+  };
+}

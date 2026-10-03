@@ -158,10 +158,15 @@ class HttpRentGearRepository implements RentGearRepository {
   // ---------------------------------------------------------------- sesi
 
   @override
-  Future<AppUser> login(String email, String password) async {
+  Future<AppUser> login(String email, String password) =>
+      _startSession('auth/login', {'email': email, 'password': password});
+
+  @override
+  Future<AppUser> loginWithGoogle(String idToken) => _startSession('auth/google', {'idToken': idToken});
+
+  Future<AppUser> _startSession(String path, Map<String, dynamic> body) async {
     await _tokens.write(null);
-    final data = await _send('POST', 'auth/login', {'email': email, 'password': password})
-        as Map<String, dynamic>;
+    final data = await _send('POST', path, body) as Map<String, dynamic>;
     await _tokens.write(data['token'] as String);
     return ApiCodec.user(data['user'] as Map<String, dynamic>);
   }
@@ -433,4 +438,7 @@ class HttpRentGearRepository implements RentGearRepository {
   Future<void> setBlacklist(String customerId, AppUser actor, {required bool blocked, String? reason}) =>
       _send(blocked ? 'PUT' : 'DELETE', 'customers/$customerId/blacklist',
           blocked ? {'reason': reason} : null);
+
+  @override
+  Future<List<AuditEntry>> auditLog(AppUser actor) async => _list(await _get('audit'), ApiCodec.audit);
 }

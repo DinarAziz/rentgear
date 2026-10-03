@@ -10,6 +10,7 @@ use App\Models\Rental;
 use App\Models\Review;
 use App\Models\User;
 use App\Support\ApiException;
+use App\Support\Audit;
 use Closure;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -195,6 +196,9 @@ final class RentalFlowService
                 'damage_review' => 'decided',
                 'review_note' => $note === null ? null : trim($note),
             ]);
+            $trimmed = trim((string) $note);
+            Audit::record($actor, Audit::DAMAGE_FEE_DECIDED, $r->invoice_code,
+                'Denda akhir Rp'.number_format($amount, 0, ',', '.').($trimmed === '' ? '' : '. Catatan: '.$trimmed));
             $this->blacklist->autoBlacklist($r->customer_id);
         });
     }

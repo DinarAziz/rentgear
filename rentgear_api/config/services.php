@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    // Client ID OAuth (web, Android, iOS) yang boleh memakai login Google, dipisah koma. Bukan rahasia.
+    'google' => [
+        'client_ids' => array_values(array_filter(array_map('trim', explode(',', (string) env('GOOGLE_CLIENT_IDS', ''))))),
+    ],
+
+    // Kunci Gemini hanya ada di server. Aplikasi tidak pernah menerimanya.
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+    ],
+
 ];

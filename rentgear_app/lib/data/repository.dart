@@ -14,6 +14,9 @@ abstract class RentGearRepository {
 
   Future<AppUser> login(String email, String password);
 
+  /// Masuk atau daftar dengan ID token dari Google. Hanya ada di server.
+  Future<AppUser> loginWithGoogle(String idToken);
+
   /// Pengguna yang masih login dari sesi sebelumnya, atau `null`.
   Future<AppUser?> restoreSession();
   Future<void> logout();
@@ -113,4 +116,7 @@ abstract class RentGearRepository {
   /// Admin memasukkan penyewa ke blacklist ([reason] wajib) atau mencabutnya.
   Future<void> setBlacklist(String customerId, AppUser actor,
       {required bool blocked, String? reason});
+
+  /// Jejak audit, terbaru lebih dulu. Hanya admin.
+  Future<List<AuditEntry>> auditLog(AppUser actor);
 }

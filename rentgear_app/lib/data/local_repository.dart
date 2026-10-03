@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../core/format.dart';
 import '../domain/availability.dart';
 import '../domain/equipment_rules.dart';
 import '../domain/fines.dart';
@@ -63,6 +64,9 @@ class LocalRentGearRepository implements RentGearRepository {
 
   /// Jumlah pelanggaran tiap penyewa saat admin terakhir mencabut blacklist-nya.
   final Map<String, int> _violationBaseline = {};
+
+  /// Jejak audit, terlama lebih dulu. Hanya ditambah, tidak pernah diubah.
+  final List<AuditEntry> _audit = [];
   int _sequence = 0;
   String? _sessionUserId;
 
@@ -96,6 +100,18 @@ class LocalRentGearRepository implements RentGearRepository {
       'idempotency': _idempotency,
       'blacklist': {for (final b in _blacklist.entries) b.key: codec.blacklist(b.value)},
       'violationBaseline': _violationBaseline,
+      'audit': [
+        for (final a in _audit)
+          {
+            'id': a.id,
+            'at': a.at.toIso8601String(),
+            'actorName': a.actorName,
+            'actorRole': a.actorRole,
+            'action': a.action,
+            'target': a.target,
+            'detail': a.detail,
+          },
+      ],
       // Ulasan bawaan demo dibuat ulang dari seed; yang disimpan hanya ulasan penyewa.
       'reviews': [
         for (final r in _reviews)
@@ -133,6 +149,18 @@ class LocalRentGearRepository implements RentGearRepository {
         b.key: codec.blacklistFrom(b.value as Map<String, dynamic>),
     });
     _violationBaseline.addAll((data['violationBaseline'] as Map?)?.cast<String, int>() ?? const {});
+    for (final saved in (data['audit'] as List?) ?? const []) {
+      final a = saved as Map<String, dynamic>;
+      _audit.add(AuditEntry(
+        id: a['id'] as String,
+        at: DateTime.parse(a['at'] as String),
+        actorName: a['actorName'] as String,
+        actorRole: a['actorRole'] as String,
+        action: a['action'] as String,
+        target: a['target'] as String?,
+        detail: a['detail'] as String?,
+      ));
+    }
     final providers = data['providers'] as Map<String, dynamic>;
     for (final p in _providers) {
       final saved = providers[p.id] as Map<String, dynamic>?;
@@ -195,6 +223,7 @@ class LocalRentGearRepository implements RentGearRepository {
         _idempotency.clear();
         _blacklist.clear();
         _violationBaseline.clear();
+        _audit.clear();
         _sequence = 0;
         _sessionUserId = null;
       });
@@ -259,6 +288,20 @@ class LocalRentGearRepository implements RentGearRepository {
     }
   }
 
+  /// Menambah satu baris jejak audit. [actor] `null` = Sistem, atau orang yang
+  /// belum dikenali bila [anonymous] diisi.
+  void _record(AppUser? actor, String action, {String? target, String? detail, String anonymous = 'Sistem'}) {
+    _audit.add(AuditEntry(
+      id: '${_audit.length + 1}',
+      at: DateTime.now(),
+      actorName: actor?.name ?? anonymous,
+      actorRole: actor?.role.name ?? 'system',
+      action: action,
+      target: target,
+      detail: detail,
+    ));
+  }
+
   // ---------------------------------------------------------------- pelanggaran
 
   CustomerRecord _recordOf(AppUser customer) {
@@ -290,6 +333,8 @@ class LocalRentGearRepository implements RentGearRepository {
       by: 'Sistem',
       at: DateTime.now(),
     );
+    _record(null, AuditAction.blacklistAdded,
+        target: record.user.name, detail: 'Otomatis: ${record.violations - baseline} pelanggaran.');
   }
 
   /// [actor] `null` = job sistem.
@@ -314,13 +359,22 @@ class LocalRentGearRepository implements RentGearRepository {
 
   @override
   Future<AppUser> login(String email, String password) => _mutate(() {
-        final user = _users.where((u) => u.email == email.trim().toLowerCase());
+        final address = email.trim().toLowerCase();
+        final user = _users.where((u) => u.email == address);
         if (user.isEmpty || password != demoPassword) {
+          // Password tidak pernah ikut dicatat.
+          _record(null, AuditAction.loginFailed, target: address, anonymous: 'Tidak dikenal');
+          _save();
           throw const AppException('AUTH_FAILED', 'Email atau password salah.');
         }
         _sessionUserId = user.first.id;
+        _record(user.first, AuditAction.login);
         return user.first;
       });
+
+  @override
+  Future<AppUser> loginWithGoogle(String idToken) => throw const AppException(
+      'UNSUPPORTED', 'Login Google hanya tersedia saat aplikasi terhubung ke server.');
 
   @override
   Future<AppUser?> restoreSession() => _delay(() {
@@ -676,6 +730,10 @@ class LocalRentGearRepository implements RentGearRepository {
           ..damageFee = amount
           ..damageReview = DamageReview.decided
           ..reviewNote = note?.trim();
+        final trimmed = note?.trim() ?? '';
+        _record(actor, AuditAction.damageFeeDecided,
+            target: r.invoiceCode,
+            detail: 'Denda akhir ${rupiah(amount)}${trimmed.isEmpty ? '' : '. Catatan: $trimmed'}');
         _autoBlacklist(r.customerId);
         return r;
       });
@@ -786,6 +844,8 @@ class LocalRentGearRepository implements RentGearRepository {
       _mutate(() {
         _requireAdmin(actor);
         final p = _providerById(providerId);
+        _record(actor, AuditAction.providerStatus,
+            target: p.businessName, detail: 'Dari ${p.status.label} menjadi ${status.label}.');
         p.status = status;
         return p;
       });
@@ -894,6 +954,7 @@ class LocalRentGearRepository implements RentGearRepository {
         if (!blocked) {
           _blacklist.remove(customer.id);
           _violationBaseline[customer.id] = _recordOf(customer).violations;
+          _record(actor, AuditAction.blacklistRemoved, target: customer.name);
           return;
         }
         final text = reason?.trim() ?? '';
@@ -901,5 +962,12 @@ class LocalRentGearRepository implements RentGearRepository {
           throw const AppException('VALIDATION', 'Alasan blacklist wajib diisi.');
         }
         _blacklist[customer.id] = BlacklistEntry(reason: text, by: actor.name, at: DateTime.now());
+        _record(actor, AuditAction.blacklistAdded, target: customer.name, detail: text);
+      });
+
+  @override
+  Future<List<AuditEntry>> auditLog(AppUser actor) => _delay(() {
+        _requireAdmin(actor);
+        return _audit.reversed.toList();
       });
 }

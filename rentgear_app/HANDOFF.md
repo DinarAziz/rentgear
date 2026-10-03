@@ -572,3 +572,44 @@ On the Redmi, Arjuna Outdoor now sits at the moved point until "Reset data demo"
 
 At the end of the session the Redmi has the local-mode APK again, `../webapp/` is rebuilt, and the Laravel server is
 stopped. The server database still holds this day's test data.
+
+## Session (2026-10-03, Google login, audit trail, Gemini key)
+
+Stage 4 of `../docs/08-RENCANA-KERJA.md`. Reader-facing detail is in section 4 there and in `../rentgear_api/README.md`
+("Login Google", "Jejak audit").
+
+Google login (code done, not tested against Google):
+
+- Server: `POST /api/v1/auth/google {idToken}`. `app/Services/GoogleTokenVerifier.php` asks Google's tokeninfo
+  endpoint, then checks `aud` against `GOOGLE_CLIENT_IDS`, `iss`, `exp` and `email_verified`. A new Google account
+  becomes a customer; an existing account is matched by `google_id`, then by email, and keeps its role. Admin accounts
+  are refused. `users.google_id` is new. Auth routes are throttled to 20 per minute.
+- App: `lib/core/google_auth.dart` (package `google_sign_in` 7). The button on the login screen shows only when the
+  build has both `API_URL` and `GOOGLE_CLIENT_ID`. Android and iOS call `authenticate()`; web shows Google's own
+  button (`lib/widgets/google_button*.dart`) and listens to `authenticationEvents`. `RentGearRepository.loginWithGoogle`;
+  the local repository answers `UNSUPPORTED`.
+- Not tested: the button and the Google account chooser on any device, because no OAuth client exists yet. The server
+  side has 5 tests with a faked Google answer. The debug keystore SHA-1 for the Android OAuth client is in the chat
+  with the user and can be read again with `keytool` (see the README).
+
+Audit trail (done):
+
+- Server: table `audit_logs`, `App\Support\Audit::record`, `GET /api/v1/audit` (admin). Recorded: login, failed
+  login, Google login and registration, provider status change, damage fee decision, blacklist added (admin or
+  automatic) and removed. No route changes or deletes a row. Passwords are never written. The IP is stored.
+- App: `AuditEntry`, `AuditAction`, `auditLog(actor)`. The local repository records the same actions and saves them
+  under `audit`. Screen `lib/features/admin/admin_audit_screen.dart`, opened from "Jejak audit" on the admin dashboard,
+  with four filters.
+- Checked on the Redmi (local mode): admin blacklists Budi and removes it; both rows show with the reason and time.
+  Checked in WebKit at 1440x900: the screen opens and shows the login row. Not checked: the audit screen in server mode
+  through the UI (the endpoint has tests).
+
+Gemini key: the user sent the key in chat. It is stored only in `../rentgear_api/.env` as `GEMINI_API_KEY` (file mode
+600, ignored by git) and Google accepted it. No AI feature uses it yet. `config/services.php` reads it as
+`services.gemini.api_key`. The user was told to make a new key later, because this one passed through the chat.
+
+Tests: 79 app and 96 server pass. The deck shows 175. Both migrations of this day were run on the `rentgear` database.
+The Redmi has the local-mode APK; `../webapp/` is rebuilt.
+
+Next: get the Google web client ID from the user, put it in `GOOGLE_CLIENT_IDS` and in the build, and test the button
+on the Redmi and on the web. Then stage 5, the Gemini features.

@@ -32,6 +32,16 @@ abstract final class ApiCodec {
         providerId: j['providerId'] as String?,
       );
 
+  static AuditEntry audit(Map<String, dynamic> j) => AuditEntry(
+        id: j['id'] as String,
+        at: _time(j['at'])!,
+        actorName: j['actorName'] as String,
+        actorRole: j['actorRole'] as String,
+        action: j['action'] as String,
+        target: j['target'] as String?,
+        detail: j['detail'] as String?,
+      );
+
   static Map<String, dynamic> policyToJson(GuaranteePolicy p) => {
         'acceptedTypes': [for (final t in p.acceptedTypes) t.name],
         'baseRequired': p.baseRequired,

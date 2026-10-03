@@ -266,4 +266,37 @@ void main() {
     expect(find.text('Terima kasih sudah menyewa.'), findsOneWidget);
     expect(find.text('Ubah balasan'), findsOneWidget);
   });
+
+  testWidgets('admin reads the audit trail of its own actions', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Admin'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Penyewa'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Masukkan blacklist').first);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Tidak mengembalikan alat');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kirim'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Dashboard'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Jejak audit'));
+    await tester.pumpAndSettle();
+    expect(find.text('Jejak Audit'), findsOneWidget);
+    expect(find.text('Masuk blacklist: Budi Santoso'), findsOneWidget);
+    expect(find.text('Tidak mengembalikan alat'), findsOneWidget);
+    expect(find.text('Masuk'), findsOneWidget);
+
+    await tester.tap(find.text('Aksi admin'));
+    await tester.pumpAndSettle();
+    expect(find.text('Masuk blacklist: Budi Santoso'), findsOneWidget);
+    expect(find.text('Masuk'), findsNothing);
+  });
+
+  testWidgets('the Google button is hidden without a server and a client id', (tester) async {
+    await pumpApp(tester);
+    expect(find.text('Masuk dengan Google'), findsNothing);
+  });
 }

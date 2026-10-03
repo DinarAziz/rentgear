@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/google_auth.dart';
 import '../../core/responsive.dart';
 import '../../core/theme.dart';
 import '../../data/local_repository.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
+import '../../widgets/google_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,26 +31,53 @@ class _LoginScreenState extends State<LoginScreen> {
     ('Admin', 'admin@rentgear.id', Icons.admin_panel_settings_outlined),
   ];
 
+  StreamSubscription<String>? _googleTokens;
+
+  @override
+  void initState() {
+    super.initState();
+    // Di web, hasil tombol Google datang lewat stream.
+    if (GoogleAuth.available && GoogleAuth.usesRenderedButton) {
+      GoogleAuth.ensureReady().then((_) {
+        if (!mounted) return;
+        setState(() {
+          _googleTokens = GoogleAuth.idTokens.listen(
+            (token) => _run((state) => state.loginWithGoogle(token)),
+          );
+        });
+      });
+    }
+  }
+
   @override
   void dispose() {
+    _googleTokens?.cancel();
     _email.dispose();
     _password.dispose();
     super.dispose();
   }
 
-  Future<void> _login() async {
+  Future<void> _run(Future<void> Function(AppState state) action) async {
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      await context.read<AppState>().login(_email.text, _password.text);
+      await action(context.read<AppState>());
     } on AppException catch (e) {
-      setState(() => _error = e.message);
+      if (mounted) setState(() => _error = e.message);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
+
+  Future<void> _login() =>
+      _run((state) => state.login(_email.text, _password.text));
+
+  Future<void> _loginWithGoogle() => _run((state) async {
+    final token = await GoogleAuth.signIn();
+    if (token != null) await state.loginWithGoogle(token);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -149,6 +180,23 @@ class _LoginScreenState extends State<LoginScreen> {
               )
             : const Text('Masuk'),
       ),
+      if (GoogleAuth.available) ...[
+        const SizedBox(height: 12),
+        if (!GoogleAuth.usesRenderedButton)
+          OutlinedButton.icon(
+            icon: const Icon(Icons.account_circle_outlined),
+            label: const Text('Masuk dengan Google'),
+            onPressed: _loading ? null : _loginWithGoogle,
+          )
+        else if (_googleTokens != null)
+          Center(child: googleRenderedButton()),
+        const SizedBox(height: 6),
+        const Text(
+          'Belum punya akun? Masuk dengan Google untuk mendaftar sebagai penyewa.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: Colors.black54),
+        ),
+      ],
       const SizedBox(height: 32),
       const Text(
         'Akun demo (password: password)',

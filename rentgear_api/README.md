@@ -47,6 +47,39 @@ flutter run --dart-define=API_URL=http://localhost:8000
 
 Untuk HP di Wi-Fi yang sama tanpa kabel, pakai alamat IP Mac, misalnya `API_URL=http://192.168.1.10:8000`.
 
+## Login Google
+
+Server memeriksa ID token dari tombol "Masuk dengan Google". Yang perlu disiapkan sekali di
+[Google Cloud Console](https://console.cloud.google.com/), menu APIs & Services:
+
+1. Buat proyek, lalu isi "OAuth consent screen" (jenis External, tambahkan akun Google penguji).
+2. Di "Credentials", buat tiga OAuth client ID:
+   - **Web application**. Authorized JavaScript origins: alamat aplikasi web, misalnya `http://localhost:8081`.
+     Client ID inilah yang dipakai aplikasi dan server.
+   - **Android**. Package name `id.rentgear.rentgear`, dan SHA-1 dari kunci yang menandatangani APK. Untuk APK debug
+     di Mac ini: `keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android`.
+     Client ini tidak ditulis di mana pun; Google hanya memakainya untuk mengenali APK.
+   - **iOS**, nanti saat versi iOS dibuat.
+3. Tulis client ID web di `.env` server, lalu jalankan ulang server:
+
+   ```
+   GOOGLE_CLIENT_IDS=xxxx.apps.googleusercontent.com
+   ```
+
+4. Bangun aplikasi dengan client ID yang sama:
+
+   ```bash
+   flutter run --dart-define=API_URL=http://localhost:8000 --dart-define=GOOGLE_CLIENT_ID=xxxx.apps.googleusercontent.com
+   ```
+
+Tanpa `GOOGLE_CLIENT_ID` tombolnya tidak tampil, dan tanpa `GOOGLE_CLIENT_IDS` server menjawab `GOOGLE_NOT_CONFIGURED`.
+Akun Google baru menjadi penyewa. Akun admin hanya bisa masuk dengan password.
+
+## Jejak audit
+
+Tabel `audit_logs` mencatat masuk, gagal masuk, dan semua aksi admin. Admin membacanya lewat `GET /api/v1/audit`.
+Tidak ada rute untuk mengubah atau menghapus baris. Password tidak pernah dicatat.
+
 ## Susunan
 
 - `app/Domain/`: aturan bisnis, PHP murni tanpa database. Salinan dari `rentgear_app/lib/domain/`.
@@ -73,5 +106,8 @@ dengan tes Dart. `tests/Feature` menguji tiap alur lewat HTTP.
 - Foto jaminan dan bukti transfer ada di disk privat dan hanya bisa diunduh penyewa, pemilik toko, atau admin.
 - Foto alat bersifat publik lewat `/api/v1/media/equipment/...`.
 - Harga, deposit, dan denda dihitung server. Tanggal kembali untuk denda memakai jam server (Asia/Jakarta).
+- Kunci API (Gemini) hanya ada di `.env`, yang diabaikan git. Jangan menulisnya di kode, di `.env.example`, atau di
+  perintah build aplikasi. Client ID Google bukan rahasia.
+- Rute masuk dibatasi 20 percobaan per menit per alamat IP.
 - Server ini untuk pengembangan dan demo di jaringan lokal (http). Sebelum dipasang di internet perlu https,
   password akun demo diganti, dan `APP_DEBUG=false`.

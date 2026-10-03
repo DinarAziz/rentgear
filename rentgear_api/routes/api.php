@@ -10,7 +10,11 @@ use App\Http\Controllers\Api\V1\StoreController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-    Route::post('auth/login', [AuthController::class, 'login']);
+    // Dibatasi supaya password tidak bisa ditebak berulang-ulang.
+    Route::middleware('throttle:20,1')->group(function () {
+        Route::post('auth/login', [AuthController::class, 'login']);
+        Route::post('auth/google', [AuthController::class, 'google']);
+    });
     Route::get('media/{path}', [FileController::class, 'media'])->where('path', '.*');
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -57,6 +61,7 @@ Route::prefix('v1')->group(function () {
 
         Route::put('providers/{id}/status', [AdminController::class, 'providerStatus']);
         Route::get('customers', [AdminController::class, 'customers']);
+        Route::get('audit', [AdminController::class, 'audit']);
         Route::put('customers/{id}/blacklist', [AdminController::class, 'blacklist']);
         Route::delete('customers/{id}/blacklist', [AdminController::class, 'unblacklist']);
         Route::get('me/blacklist', [AdminController::class, 'myBlacklist']);

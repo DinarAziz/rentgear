@@ -2,6 +2,7 @@
 
 namespace App\Http\Presenters;
 
+use App\Models\AuditLog;
 use App\Models\BlacklistEntry;
 use App\Models\Equipment;
 use App\Models\Guarantee;
@@ -27,6 +28,14 @@ final class Present
         return [
             'id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'phone' => $u->phone,
             'role' => $u->role, 'city' => $u->city, 'providerId' => $u->provider_id,
+        ];
+    }
+
+    public static function audit(AuditLog $a): array
+    {
+        return [
+            'id' => (string) $a->id, 'at' => self::time($a->at), 'actorName' => $a->actor_name, 'actorRole' => $a->actor_role,
+            'action' => $a->action, 'target' => $a->target, 'detail' => $a->detail,
         ];
     }
 
