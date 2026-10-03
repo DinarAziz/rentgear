@@ -51,7 +51,10 @@ abstract final class GoogleAuth {
       return token;
     } on GoogleSignInException catch (e) {
       if (e.code == GoogleSignInExceptionCode.canceled) return null;
-      throw AppException('GOOGLE_FAILED', '$_failed (${e.code.name})');
+      // Rincian dari Google ikut ditampilkan, misalnya bila client ID Android
+      // belum cocok dengan APK ("Developer console is not set up correctly").
+      final detail = [e.code.name, ?e.description].join(': ');
+      throw AppException('GOOGLE_FAILED', '$_failed ($detail)');
     }
   }
 

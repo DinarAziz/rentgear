@@ -32,6 +32,41 @@ abstract final class ApiCodec {
         providerId: j['providerId'] as String?,
       );
 
+  static AiRecommendation aiRecommendation(Map<String, dynamic> j) => AiRecommendation(
+        summary: j['summary'] as String,
+        items: [
+          for (final i in (j['items'] as List).cast<Map<String, dynamic>>())
+            AiPick(
+              equipmentId: i['equipmentId'] as String,
+              name: i['name'] as String,
+              providerName: i['providerName'] as String,
+              city: i['city'] as String,
+              qty: i['qty'] as int,
+              reason: i['reason'] as String,
+              rentCost: _double(i['rentCost']),
+              deposit: _double(i['deposit']),
+            ),
+        ],
+        tips: (j['tips'] as List).cast<String>(),
+        days: j['days'] as int,
+        people: j['people'] as int,
+        rentTotal: _double(j['rentTotal']),
+        depositTotal: _double(j['depositTotal']),
+      );
+
+  static AiFineOpinion aiFineOpinion(Map<String, dynamic> j) => AiFineOpinion(
+        verdict: j['verdict'] as String,
+        suggestedFee: _double(j['suggestedFee']),
+        explanation: j['explanation'] as String,
+        proposedFee: _double(j['proposedFee']),
+      );
+
+  static AiRisk aiRisk(Map<String, dynamic> j) => AiRisk(
+        level: j['level'] as String,
+        summary: j['summary'] as String,
+        factors: (j['factors'] as List).cast<String>(),
+      );
+
   static AuditEntry audit(Map<String, dynamic> j) => AuditEntry(
         id: j['id'] as String,
         at: _time(j['at'])!,

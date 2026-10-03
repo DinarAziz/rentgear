@@ -501,3 +501,84 @@ Future<String?> askReason(
     ),
   );
 }
+
+/// Catatan di bawah setiap jawaban AI.
+class AiDisclaimer extends StatelessWidget {
+  const AiDisclaimer({super.key});
+
+  @override
+  Widget build(BuildContext context) => const Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Icon(Icons.auto_awesome, size: 16, color: Colors.black45),
+      SizedBox(width: 6),
+      Expanded(
+        child: Text(
+          'Dibuat AI, bisa keliru. Ini saran, bukan keputusan.',
+          style: TextStyle(fontSize: 12, color: Colors.black54),
+        ),
+      ),
+    ],
+  );
+}
+
+/// Dialog yang memuat satu jawaban AI lalu menampilkannya lewat [builder].
+/// Galat (AI mati, bukan mode server) tampil sebagai pesan di dialog.
+Future<void> showAiDialog<T>(
+  BuildContext context, {
+  required String title,
+  required Future<T> Function() load,
+  required List<Widget> Function(BuildContext context, T data) builder,
+}) {
+  dismissKeyboard();
+  final future = load();
+  return showDialog<void>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(title),
+      content: FutureBuilder<T>(
+        future: future,
+        builder: (context, snap) {
+          if (snap.hasError) {
+            final error = snap.error;
+            return Text(
+              error is AppException
+                  ? error.message
+                  : 'Terjadi kesalahan: $error',
+              style: TextStyle(color: Colors.red.shade700),
+            );
+          }
+          if (!snap.hasData) {
+            return const Row(
+              children: [
+                SizedBox.square(
+                  dimension: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 14),
+                Expanded(child: Text('AI sedang menilai…')),
+              ],
+            );
+          }
+          return SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...builder(context, snap.data as T),
+                const SizedBox(height: 12),
+                const AiDisclaimer(),
+              ],
+            ),
+          );
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Tutup'),
+        ),
+      ],
+    ),
+  );
+}

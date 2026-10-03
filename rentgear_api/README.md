@@ -75,6 +75,18 @@ Server memeriksa ID token dari tombol "Masuk dengan Google". Yang perlu disiapka
 Tanpa `GOOGLE_CLIENT_ID` tombolnya tidak tampil, dan tanpa `GOOGLE_CLIENT_IDS` server menjawab `GOOGLE_NOT_CONFIGURED`.
 Akun Google baru menjadi penyewa. Akun admin hanya bisa masuk dengan password.
 
+## Fitur AI (Gemini)
+
+Isi `GEMINI_API_KEY` di `.env` dengan kunci dari [aistudio.google.com](https://aistudio.google.com/). Model bisa
+diganti dengan `GEMINI_MODEL` (bawaan `gemini-2.5-flash`). Tiga rute, semuanya hanya memberi saran:
+
+- `POST /api/v1/ai/recommend` `{trip, people, days}`: paket alat untuk penyewa.
+- `POST /api/v1/ai/rentals/{id}/fine-opinion`: pendapat atas denda kerusakan, admin saja.
+- `POST /api/v1/ai/customers/{id}/risk`: tingkat risiko penyewa, admin saja.
+
+Tanpa kunci, atau bila Gemini tidak menjawab, rute ini menjawab `AI_UNAVAILABLE` (503) dan rute lain tetap jalan.
+Identitas penyewa tidak dikirim ke Gemini.
+
 ## Jejak audit
 
 Tabel `audit_logs` mencatat masuk, gagal masuk, dan semua aksi admin. Admin membacanya lewat `GET /api/v1/audit`.

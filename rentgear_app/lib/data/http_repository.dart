@@ -441,4 +441,17 @@ class HttpRentGearRepository implements RentGearRepository {
 
   @override
   Future<List<AuditEntry>> auditLog(AppUser actor) async => _list(await _get('audit'), ApiCodec.audit);
+
+  @override
+  Future<AiRecommendation> aiRecommend({required String trip, required int people, required int days}) async =>
+      ApiCodec.aiRecommendation(
+          await _send('POST', 'ai/recommend', {'trip': trip, 'people': people, 'days': days}) as Map<String, dynamic>);
+
+  @override
+  Future<AiFineOpinion> aiFineOpinion(String rentalId, AppUser actor) async =>
+      ApiCodec.aiFineOpinion(await _send('POST', 'ai/rentals/$rentalId/fine-opinion') as Map<String, dynamic>);
+
+  @override
+  Future<AiRisk> aiCustomerRisk(String customerId, AppUser actor) async =>
+      ApiCodec.aiRisk(await _send('POST', 'ai/customers/$customerId/risk') as Map<String, dynamic>);
 }

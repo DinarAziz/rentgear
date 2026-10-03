@@ -59,6 +59,33 @@ class _CustomerCard extends StatelessWidget {
     );
   }
 
+  Future<void> _risk(BuildContext context) {
+    final state = context.read<AppState>();
+    return showAiDialog<AiRisk>(
+      context,
+      title: 'Risiko ${record.user.name}',
+      load: () => state.repo.aiCustomerRisk(record.user.id, state.currentUser),
+      builder: (context, risk) => [
+        Pill(
+          'Risiko ${risk.level}',
+          color: switch (risk.level) {
+            'tinggi' => Colors.red.shade700,
+            'sedang' => Colors.orange.shade800,
+            _ => Colors.green.shade800,
+          },
+        ),
+        const SizedBox(height: 10),
+        Text(risk.summary),
+        const SizedBox(height: 8),
+        for (final factor in risk.factors)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text('• $factor', style: const TextStyle(fontSize: 13)),
+          ),
+      ],
+    );
+  }
+
   Future<void> _unblock(BuildContext context) async {
     final state = context.read<AppState>();
     final ok = await confirmDialog(
@@ -140,6 +167,17 @@ class _CustomerCard extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 10),
+            if (context.read<AppState>().repo.isRemote) ...[
+              SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.auto_awesome),
+                  label: const Text('Analisis risiko AI'),
+                  onPressed: () => _risk(context),
+                ),
+              ),
+              const SizedBox(height: 4),
+            ],
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(

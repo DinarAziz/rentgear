@@ -14,6 +14,7 @@ import '../../widgets/blacklist_notice.dart';
 import '../../widgets/common.dart';
 import '../../widgets/motion.dart';
 import '../../widgets/photo_widgets.dart';
+import 'ai_recommend_screen.dart';
 import 'equipment_cards.dart';
 import 'provider_store_screen.dart';
 import 'store_map_screen.dart';
@@ -72,6 +73,21 @@ class _CatalogScreenState extends State<CatalogScreen> {
       appBar: AppBar(
         title: Text('Halo, ${state.currentUser.name.split(' ').first}'),
         actions: [
+          // Saran AI butuh server; di mode data lokal tombolnya tidak ada.
+          if (state.repo.isRemote)
+            TextButton.icon(
+              icon: const Icon(Icons.auto_awesome),
+              label: const Text('Saran AI'),
+              onPressed: () {
+                dismissKeyboard();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => const AiRecommendScreen(),
+                  ),
+                );
+              },
+            ),
           TextButton.icon(
             icon: const Icon(Icons.map_outlined),
             label: const Text('Peta'),

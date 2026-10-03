@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AdminController;
+use App\Http\Controllers\Api\V1\AiController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CatalogController;
 use App\Http\Controllers\Api\V1\FileController;
@@ -62,6 +63,13 @@ Route::prefix('v1')->group(function () {
         Route::put('providers/{id}/status', [AdminController::class, 'providerStatus']);
         Route::get('customers', [AdminController::class, 'customers']);
         Route::get('audit', [AdminController::class, 'audit']);
+
+        // Dibatasi supaya kuota Gemini tidak habis oleh satu pengguna.
+        Route::middleware('throttle:15,1')->group(function () {
+            Route::post('ai/recommend', [AiController::class, 'recommend']);
+            Route::post('ai/rentals/{id}/fine-opinion', [AiController::class, 'fineOpinion']);
+            Route::post('ai/customers/{id}/risk', [AiController::class, 'customerRisk']);
+        });
         Route::put('customers/{id}/blacklist', [AdminController::class, 'blacklist']);
         Route::delete('customers/{id}/blacklist', [AdminController::class, 'unblacklist']);
         Route::get('me/blacklist', [AdminController::class, 'myBlacklist']);

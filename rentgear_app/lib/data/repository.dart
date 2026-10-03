@@ -119,4 +119,15 @@ abstract class RentGearRepository {
 
   /// Jejak audit, terbaru lebih dulu. Hanya admin.
   Future<List<AuditEntry>> auditLog(AppUser actor);
+
+  // Saran AI. Hanya ada saat aplikasi memakai server; AI tidak mengubah data.
+
+  /// Paket alat untuk satu rencana perjalanan.
+  Future<AiRecommendation> aiRecommend({required String trip, required int people, required int days});
+
+  /// Pendapat atas denda kerusakan sebuah transaksi, untuk admin.
+  Future<AiFineOpinion> aiFineOpinion(String rentalId, AppUser actor);
+
+  /// Tingkat risiko seorang penyewa, untuk admin.
+  Future<AiRisk> aiCustomerRisk(String customerId, AppUser actor);
 }

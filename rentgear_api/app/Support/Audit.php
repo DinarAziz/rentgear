@@ -24,6 +24,10 @@ final class Audit
 
     public const BLACKLIST_REMOVED = 'blacklist_removed';
 
+    public const AI_FINE_OPINION = 'ai_fine_opinion';
+
+    public const AI_CUSTOMER_RISK = 'ai_customer_risk';
+
     /** [actor] kosong berarti Sistem, atau orang yang belum dikenali (gagal masuk). */
     public static function record(?User $actor, string $action, ?string $target = null, ?string $detail = null, string $anonymous = 'Sistem'): void
     {

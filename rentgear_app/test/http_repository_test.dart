@@ -317,6 +317,73 @@ void main() {
     expect(p.policy.acceptedTypes, {GuaranteeType.ktp, GuaranteeType.ktm});
     expect(p.policy.highValueThreshold, 750000);
   });
+
+  test('saran AI dipetakan, dan AI yang mati menjadi pesan biasa', () async {
+    tokens.write('t');
+    var api = repo((_) async => ok({
+          'summary': 'Paket untuk 4 orang.',
+          'items': [
+            {
+              'equipmentId': 'e-dome4',
+              'name': 'Tenda Dome 4 Orang',
+              'providerName': 'Arjuna Outdoor',
+              'city': 'Malang',
+              'qty': 1,
+              'reason': 'Muat 4 orang.',
+              'pricePerDay': 45000,
+              'rentCost': 135000,
+              'deposit': 100000,
+            },
+          ],
+          'tips': ['Bawa jas hujan.'],
+          'days': 3,
+          'people': 4,
+          'rentTotal': 135000,
+          'depositTotal': 100000,
+        }));
+
+    final saran = await api.aiRecommend(trip: 'Semeru', people: 4, days: 3);
+    expect(seen.last.url.path, endsWith('/ai/recommend'));
+    expect(jsonDecode(seen.last.body), {'trip': 'Semeru', 'people': 4, 'days': 3});
+    expect(saran.items.single.equipmentId, 'e-dome4');
+    expect(saran.items.single.rentCost, 135000);
+    expect(saran.rentTotal, 135000);
+    expect(saran.tips, ['Bawa jas hujan.']);
+
+    api = repo((_) async => fail('AI_UNAVAILABLE', 'AI sedang tidak bisa dihubungi. Coba lagi nanti.', 503));
+    await expectLater(
+      api.aiRecommend(trip: 'Semeru', people: 4, days: 3),
+      throwsA(isA<AppException>().having((e) => e.code, 'code', 'AI_UNAVAILABLE')),
+    );
+  });
+
+  test('pendapat denda dan risiko penyewa dipetakan untuk admin', () async {
+    tokens.write('t');
+    const admin = AppUser(
+        id: 'u-admin', name: 'Admin', email: 'admin@rentgear.id', phone: '', role: UserRole.admin, city: '');
+    var api = repo((_) async => ok({
+          'verdict': 'terlalu_tinggi',
+          'suggestedFee': 40000,
+          'explanation': 'Catatan terlalu singkat.',
+          'proposedFee': 100000,
+          'depositTotal': 150000,
+        }));
+    final pendapat = await api.aiFineOpinion('r-4', admin);
+    expect(seen.last.url.path, endsWith('/ai/rentals/r-4/fine-opinion'));
+    expect(pendapat.verdictLabel, 'Denda terlalu tinggi');
+    expect(pendapat.suggestedFee, 40000);
+
+    api = repo((_) async => ok({
+          'level': 'sedang',
+          'summary': 'Satu kali merusak alat.',
+          'factors': ['Merusak alat sekali.'],
+          'violations': 1,
+        }));
+    final risiko = await api.aiCustomerRisk('u-budi', admin);
+    expect(seen.last.url.path, endsWith('/ai/customers/u-budi/risk'));
+    expect(risiko.level, 'sedang');
+    expect(risiko.factors, ['Merusak alat sekali.']);
+  });
 }
 
 /// MockClient hanya mengenal permintaan biasa; ini menangkap multipart juga.

@@ -80,7 +80,11 @@ void main() {
     ]);
   });
 
-  test('login Google ditolak tanpa server', () {
+  test('login Google dan saran AI ditolak tanpa server', () async {
     expect(() => repo.loginWithGoogle('token'), throwsCode('UNSUPPORTED'));
+    final admin = await repo.login('admin@rentgear.id', 'password');
+    expect(() => repo.aiRecommend(trip: 'Semeru', people: 2, days: 2), throwsCode('AI_UNAVAILABLE'));
+    expect(() => repo.aiFineOpinion('r-4', admin), throwsCode('AI_UNAVAILABLE'));
+    expect(() => repo.aiCustomerRisk('u-budi', admin), throwsCode('AI_UNAVAILABLE'));
   });
 }

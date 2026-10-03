@@ -131,6 +131,10 @@ class _AuditTile extends StatelessWidget {
         Icons.gavel_outlined,
         Colors.orange.shade800,
       ),
+      AuditAction.aiFineOpinion || AuditAction.aiCustomerRisk => (
+        Icons.auto_awesome,
+        Colors.purple.shade700,
+      ),
       _ => (Icons.login, Colors.black54),
     };
     final role = _roles[e.actorRole];

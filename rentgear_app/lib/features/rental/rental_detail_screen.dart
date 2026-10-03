@@ -424,6 +424,30 @@ class _ActionBar extends StatelessWidget {
     }
 
     if (user.role == UserRole.admin && r.damageReview == DamageReview.pending) {
+      if (state.repo.isRemote) {
+        actions.add(
+          OutlinedButton.icon(
+            icon: const Icon(Icons.auto_awesome),
+            label: const Text('Minta pendapat AI'),
+            onPressed: () => showAiDialog<AiFineOpinion>(
+              context,
+              title: 'Pendapat AI atas denda',
+              load: () => state.repo.aiFineOpinion(r.id, user),
+              builder: (context, o) => [
+                Text(
+                  o.verdictLabel,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 8),
+                InfoRow('Diusulkan penyedia', rupiah(o.proposedFee)),
+                InfoRow('Saran AI', rupiah(o.suggestedFee)),
+                const SizedBox(height: 8),
+                Text(o.explanation),
+              ],
+            ),
+          ),
+        );
+      }
       actions.add(
         FilledButton.icon(
           icon: const Icon(Icons.gavel_outlined),

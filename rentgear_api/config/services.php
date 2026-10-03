@@ -43,6 +43,7 @@ return [
     // Kunci Gemini hanya ada di server. Aplikasi tidak pernah menerimanya.
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
     ],
 
 ];

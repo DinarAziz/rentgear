@@ -481,6 +481,8 @@ abstract final class AuditAction {
   static const damageFeeDecided = 'damage_fee_decided';
   static const blacklistAdded = 'blacklist_added';
   static const blacklistRemoved = 'blacklist_removed';
+  static const aiFineOpinion = 'ai_fine_opinion';
+  static const aiCustomerRisk = 'ai_customer_risk';
 
   static String label(String action) => switch (action) {
     login => 'Masuk',
@@ -491,6 +493,89 @@ abstract final class AuditAction {
     damageFeeDecided => 'Denda kerusakan diputuskan',
     blacklistAdded => 'Masuk blacklist',
     blacklistRemoved => 'Blacklist dicabut',
+    aiFineOpinion => 'Pendapat AI atas denda diminta',
+    aiCustomerRisk => 'Analisis risiko AI diminta',
     _ => action,
   };
+}
+
+/// Satu alat dalam paket yang disarankan AI. Harga dihitung server.
+class AiPick {
+  const AiPick({
+    required this.equipmentId,
+    required this.name,
+    required this.providerName,
+    required this.city,
+    required this.qty,
+    required this.reason,
+    required this.rentCost,
+    required this.deposit,
+  });
+
+  final String equipmentId;
+  final String name;
+  final String providerName;
+  final String city;
+  final int qty;
+  final String reason;
+  final double rentCost;
+  final double deposit;
+}
+
+/// Paket alat yang disarankan AI untuk satu rencana perjalanan.
+class AiRecommendation {
+  const AiRecommendation({
+    required this.summary,
+    required this.items,
+    required this.tips,
+    required this.days,
+    required this.people,
+    required this.rentTotal,
+    required this.depositTotal,
+  });
+
+  final String summary;
+  final List<AiPick> items;
+  final List<String> tips;
+  final int days;
+  final int people;
+  final double rentTotal;
+  final double depositTotal;
+}
+
+/// Pendapat AI atas denda kerusakan. Hanya saran; admin yang memutuskan.
+class AiFineOpinion {
+  const AiFineOpinion({
+    required this.verdict,
+    required this.suggestedFee,
+    required this.explanation,
+    required this.proposedFee,
+  });
+
+  /// `wajar`, `terlalu_tinggi`, `terlalu_rendah`, atau `perlu_bukti`.
+  final String verdict;
+  final double suggestedFee;
+  final String explanation;
+  final double proposedFee;
+
+  String get verdictLabel => switch (verdict) {
+    'wajar' => 'Denda wajar',
+    'terlalu_tinggi' => 'Denda terlalu tinggi',
+    'terlalu_rendah' => 'Denda terlalu rendah',
+    _ => 'Perlu bukti tambahan',
+  };
+}
+
+/// Tingkat risiko seorang penyewa menurut AI. Hanya saran untuk admin.
+class AiRisk {
+  const AiRisk({
+    required this.level,
+    required this.summary,
+    required this.factors,
+  });
+
+  /// `rendah`, `sedang`, atau `tinggi`.
+  final String level;
+  final String summary;
+  final List<String> factors;
 }

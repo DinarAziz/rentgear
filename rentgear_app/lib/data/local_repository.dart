@@ -970,4 +970,16 @@ class LocalRentGearRepository implements RentGearRepository {
         _requireAdmin(actor);
         return _audit.reversed.toList();
       });
+
+  static const _noAi = AppException('AI_UNAVAILABLE', 'Fitur AI hanya tersedia saat aplikasi terhubung ke server.');
+
+  @override
+  Future<AiRecommendation> aiRecommend({required String trip, required int people, required int days}) =>
+      throw _noAi;
+
+  @override
+  Future<AiFineOpinion> aiFineOpinion(String rentalId, AppUser actor) => throw _noAi;
+
+  @override
+  Future<AiRisk> aiCustomerRisk(String customerId, AppUser actor) => throw _noAi;
 }

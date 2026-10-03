@@ -11,7 +11,7 @@ diambil, supaya tiap tahap bisa dikerjakan terpisah.
 | 2 | Katalog per penyedia: halaman toko, rating, komentar, follow, lokasi di peta | Selesai, lihat bagian 2 |
 | 3 | Server Laravel + MySQL, lalu Flutter bisa memilih data lokal atau server | Selesai, lihat bagian 3 |
 | 4 | Daftar dan login dengan akun Google, dan jejak audit admin | Kode selesai; login Google menunggu client ID, lihat bagian 4 |
-| 5 | Fitur AI dengan Gemini | Belum, butuh tahap 3 dan API key |
+| 5 | Fitur AI dengan Gemini | Tiga saran AI selesai, pemeriksaan foto belum, lihat bagian 5 |
 | 6 | Payment gateway dan versi iOS | Menyusul |
 
 ## 1. Denda dan blacklist (selesai)
@@ -116,15 +116,33 @@ Belum diuji dengan akun Google sungguhan, karena client ID belum dibuat. Cara me
 - Bila kunci pernah terkirim lewat chat, email, atau tangkapan layar, buat kunci baru di aistudio.google.com dan
   hapus yang lama.
 
-## 5. Fitur AI
+## 5. Fitur AI (Gemini)
 
-Keputusan: Gemini. API key dibuat pemilik proyek di aistudio.google.com dan disimpan di `.env` server, tidak pernah
-di dalam APK. Kuncinya sudah terpasang di server pada 3 Oktober 2026 dan diterima Google; fiturnya belum dibuat.
-Cakupan:
+Dibuat 3 Oktober 2026. Modelnya `gemini-2.5-flash`, dipanggil dari server (`app/Services/GeminiClient.php` dan
+`AiAdvisor.php`). Aplikasi tidak pernah memegang kunci API.
 
-- Rekomendasi paket alat dari kebutuhan perjalanan (ALG-1 di `02-ALGORITMA.md`).
-- Pemeriksaan kondisi alat dari foto (ALG-3), yang juga memberi tanda pada denda kerusakan yang janggal.
-- Tanda risiko penyewa untuk membantu keputusan blacklist.
+Yang sudah ada:
 
-Prinsip dari `01-KONSEP-DAN-ANALISIS.md` tetap berlaku: AI memberi saran, keputusan yang menyangkut uang tetap di
-tangan manusia, dan aplikasi tetap jalan bila AI mati.
+- **Saran paket alat** untuk penyewa (tombol "Saran AI" di halaman awal). Penyewa menulis rencana perjalanan, jumlah
+  orang, dan lama sewa. AI memilih paling banyak 6 alat dari katalog toko terverifikasi dan memberi alasan. Server
+  memeriksa jawabannya: alat yang tidak ada di katalog dibuang, jumlah dibatasi stok, dan biaya sewa serta deposit
+  dihitung server. Penyewa tetap memesan tiap alat sendiri.
+- **Pendapat atas denda kerusakan** untuk admin (tombol "Minta pendapat AI" di transaksi yang dendanya ditinjau). AI
+  menilai wajar, terlalu tinggi, terlalu rendah, atau perlu bukti, dan memberi nominal saran yang dibatasi sebesar
+  deposit. Transaksi tidak berubah; admin tetap yang menetapkan.
+- **Analisis risiko penyewa** untuk admin (tombol "Analisis risiko AI" di tab Penyewa): rendah, sedang, atau tinggi,
+  dengan paling banyak tiga alasan dari riwayat sewa.
+
+Aturan yang dipegang:
+
+- AI memberi saran, keputusan yang menyangkut uang tetap di tangan manusia (`01-KONSEP-DAN-ANALISIS.md`).
+- Nama, email, nomor dokumen, dan foto penyewa tidak dikirim ke Gemini. Yang dikirim hanya angka riwayat, data alat,
+  dan catatan denda.
+- Bila AI mati, kuncinya kosong, atau jawabannya rusak, server menjawab `AI_UNAVAILABLE` dan aplikasi menampilkan
+  pesan biasa. Semua alur sewa tetap jalan.
+- Tombol AI hanya tampil saat aplikasi memakai server. Rute AI dibatasi 15 permintaan per menit.
+- Permintaan admin ke AI ikut tercatat di jejak audit.
+
+Belum dibuat: pemeriksaan kondisi alat dari foto sebelum dan sesudah sewa (ALG-3). Itu butuh foto kondisi saat
+serah terima dan saat kembali, yang belum ada di aplikasi. Skor dan penyusunan paket yang sepenuhnya deterministik
+seperti di `02-ALGORITMA.md` (ALG-1) juga belum; saat ini pemilihan alat dilakukan AI lalu diperiksa server.

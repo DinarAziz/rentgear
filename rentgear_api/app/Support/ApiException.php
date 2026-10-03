@@ -22,6 +22,7 @@ class ApiException extends RuntimeException
         'ALREADY_REVIEWED' => 409,
         'DAMAGE_REVIEW_PENDING' => 409,
         'GOOGLE_NOT_CONFIGURED' => 503,
+        'AI_UNAVAILABLE' => 503,
     ];
 
     public function __construct(public readonly string $errorCode, string $message)

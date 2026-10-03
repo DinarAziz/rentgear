@@ -613,3 +613,45 @@ The Redmi has the local-mode APK; `../webapp/` is rebuilt.
 
 Next: get the Google web client ID from the user, put it in `GOOGLE_CLIENT_IDS` and in the build, and test the button
 on the Redmi and on the web. Then stage 5, the Gemini features.
+
+## Session (2026-10-03, Gemini advice features, Google login attempt)
+
+Stage 5 of `../docs/08-RENCANA-KERJA.md` (section 5 there has the reader-facing description).
+
+Gemini (done, model `gemini-2.5-flash`, thinking off, about 2 seconds per answer):
+
+- Server: `app/Services/GeminiClient.php` (key in the `x-goog-api-key` header, JSON answer with a response schema,
+  every failure becomes `AI_UNAVAILABLE`), `app/Services/AiAdvisor.php`, `AiController`. Routes, throttled 15 per
+  minute: `POST ai/recommend`, `POST ai/rentals/{id}/fine-opinion` (admin), `POST ai/customers/{id}/risk` (admin).
+  The server checks every answer: unknown gear is dropped, quantity is capped by stock, costs are computed by the
+  server, the suggested fee is clamped to the deposit. No customer name or email is put in a prompt. Admin requests
+  are written to the audit trail (`ai_fine_opinion`, `ai_customer_risk`).
+- App: `aiRecommend`, `aiFineOpinion`, `aiCustomerRisk` on the repository (the local one answers `AI_UNAVAILABLE`).
+  `lib/features/customer/ai_recommend_screen.dart` behind "Saran AI" on the customer home; "Minta pendapat AI" on a
+  rental whose fine is under review; "Analisis risiko AI" on the admin customer card. `showAiDialog` and
+  `AiDisclaimer` are in `lib/widgets/common.dart`. The buttons show only when `repo.isRemote`.
+- Tests: 4 server tests with a faked Gemini, 3 app tests. 82 app and 100 server tests pass. The deck shows 182.
+- Checked with the real Gemini through the web build in WebKit at 390x844: a recommendation for "Semeru lewat Ranu
+  Pane, musim hujan" (4 people, 3 days: 6 items, Rp960.000 rent, Rp700.000 deposit), the risk dialog for Budi, and the
+  fine opinion on INV-DEMO-0004. Not checked on the Redmi.
+- Not built: the photo comparison of ALG-3 (the app has no condition photos at handover and return), and the fully
+  deterministic scoring and bundling of ALG-1. There is no guideline yet for how large a fine should be per damage
+  level, so the fine opinion judges only from the note and the deposit.
+
+Google login (still failing, cause is in Google Cloud Console):
+
+- The user created a web client and an Android client. The web client ID is in `../rentgear_api/.env`
+  (`GOOGLE_CLIENT_IDS`) and is passed to the build as `GOOGLE_CLIENT_ID`; it is not in the repository.
+- Redmi: the button shows, the Google account chooser and the consent screen open (the user accepted consent
+  themselves), then Google answers `[28444] Developer console is not set up correctly`. The APK's package name and
+  SHA-1 were read from the installed APK and match what the user was given, so the Android client in the console
+  does not match or is not active yet. Three retries over about 15 minutes gave the same result.
+- Web: Google's button renders, but the console logs `The given origin is not allowed for the given client ID`
+  for `http://localhost:8081`. The origin still has to be added to the web client.
+- `lib/core/google_auth.dart` now shows Google's own error text in the app.
+- Next: get screenshots of the two client pages from the user, or wait for Google to activate them, then retry.
+
+State at the end: the Redmi has the server-mode APK (with the Google client ID), the Laravel server runs on port 8000
+with `adb reverse`, and a server-mode web build is served from the scratchpad on port 8081 for the Google test.
+`../webapp/` holds the local-mode build. The server database has test data from this day (INV-DEMO-0004 returned with
+a fine under review); `php artisan migrate:fresh --seed` resets it.

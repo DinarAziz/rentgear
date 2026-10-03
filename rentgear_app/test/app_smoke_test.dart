@@ -299,4 +299,12 @@ void main() {
     await pumpApp(tester);
     expect(find.text('Masuk dengan Google'), findsNothing);
   });
+
+  testWidgets('AI buttons are hidden when the app runs on local data', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Penyewa · Budi'));
+    await tester.pumpAndSettle();
+    expect(find.text('Peta'), findsOneWidget);
+    expect(find.text('Saran AI'), findsNothing);
+  });
 }
