@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/format.dart';
+import '../../core/location.dart';
+import '../../core/maps.dart';
 import '../../core/responsive.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
@@ -13,6 +16,7 @@ import '../../widgets/motion.dart';
 import '../../widgets/photo_widgets.dart';
 import 'equipment_cards.dart';
 import 'provider_store_screen.dart';
+import 'store_map_screen.dart';
 
 /// Halaman awal penyewa. Tanpa kata kunci: daftar toko, seperti di aplikasi
 /// belanja. Saat mengetik atau memilih kategori: alat dari semua toko.
@@ -32,6 +36,19 @@ class _CatalogScreenState extends State<CatalogScreen> {
   static const double _maxWidth = 1280;
 
   bool get _searching => _query.isNotEmpty || _categoryId != null;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pakai lokasi hanya bila izinnya sudah pernah diberikan. Dialog izin
+    // baru muncul saat pengguna menekan tombol lokasi.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = context.read<AppState>();
+      if (state.locationStatus == LocationStatus.unknown) {
+        state.locate(ask: false);
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -54,6 +71,20 @@ class _CatalogScreenState extends State<CatalogScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Halo, ${state.currentUser.name.split(' ').first}'),
+        actions: [
+          TextButton.icon(
+            icon: const Icon(Icons.map_outlined),
+            label: const Text('Peta'),
+            onPressed: () {
+              dismissKeyboard();
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(builder: (_) => const StoreMapScreen()),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: LayoutBuilder(
         builder: (context, c) {
@@ -105,6 +136,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
                   ),
                 ),
               ),
+              if (!_searching)
+                Padding(
+                  padding: EdgeInsets.fromLTRB(gutter.left, 4, gutter.right, 0),
+                  child: const _LocationBar(),
+                ),
               Expanded(
                 child: _searching
                     ? _results(state, gutter, c.maxWidth)
@@ -161,26 +197,35 @@ class _StoreList extends StatelessWidget {
   Future<_Stores> _load(AppState state) async {
     final providers = await state.repo.providers();
     final followed = await state.repo.followedProviders(state.currentUser.id);
-    // Toko yang diikuti tampil lebih dulu, lalu urut rating.
-    int byFollowThenRating(ProviderProfile a, ProviderProfile b) {
-      final aFollowed = followed.contains(a.id);
-      if (aFollowed != followed.contains(b.id)) return aFollowed ? -1 : 1;
-      return b.rating.compareTo(a.rating);
-    }
-
-    final stores =
-        providers.where((p) => p.status == ProviderStatus.verified).toList()
-          ..sort(byFollowThenRating);
+    final stores = providers
+        .where((p) => p.status == ProviderStatus.verified)
+        .toList();
     return (stores, await state.repo.searchEquipment(), followed);
+  }
+
+  /// Toko yang diikuti tampil lebih dulu. Sisanya urut dari yang terdekat
+  /// bila lokasi pengguna diketahui, selain itu urut rating.
+  static List<ProviderProfile> _ordered(
+    List<ProviderProfile> stores,
+    Set<String> followed,
+    LatLng? user,
+  ) {
+    final sorted = sortStores(stores, user);
+    return [
+      ...sorted.where((s) => followed.contains(s.id)),
+      ...sorted.where((s) => !followed.contains(s.id)),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
     final state = context.read<AppState>();
+    final user = context.select<AppState, LatLng?>((s) => s.location);
     return AsyncView<_Stores>(
       load: () => _load(state),
       builder: (context, data) {
-        final (stores, equipment, followed) = data;
+        final (verified, equipment, followed) = data;
+        final stores = _ordered(verified, followed, user);
         if (stores.isEmpty) {
           return const EmptyState(
             icon: Icons.storefront_outlined,
@@ -201,6 +246,7 @@ class _StoreList extends StatelessWidget {
                     .where((e) => e.providerId == store.id)
                     .toList(),
                 followed: followed.contains(store.id),
+                distance: user == null ? null : distanceKm(user, store.point),
               ),
             );
           },
@@ -215,11 +261,15 @@ class _StoreCard extends StatelessWidget {
     required this.store,
     required this.equipment,
     required this.followed,
+    required this.distance,
   });
 
   final ProviderProfile store;
   final List<Equipment> equipment;
   final bool followed;
+
+  /// Jarak dari pengguna dalam km, `null` bila lokasinya belum diketahui.
+  final double? distance;
 
   @override
   Widget build(BuildContext context) {
@@ -254,7 +304,12 @@ class _StoreCard extends StatelessWidget {
                             fontSize: 16,
                           ),
                         ),
-                        Text(p.city, style: muted),
+                        Text(
+                          distance == null
+                              ? p.city
+                              : '${p.city} · ${jarak(distance!)}',
+                          style: muted,
+                        ),
                       ],
                     ),
                   ),
@@ -296,6 +351,60 @@ class _StoreCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Baris status lokasi di atas daftar toko, dengan tombol untuk
+/// mengaktifkan lokasi.
+class _LocationBar extends StatelessWidget {
+  const _LocationBar();
+
+  @override
+  Widget build(BuildContext context) {
+    final status = context.select<AppState, LocationStatus>(
+      (s) => s.locationStatus,
+    );
+    final (text, action) = switch (status) {
+      LocationStatus.found => ('Toko diurutkan dari yang terdekat', null),
+      LocationStatus.searching => ('Mencari lokasi Anda…', null),
+      LocationStatus.unknown => (
+        'Aktifkan lokasi untuk melihat toko terdekat',
+        'Aktifkan',
+      ),
+      LocationStatus.denied => ('Izin lokasi ditolak', 'Coba lagi'),
+      LocationStatus.unavailable => (
+        'Lokasi tidak didapat. Nyalakan lokasi perangkat.',
+        'Coba lagi',
+      ),
+    };
+    final found = status == LocationStatus.found;
+    return Row(
+      children: [
+        Icon(
+          found ? Icons.near_me : Icons.location_off_outlined,
+          size: 18,
+          color: found ? Theme.of(context).colorScheme.primary : Colors.black54,
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 13, color: Colors.black54),
+          ),
+        ),
+        if (action != null)
+          TextButton(
+            style: TextButton.styleFrom(
+              visualDensity: VisualDensity.compact,
+              minimumSize: const Size(0, 36),
+            ),
+            onPressed: () => context.read<AppState>().locate(ask: true),
+            child: Text(action),
+          )
+        else
+          const SizedBox(height: 36),
+      ],
     );
   }
 }

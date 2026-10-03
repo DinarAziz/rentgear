@@ -104,7 +104,12 @@ class LocalRentGearRepository implements RentGearRepository {
       'follows': {for (final f in _follows.entries) f.key: f.value.toList()},
       'providers': {
         for (final p in _providers)
-          p.id: {'status': p.status.name, 'policy': codec.policy(p.policy)},
+          p.id: {
+            'status': p.status.name,
+            'policy': codec.policy(p.policy),
+            'latitude': p.latitude,
+            'longitude': p.longitude,
+          },
       },
       'equipment': [for (final e in _equipment) codec.equipment(e)],
       'rentals': [for (final r in _rentals) codec.rental(r)],
@@ -129,7 +134,10 @@ class LocalRentGearRepository implements RentGearRepository {
       if (saved == null) continue;
       p
         ..status = ProviderStatus.values.byName(saved['status'] as String)
-        ..policy = codec.policyFrom(saved['policy'] as Map<String, dynamic>);
+        ..policy = codec.policyFrom(saved['policy'] as Map<String, dynamic>)
+        // Data lama belum menyimpan lokasi; pakai titik bawaan toko.
+        ..latitude = (saved['latitude'] as num?)?.toDouble() ?? p.latitude
+        ..longitude = (saved['longitude'] as num?)?.toDouble() ?? p.longitude;
     }
     _equipment = [
       for (final e in data['equipment'] as List) codec.equipmentFrom(e as Map<String, dynamic>),
@@ -739,6 +747,23 @@ class LocalRentGearRepository implements RentGearRepository {
               'Jenis jaminan yang diterima lebih sedikit dari jumlah jaminan yang diminta.');
         }
         p.policy = policy;
+        return p;
+      });
+
+  @override
+  Future<ProviderProfile> updateProviderLocation(String providerId, AppUser actor,
+          {required double latitude, required double longitude}) =>
+      _mutate(() {
+        final p = _providerById(providerId);
+        if (actor.providerId != p.id) {
+          throw const AppException('FORBIDDEN', 'Bukan toko Anda.');
+        }
+        if (latitude.abs() > 90 || longitude.abs() > 180) {
+          throw const AppException('VALIDATION', 'Titik lokasi tidak valid.');
+        }
+        p
+          ..latitude = latitude
+          ..longitude = longitude;
         return p;
       });
 

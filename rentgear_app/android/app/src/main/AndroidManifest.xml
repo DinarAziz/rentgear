@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Mode server (API_URL) butuh jaringan. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Lokasi dipakai untuk mengurutkan toko dari yang terdekat. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <application
         android:label="RentGear"
         android:name="${applicationName}"

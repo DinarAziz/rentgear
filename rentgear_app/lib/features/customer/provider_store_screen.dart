@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -8,6 +9,7 @@ import '../../core/responsive.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
 import '../../widgets/common.dart';
+import '../../widgets/map_widgets.dart';
 import 'equipment_cards.dart';
 
 typedef _Store = (ProviderProfile, List<Equipment>, List<Review>, bool);
@@ -114,6 +116,7 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.read<AppState>();
+    final user = context.select<AppState, LatLng?>((s) => s.location);
     final p = store;
     final isCustomer = state.currentUser.role == UserRole.customer;
 
@@ -152,6 +155,15 @@ class _Header extends StatelessWidget {
                 Expanded(child: Text(p.address, style: _muted)),
               ],
             ),
+            const SizedBox(height: 12),
+            MiniMap(point: p.point, user: user, onTap: () => _openMap(context)),
+            if (user != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                '${jarak(distanceKm(user, p.point))} dari lokasi Anda',
+                style: _mutedSmall,
+              ),
+            ],
             const SizedBox(height: 14),
             Row(
               children: [

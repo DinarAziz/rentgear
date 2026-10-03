@@ -68,6 +68,8 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Kamera dipakai untuk memotret dokumen jaminan dan kondisi alat.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Lokasi dipakai untuk mengurutkan toko dari yang terdekat dan menampilkan posisi Anda di peta.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Galeri dipakai untuk memilih foto dokumen jaminan dan bukti bayar.</string>
 </dict>

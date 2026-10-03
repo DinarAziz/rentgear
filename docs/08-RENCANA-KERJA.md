@@ -45,8 +45,21 @@ tanda risiko untuk blacklist. Sampai saat itu, "janggal" ditentukan aturan tetap
   perkiraan di kota masing-masing, karena tokonya fiktif.
 - Enam ulasan awal di data demo adalah contoh buatan, supaya halaman toko tidak kosong.
 
-Belum dibuat: peta yang tertanam di dalam aplikasi (butuh Google Maps API key dan akun penagihan Google Cloud), urutan
-toko berdasarkan jarak dari penyewa, dan balasan penyedia atas ulasan.
+Peta di dalam aplikasi (ditambahkan 3 Oktober 2026), memakai OpenStreetMap lewat paket `flutter_map`, jadi tidak
+butuh API key atau akun penagihan:
+
+- Tombol "Peta" di halaman awal penyewa membuka peta semua toko terverifikasi. Kartu toko di bawah peta bisa digeser,
+  dan peta ikut pindah ke toko yang dipilih. Di layar lebar daftar toko ada di samping peta.
+- Bila penyewa mengizinkan lokasi, daftar toko diurutkan dari yang terdekat (toko yang diikuti tetap di atas) dan tiap
+  kartu menampilkan jaraknya. Jarak dihitung garis lurus dengan rumus haversine di `rentgear_app/lib/core/maps.dart`.
+  Lokasi penyewa hanya dipakai di perangkat, tidak disimpan dan tidak dikirim ke server.
+- Halaman toko menampilkan peta kecil lokasi toko. Tombol "Buka di Google Maps" tetap ada untuk petunjuk arah.
+- Penyedia mengatur titik tokonya di Profil, "Lokasi toko di peta", dengan menggeser peta. Di server: `PUT
+  /api/v1/provider/location`.
+
+Belum dibuat: rute dan perkiraan waktu tempuh di dalam aplikasi, pencarian alamat di peta, dan balasan penyedia atas
+ulasan. Ubin peta diambil dari server publik OpenStreetMap, yang cukup untuk demo; untuk pemakaian ramai perlu
+penyedia ubin sendiri.
 
 ## 3. Server Laravel (selesai)
 

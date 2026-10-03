@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:latlong2/latlong.dart';
 
+import '../core/location.dart';
 import '../data/local_repository.dart';
 import '../data/repository.dart';
 import '../domain/models.dart';
@@ -10,9 +12,12 @@ import '../domain/models.dart';
 /// Setiap aksi yang mengubah data lewat [run], lalu [revision] naik
 /// sehingga semua [AsyncView] memuat ulang datanya.
 class AppState extends ChangeNotifier {
-  AppState(this.repo);
+  AppState(this.repo, {this.findLocation = deviceLocation});
 
   final RentGearRepository repo;
+  final LocationFinder findLocation;
+  LocationStatus _locationStatus = LocationStatus.unknown;
+  LatLng? _location;
   AppUser? _user;
   int _revision = 0;
   Timer? _poll;
@@ -24,6 +29,23 @@ class AppState extends ChangeNotifier {
   AppUser? get user => _user;
   AppUser get currentUser => _user!;
   int get revision => _revision;
+
+  /// Lokasi pengguna untuk mengurutkan toko dari yang terdekat. Tidak
+  /// disimpan dan tidak dikirim ke server.
+  LatLng? get location => _location;
+  LocationStatus get locationStatus => _locationStatus;
+
+  /// [ask] true bila pengguna menekan tombol lokasi, sehingga dialog izin
+  /// boleh muncul. Lokasi lama dipertahankan bila pencarian baru gagal.
+  Future<void> locate({required bool ask}) async {
+    if (_locationStatus == LocationStatus.searching) return;
+    _locationStatus = LocationStatus.searching;
+    notifyListeners();
+    final result = await findLocation(ask: ask);
+    _location = result.point ?? _location;
+    _locationStatus = _location != null ? LocationStatus.found : result.status;
+    notifyListeners();
+  }
 
   /// Dipanggil sekali saat aplikasi dibuka: pulihkan sesi + jalankan job.
   Future<void> bootstrap() async {

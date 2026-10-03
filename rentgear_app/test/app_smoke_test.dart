@@ -1,18 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:rentgear/app.dart';
+import 'package:rentgear/core/location.dart';
+import 'package:rentgear/core/maps.dart';
 import 'package:rentgear/data/local_repository.dart';
 import 'package:rentgear/state/app_state.dart';
 
-Future<void> pumpApp(WidgetTester tester) async {
+Future<LocationResult> noLocation({required bool ask}) async =>
+    (status: LocationStatus.unknown, point: null);
+
+/// Pengguna berada di Lumajang, dekat Semeru Camp Rent.
+Future<LocationResult> inLumajang({required bool ask}) async =>
+    (status: LocationStatus.found, point: const LatLng(-8.13, 113.22));
+
+Future<void> pumpApp(WidgetTester tester, {LocationFinder findLocation = noLocation}) async {
   await initializeDateFormatting('id_ID');
   tester.view.physicalSize = const Size(1170, 2532);
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
+  // Peta tidak mengambil ubin dari jaringan selama tes.
+  debugTileProvider = BlankTileProvider();
   await tester.pumpWidget(ChangeNotifierProvider(
-    create: (_) => AppState(LocalRentGearRepository.open(latency: Duration.zero)),
+    create: (_) =>
+        AppState(LocalRentGearRepository.open(latency: Duration.zero), findLocation: findLocation),
     child: const RentGearApp(),
   ));
 }
@@ -189,5 +202,40 @@ void main() {
     await tester.tap(find.text('Sewa Sekarang'));
     await tester.pumpAndSettle();
     expect(find.text('Jaminan 1'), findsNothing);
+  });
+
+  testWidgets('stores are sorted by distance and shown on the map', (tester) async {
+    await pumpApp(tester, findLocation: inLumajang);
+    await tester.tap(find.text('Penyewa · Budi'));
+    await tester.pumpAndSettle();
+
+    // Semeru Camp Rent (Lumajang) lebih dekat daripada Arjuna Outdoor (Malang).
+    expect(find.text('Toko diurutkan dari yang terdekat'), findsOneWidget);
+    expect(tester.getTopLeft(find.text('Semeru Camp Rent')).dy,
+        lessThan(tester.getTopLeft(find.text('Arjuna Outdoor')).dy));
+    expect(find.textContaining('Lumajang · '), findsOneWidget);
+
+    await tester.tap(find.text('Peta'));
+    await tester.pumpAndSettle();
+    expect(find.text('Peta Toko'), findsOneWidget);
+    expect(find.text('Lihat toko'), findsWidgets);
+    await tester.tap(find.text('Lihat toko').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Buka di Google Maps'), findsOneWidget);
+    expect(find.textContaining('dari lokasi Anda'), findsOneWidget);
+  });
+
+  testWidgets('provider opens the store location screen', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Penyedia · Arjuna'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Profil'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lokasi toko di peta'));
+    await tester.pumpAndSettle();
+    expect(find.text('Lokasi Toko'), findsOneWidget);
+    expect(find.text('-7,93960, 112,62890'), findsOneWidget);
+    // Belum digeser, jadi belum ada yang disimpan.
+    expect(tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Simpan lokasi')).onPressed, isNull);
   });
 }

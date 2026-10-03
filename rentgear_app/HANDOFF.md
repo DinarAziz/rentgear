@@ -520,3 +520,37 @@ Not done:
 - The servers started for the test are stopped. MySQL still runs as a brew service.
 
 Next: Google login (stage 4) and the Gemini features (stage 5), both waiting for credentials from the user.
+
+## Session (2026-10-03, in-app map)
+
+The user asked for a map "like GoFood / GrabFood". It uses OpenStreetMap through `flutter_map`, so there is no API
+key and no billing account. Details for readers are in `../docs/08-RENCANA-KERJA.md`, section 2.
+
+- `lib/core/maps.dart`: `distanceKm` (haversine), `jarak` ("850 m", "2,4 km"), `koordinat`, `osmTileLayer`,
+  `osmAttribution`, and `debugTileProvider` / `BlankTileProvider` so tests load no tiles.
+- `lib/core/location.dart`: `deviceLocation` (geolocator) and `LocationStatus`. `AppState.locate(ask:)` keeps the
+  user's point in memory only. The catalog tries once without a permission dialog; the dialog appears only when the
+  user taps "Aktifkan" or the location button.
+- `lib/features/customer/store_map_screen.dart`: "Peta" button on the customer home. Pins for verified stores, a
+  swipeable store card on a phone, a side list from 900 px wide. `sortStores` orders by distance when the location is
+  known, otherwise by rating. Followed stores still come first on the catalog.
+- Store page: `MiniMap` above the stats, plus the distance when known. "Buka di Google Maps" is unchanged.
+- `lib/features/provider/store_location_screen.dart`: Profil > "Lokasi toko di peta". The provider drags the map
+  under a fixed pin and saves. New repository operation `updateProviderLocation`; local data keeps the point per
+  provider (old saved data falls back to the seed point); server route `PUT /api/v1/provider/location`.
+- New packages: `flutter_map`, `latlong2`, `geolocator`. Android has the two location permissions, iOS has
+  `NSLocationWhenInUseUsageDescription`.
+- Tests: `test/maps_test.dart` (5) and two widget tests. 70 app tests and 87 server tests pass. The deck shows 157.
+
+Checked on the Redmi (local mode): the store map with both pins, swiping to the second card moves the map, "Lihat toko"
+opens the store with its mini map, and Sari moves Arjuna Outdoor to -7,94272, 112,63100 ("Lokasi toko disimpan.").
+Checked in WebKit at 1440x900 (side list plus map) and 390x844 (catalog, store page).
+
+Not checked: sorting by distance on a real device. Location is switched off on the Redmi (`location_mode` 0), so the
+app shows "Lokasi tidak didapat". It is covered by the tests with a fixed point in Lumajang. Server mode was not
+rerun through the UI for the new route; it has a feature test.
+
+Not built: routes and travel time inside the app, address search on the map. Tiles come from the public
+OpenStreetMap server, which is fine for a demo and not for heavy use.
+
+On the Redmi, Arjuna Outdoor now sits at the moved point until "Reset data demo".

@@ -67,9 +67,9 @@ class ProviderProfile {
   ProviderStatus status;
   GuaranteePolicy policy;
 
-  /// Lokasi toko, untuk dibuka di Google Maps.
-  final double latitude;
-  final double longitude;
+  /// Lokasi toko di peta. Penyedia bisa memindahkannya.
+  double latitude;
+  double longitude;
 
   /// Rata-rata bintang, jumlah ulasan, dan jumlah pengikut. Dihitung ulang
   /// oleh repository setiap kali ulasan atau pengikut berubah.

@@ -82,4 +82,20 @@ class ProviderController extends Controller
 
         return ApiResponse::ok(Present::providerById($provider->id));
     }
+
+    /** Penyedia memindahkan titik tokonya di peta. */
+    public function location(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $provider = $user->isProvider() ? Provider::find($user->provider_id) : null;
+        if ($provider === null) {
+            throw new ApiException('FORBIDDEN', 'Bukan toko Anda.');
+        }
+        $data = $request->validate([
+            'latitude' => 'required|numeric|between:-90,90', 'longitude' => 'required|numeric|between:-180,180',
+        ]);
+        $provider->update($data);
+
+        return ApiResponse::ok(Present::providerById($provider->id));
+    }
 }

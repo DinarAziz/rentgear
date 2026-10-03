@@ -391,6 +391,11 @@ class HttpRentGearRepository implements RentGearRepository {
       _provider(await _send('PUT', 'provider/guarantee-policy', ApiCodec.policyToJson(policy)));
 
   @override
+  Future<ProviderProfile> updateProviderLocation(String providerId, AppUser actor,
+          {required double latitude, required double longitude}) async =>
+      _provider(await _send('PUT', 'provider/location', {'latitude': latitude, 'longitude': longitude}));
+
+  @override
   Future<ProviderProfile> setProviderStatus(
           String providerId, ProviderStatus status, AppUser actor) async =>
       _provider(await _send('PUT', 'providers/$providerId/status', {'status': status.name}));

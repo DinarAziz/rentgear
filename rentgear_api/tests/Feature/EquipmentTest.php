@@ -111,4 +111,16 @@ class EquipmentTest extends ApiTestCase
             'acceptedTypes' => ['ktp'], 'baseRequired' => 1, 'highValueRequired' => 1, 'highValueThreshold' => 1,
         ]), 'FORBIDDEN', 403);
     }
+
+    public function test_provider_moves_its_store_location(): void
+    {
+        $this->as('sari')->putJson('/api/v1/provider/location', ['latitude' => -7.95, 'longitude' => 112.61])
+            ->assertOk()->assertJsonPath('data.latitude', -7.95)->assertJsonPath('data.longitude', 112.61);
+        $this->getJson('/api/v1/providers/p-arjuna')->assertJsonPath('data.latitude', -7.95);
+
+        $this->assertApiError($this->putJson('/api/v1/provider/location', ['latitude' => 120, 'longitude' => 112.61]),
+            'VALIDATION', 422);
+        $this->assertApiError($this->as('budi')->putJson('/api/v1/provider/location', ['latitude' => -7.95, 'longitude' => 112.61]),
+            'FORBIDDEN', 403);
+    }
 }

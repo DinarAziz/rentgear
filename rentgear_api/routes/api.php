@@ -26,6 +26,7 @@ Route::prefix('v1')->group(function () {
         // POST, bukan PUT: PHP hanya membaca berkas multipart pada POST.
         Route::post('equipment/{id}', [ProviderController::class, 'updateEquipment']);
         Route::put('provider/guarantee-policy', [ProviderController::class, 'guaranteePolicy']);
+        Route::put('provider/location', [ProviderController::class, 'location']);
 
         Route::get('providers', [StoreController::class, 'index']);
         Route::get('providers/{id}', [StoreController::class, 'show']);

@@ -81,6 +81,11 @@ abstract class RentGearRepository {
 
   Future<ProviderProfile> updateGuaranteePolicy(
       String providerId, GuaranteePolicy policy, AppUser actor);
+
+  /// Penyedia memindahkan titik tokonya di peta.
+  Future<ProviderProfile> updateProviderLocation(
+      String providerId, AppUser actor, {required double latitude, required double longitude});
+
   Future<ProviderProfile> setProviderStatus(
       String providerId, ProviderStatus status, AppUser actor);
 
