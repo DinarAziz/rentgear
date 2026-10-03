@@ -1,7 +1,7 @@
 # Presentasi sidang RentGear
 
 Deck sidang dalam bentuk halaman web. Buka `index.html` di Chrome dengan klik dua kali. Tidak perlu internet dan
-tidak perlu server, karena font, GSAP, screenshot, dan video promo sudah ada di folder ini.
+tidak perlu server, karena font, GSAP, three.js, screenshot, dan video promo sudah ada di folder ini.
 
 ## Kontrol
 
@@ -17,11 +17,29 @@ Clicker presentasi mengirim Page Down dan Page Up, jadi bisa langsung dipakai. A
 
 ## Isi
 
-21 slide dengan urutan sidang: judul, filosofi logo, latar belakang (data pendaki, kasus nyata di toko sewa, ringkasan
-masalah), rumusan masalah, tujuan dan manfaat, inovasi, batasan masalah, metode, perancangan (alur bisnis, peran, alur
+21 slide dengan urutan sidang: judul, filosofi logo, latar belakang (data usaha sewa alat, kasus nyata di toko sewa,
+ringkasan masalah), rumusan masalah, tujuan dan manfaat, inovasi, batasan masalah, metode, perancangan (alur bisnis, peran, alur
 status, algoritma ketersediaan, susunan aplikasi), implementasi (screenshot dan video), pengujian, kesimpulan dan
 rencana lanjutan, sumber data, lalu tanya jawab. Latar gunung ikut naik dari basecamp saat senja sampai puncak saat matahari
 terbit.
+
+## Gerak
+
+- Latar gunung adalah adegan 3D yang digambar three.js di `gunung3d.js`: medan berpoligon rendah, pohon, tenda, dan api
+  unggun di basecamp. Kamera mendaki dari lapangan kemah ke puncak mengikuti nomor slide, dan cahayanya berubah dari
+  senja ke malam lalu fajar. Rute kamera ada di `rute` dan `pandang`, bentuk gunung di fungsi `tinggi`. Kalau browser
+  tidak punya WebGL, deck memakai punggungan SVG yang datar.
+- Pindah pos (misalnya dari Pos 1 ke Pos 2) memakai sapuan punggungan gelap. Pindah slide di dalam pos yang sama
+  hanya bergeser.
+- Slide implementasi menampilkan HP dalam ruang 3D: masuk dari kedalaman, maju satu per satu, lalu melayang. Sikap tiap
+  HP diatur di `SIKAP_HP`, `SIKAP_WEB`, dan `SIKAP_ADMIN` pada `deck.js`. Menggerakkan mouse menggeser titik pandangnya.
+- Gerak 3D lain: huruf judul berdiri dari posisi rebah, kartu ilustrasi latar belakang berganti dengan berputar, kartu
+  kasus dan kartu peran terbuka seperti pintu (`pintu` di `deck.js`), papan di slide batasan dan kesimpulan juga, lapisan
+  di slide susunan aplikasi jatuh lalu berayun, dan layar video datang dari kedalaman.
+- Konfeti muncul di slide pengujian, kesimpulan, dan tanya jawab (`ledakkan` di `deck.js`). Tiap langkah baru diberi
+  percikan kecil (`percik`).
+- Latar punya kunang-kunang, burung, dan bintang jatuh. Semua gerak ini mati sendiri kalau sistem memakai setelan
+  "kurangi gerakan".
 
 ## Mengubah isi
 
@@ -40,10 +58,15 @@ terbit.
 - Rumusan masalah, tujuan, dan kesimpulan ditulis untuk fitur yang sudah ada di aplikasi. Server Laravel, fitur AI,
   halaman toko penyedia, login Google, payment gateway, dan iOS ditulis sebagai rencana kerja ("dikerjakan setelah tahap ini"), bukan
   saran. Denda, blacklist, dan halaman toko sudah dibuat. Rencana lengkapnya ada di `../docs/08-RENCANA-KERJA.md`.
-- Data latar belakang punya sumber, dan daftarnya ada di slide "Sumber data". Jumlah pendaki Gede Pangrango, kasus
-  Opak Adventure, Dahlia Adventure, dan EX Adventure Solo dibaca langsung dari PDF jurnalnya. Angka Rinjani (IDN Times)
-  dan Basarnas (Kompas.com) dibaca dari artikel berita; buka lagi tautannya sebelum sidang.
+- Semua sumber latar belakang membahas usaha sewa alat, tidak ada data jumlah pendaki atau kecelakaan. Tiap sumber
+  ditulis dengan URL di slide tempat ia dipakai dan di slide "Sumber data". Tautannya bisa diklik.
+- Skor risiko Lentera Camp (Ramadhan dkk. 2025, Tabel 5), masalah PT ABC (Nurjanah dkk. 2025), dan artikel detikFinance
+  (28 April 2018) dibaca langsung dari PDF dan halaman aslinya pada 2 Oktober 2026. Grafik menampilkan nilai
+  kemungkinan (likelihood) untuk 4 dari 18 risiko di tabel itu. Kasus Opak Adventure, Dahlia Adventure, dan EX Adventure
+  Solo dibaca dari jurnalnya. Buka lagi tautannya sebelum sidang.
+- DOI artikel Opak Adventure (10.48144/suryainformatika.v7i1.379) tidak terdaftar di doi.org, jadi slide memakai
+  alamat halaman jurnalnya.
 - Belum ada sumber untuk klaim "penyewa tidak tahu tempat sewa". Klaim itu tidak ada di slide.
 - Makna logo dan "arah berikutnya" di slide alur bisnis (komisi per transaksi) adalah usulan, belum keputusan.
-- Angka pengujian (147 tes: 61 aplikasi dan 86 server, hasil uji di Redmi 17 dan Chrome) berasal dari `../rentgear_app/HANDOFF.md`. Kalau jumlah tes
+- Angka pengujian (149 tes: 63 aplikasi dan 86 server, hasil uji di Redmi 17 dan browser) berasal dari `../rentgear_app/HANDOFF.md`. Kalau jumlah tes
   berubah, perbarui slide Pengujian dan angka di `adegan.pengujian` pada `deck.js`.
