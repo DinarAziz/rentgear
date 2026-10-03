@@ -83,6 +83,7 @@ final class Present
             'id' => $r->id, 'providerId' => $r->provider_id, 'customerName' => $r->customer_name,
             'rating' => $r->rating, 'comment' => $r->comment, 'at' => self::time($r->at),
             'rentalId' => $r->rental_id, 'equipmentName' => $r->equipment_name,
+            'reply' => $r->reply, 'repliedAt' => self::time($r->replied_at),
         ];
     }
 

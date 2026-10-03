@@ -546,11 +546,29 @@ Checked on the Redmi (local mode): the store map with both pins, swiping to the 
 opens the store with its mini map, and Sari moves Arjuna Outdoor to -7,94272, 112,63100 ("Lokasi toko disimpan.").
 Checked in WebKit at 1440x900 (side list plus map) and 390x844 (catalog, store page).
 
-Not checked: sorting by distance on a real device. Location is switched off on the Redmi (`location_mode` 0), so the
-app shows "Lokasi tidak didapat". It is covered by the tests with a fixed point in Lumajang. Server mode was not
-rerun through the UI for the new route; it has a feature test.
+Checked later the same day, after the user switched location on: the Redmi catalog shows "Toko diurutkan dari yang
+terdekat" with a distance on each card. In server mode on the Redmi, Sari saved a new store point and the `providers`
+row changed.
 
 Not built: routes and travel time inside the app, address search on the map. Tiles come from the public
 OpenStreetMap server, which is fine for a demo and not for heavy use.
 
 On the Redmi, Arjuna Outdoor now sits at the moved point until "Reset data demo".
+
+## Session (2026-10-03, store replies to reviews)
+
+- `Review.reply` and `Review.repliedAt`. Repository operation `replyToReview(reviewId, actor, reply)`: only the owner
+  of the reviewed store, 1 to 500 characters, a new reply replaces the old one.
+- Local data keeps replies in `reviewReplies`, keyed by review id, because seed reviews can be answered too.
+- Server: migration `2026_10_03_000000_add_reply_to_reviews` (`reply`, `replied_at`), route
+  `PUT /api/v1/reviews/{id}/reply`. The migration was run on the `rentgear` database with `php artisan migrate`.
+- UI: `ReviewTile` shows "Balasan toko, <tanggal>" under the review, and the owner gets "Balas" or "Ubah balasan".
+  The provider reaches its own store page from Profil > "Halaman toko dan ulasan". `askReason` takes an `initial` text.
+- Tests: one repository test, one widget test, one server test. 72 app tests and 88 server tests pass. The deck
+  shows 160.
+- Checked on the Redmi in server mode: Sari answers Sinta Maharani's review; the reply shows under the review and
+  `reviews.reply` is filled for `rv-2`. Not checked: the customer's view of the reply on a device, and local mode on
+  a device (both covered by tests).
+
+At the end of the session the Redmi has the local-mode APK again, `../webapp/` is rebuilt, and the Laravel server is
+stopped. The server database still holds this day's test data.

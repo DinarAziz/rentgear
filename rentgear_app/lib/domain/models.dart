@@ -345,7 +345,7 @@ class Rental {
 
 /// Ulasan penyewa untuk sebuah toko.
 class Review {
-  const Review({
+  Review({
     required this.id,
     required this.providerId,
     required this.customerName,
@@ -354,6 +354,8 @@ class Review {
     required this.at,
     this.rentalId,
     this.equipmentName,
+    this.reply,
+    this.repliedAt,
   });
 
   final String id;
@@ -368,6 +370,10 @@ class Review {
   /// Kosong untuk ulasan bawaan data demo.
   final String? rentalId;
   final String? equipmentName;
+
+  /// Balasan pemilik toko, kosong bila belum dibalas.
+  String? reply;
+  DateTime? repliedAt;
 }
 
 /// Penyewa yang tidak boleh membuat booking baru.

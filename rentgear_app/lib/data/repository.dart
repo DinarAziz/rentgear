@@ -92,6 +92,9 @@ abstract class RentGearRepository {
   /// Ulasan sebuah toko, terbaru lebih dulu.
   Future<List<Review>> providerReviews(String providerId);
 
+  /// Pemilik toko membalas ulasan tokonya. Balasan baru menggantikan yang lama.
+  Future<Review> replyToReview(String reviewId, AppUser actor, String reply);
+
   /// Penyewa memberi ulasan untuk transaksi yang sudah selesai (sekali saja).
   Future<Rental> submitReview(String rentalId, AppUser actor,
       {required int rating, String comment = ''});

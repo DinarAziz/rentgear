@@ -6,6 +6,7 @@ import '../../core/theme.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
 import '../../widgets/common.dart';
+import '../customer/provider_store_screen.dart';
 import '../provider/store_location_screen.dart';
 import 'photo_credits_screen.dart';
 
@@ -78,6 +79,12 @@ class ProfileScreen extends StatelessWidget {
                         leading: const Icon(Icons.account_balance_outlined),
                         title: Text(bank),
                       ),
+                    ListTile(
+                      leading: const Icon(Icons.reviews_outlined),
+                      title: const Text('Halaman toko dan ulasan'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => openProviderStore(context, p.id),
+                    ),
                     ListTile(
                       leading: const Icon(Icons.place_outlined),
                       title: const Text('Lokasi toko di peta'),

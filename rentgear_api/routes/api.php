@@ -32,6 +32,7 @@ Route::prefix('v1')->group(function () {
         Route::get('providers/{id}', [StoreController::class, 'show']);
         Route::get('providers/{id}/equipment', [StoreController::class, 'equipment']);
         Route::get('providers/{id}/reviews', [StoreController::class, 'reviews']);
+        Route::put('reviews/{id}/reply', [StoreController::class, 'reply']);
         Route::put('providers/{id}/follow', [StoreController::class, 'follow']);
         Route::delete('providers/{id}/follow', [StoreController::class, 'unfollow']);
         Route::get('me/follows', [StoreController::class, 'myFollows']);

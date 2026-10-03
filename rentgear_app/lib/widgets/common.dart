@@ -465,9 +465,10 @@ Future<String?> askReason(
   BuildContext context, {
   required String title,
   String hint = 'Alasan',
+  String initial = '',
 }) {
   dismissKeyboard();
-  final controller = TextEditingController();
+  final controller = TextEditingController(text: initial);
   return showDialog<String>(
     context: context,
     builder: (context) => AlertDialog(

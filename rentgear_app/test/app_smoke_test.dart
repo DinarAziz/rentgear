@@ -238,4 +238,32 @@ void main() {
     // Belum digeser, jadi belum ada yang disimpan.
     expect(tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Simpan lokasi')).onPressed, isNull);
   });
+
+  testWidgets('provider replies to a review from its store page', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Penyedia · Arjuna'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Profil'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Halaman toko dan ulasan'));
+    await tester.pumpAndSettle();
+    // Pemilik toko tidak melihat tombol ikuti.
+    expect(find.text('Ikuti'), findsNothing);
+
+    final page = find
+        .ancestor(of: find.text('Buka di Google Maps'), matching: find.byType(Scrollable))
+        .first;
+    // Ulasan terbaru toko ini ditulis Andi Prasetyo.
+    await tester.scrollUntilVisible(find.text('Andi Prasetyo'), 300, scrollable: page);
+    await tester.ensureVisible(find.text('Balas').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Balas').first);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Terima kasih sudah menyewa.');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kirim'));
+    await tester.pumpAndSettle();
+    expect(find.text('Terima kasih sudah menyewa.'), findsOneWidget);
+    expect(find.text('Ubah balasan'), findsOneWidget);
+  });
 }

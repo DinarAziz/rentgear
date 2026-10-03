@@ -139,6 +139,34 @@ void main() {
     expect(loaded.rating, closeTo(saved.rating, 0.001));
   });
 
+  test('hanya pemilik toko yang bisa membalas ulasan, dan balasan tersimpan', () async {
+    final dir = await Directory.systemTemp.createTemp('rentgear_reply');
+    addTearDown(() => dir.delete(recursive: true));
+    var local = LocalRentGearRepository.open(store: LocalStore(dir), latency: Duration.zero);
+    final dewi = await local.login('dewi@rentgear.id', 'password'); // pemilik Semeru Camp Rent
+
+    // rv-1 adalah ulasan bawaan untuk Arjuna Outdoor (toko Sari).
+    expect(() => local.replyToReview('rv-1', budi, 'Halo'), throwsCode('FORBIDDEN'));
+    expect(() => local.replyToReview('rv-1', dewi, 'Halo'), throwsCode('FORBIDDEN'));
+    expect(() => local.replyToReview('rv-1', sari, '   '), throwsCode('VALIDATION'));
+    expect(() => local.replyToReview('rv-x', sari, 'Halo'), throwsCode('NOT_FOUND'));
+
+    await local.replyToReview('rv-1', sari, '  Terima kasih, Kak.  ');
+    final replied = await local.replyToReview('rv-1', sari, 'Terima kasih sudah menyewa.');
+    expect(replied.reply, 'Terima kasih sudah menyewa.');
+    expect(replied.repliedAt, isNotNull);
+
+    // Ulasan penyewa juga bisa dibalas, dan balasannya ikut ke detail transaksi.
+    await local.submitReview('r-5', budi, rating: 4, comment: 'Mantap');
+    await local.replyToReview('rv-r-5', sari, 'Sampai jumpa lagi.');
+
+    local = LocalRentGearRepository.open(store: LocalStore(dir), latency: Duration.zero);
+    final reviews = await local.providerReviews('p-arjuna');
+    expect(reviews.firstWhere((r) => r.id == 'rv-1').reply, 'Terima kasih sudah menyewa.');
+    expect((await local.rental('r-5')).review?.reply, 'Sampai jumpa lagi.');
+    expect(reviews.where((r) => r.reply != null), hasLength(2));
+  });
+
   test('tiap toko punya koordinat untuk dibuka di Google Maps', () async {
     for (final p in await repo.providers()) {
       expect(p.latitude, inInclusiveRange(-11, 6), reason: p.businessName);

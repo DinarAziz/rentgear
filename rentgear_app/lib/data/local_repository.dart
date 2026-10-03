@@ -101,6 +101,11 @@ class LocalRentGearRepository implements RentGearRepository {
         for (final r in _reviews)
           if (r.rentalId != null) codec.review(r),
       ],
+      // Balasan disimpan terpisah, karena ulasan bawaan demo juga bisa dibalas.
+      'reviewReplies': {
+        for (final r in _reviews)
+          if (r.reply != null) r.id: {'reply': r.reply, 'at': r.repliedAt!.toIso8601String()},
+      },
       'follows': {for (final f in _follows.entries) f.key: f.value.toList()},
       'providers': {
         for (final p in _providers)
@@ -149,6 +154,14 @@ class LocalRentGearRepository implements RentGearRepository {
       final review = codec.reviewFrom(saved as Map<String, dynamic>);
       _reviews.add(review);
       _rentals.where((r) => r.id == review.rentalId).firstOrNull?.review = review;
+    }
+    final replies = (data['reviewReplies'] as Map<String, dynamic>?) ?? const {};
+    for (final r in _reviews) {
+      final saved = replies[r.id] as Map<String, dynamic>?;
+      if (saved == null) continue;
+      r
+        ..reply = saved['reply'] as String
+        ..repliedAt = DateTime.parse(saved['at'] as String);
     }
     final follows = data['follows'] as Map<String, dynamic>?;
     if (follows != null) {
@@ -783,6 +796,25 @@ class LocalRentGearRepository implements RentGearRepository {
   Future<List<Review>> providerReviews(String providerId) => _delay(() =>
       _reviews.where((r) => r.providerId == providerId).toList()
         ..sort((a, b) => b.at.compareTo(a.at)));
+
+  @override
+  Future<Review> replyToReview(String reviewId, AppUser actor, String reply) => _mutate(() {
+        final review = _reviews.firstWhere(
+          (r) => r.id == reviewId,
+          orElse: () => throw const AppException('NOT_FOUND', 'Ulasan tidak ditemukan.'),
+        );
+        if (actor.role != UserRole.provider || actor.providerId != review.providerId) {
+          throw const AppException('FORBIDDEN', 'Hanya pemilik toko yang bisa membalas ulasan.');
+        }
+        final text = reply.trim();
+        if (text.isEmpty || text.length > 500) {
+          throw const AppException('VALIDATION', 'Balasan harus diisi, paling banyak 500 huruf.');
+        }
+        review
+          ..reply = text
+          ..repliedAt = DateTime.now();
+        return review;
+      });
 
   @override
   Future<Rental> submitReview(String rentalId, AppUser actor,

@@ -253,9 +253,29 @@ class ReviewTile extends StatelessWidget {
 
   final Review review;
 
+  Future<void> _reply(BuildContext context) async {
+    final state = context.read<AppState>();
+    final text = await askReason(
+      context,
+      title: 'Balas ulasan ${review.customerName}',
+      hint: 'Balasan toko',
+      initial: review.reply ?? '',
+    );
+    if (text == null || !context.mounted) return;
+    await runAction(
+      context,
+      () => state.run(
+        (repo) => repo.replyToReview(review.id, state.currentUser, text),
+      ),
+      success: 'Balasan tersimpan.',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final r = review;
+    final isOwner =
+        context.read<AppState>().currentUser.providerId == r.providerId;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -281,6 +301,37 @@ class ReviewTile extends StatelessWidget {
               const SizedBox(height: 6),
               Text(r.comment),
             ],
+            if (r.reply case final reply?) ...[
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Balasan toko, ${tanggal(r.repliedAt!)}',
+                      style: _mutedSmall,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(reply),
+                  ],
+                ),
+              ),
+            ],
+            if (isOwner)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.reply, size: 18),
+                  label: Text(r.reply == null ? 'Balas' : 'Ubah balasan'),
+                  onPressed: () => _reply(context),
+                ),
+              ),
           ],
         ),
       ),

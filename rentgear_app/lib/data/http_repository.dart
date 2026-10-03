@@ -405,6 +405,10 @@ class HttpRentGearRepository implements RentGearRepository {
       _list(await _get('providers/$providerId/reviews'), ApiCodec.review);
 
   @override
+  Future<Review> replyToReview(String reviewId, AppUser actor, String reply) async =>
+      ApiCodec.review(await _send('PUT', 'reviews/$reviewId/reply', {'reply': reply}) as Map<String, dynamic>);
+
+  @override
   Future<Rental> submitReview(String rentalId, AppUser actor, {required int rating, String comment = ''}) =>
       _action(rentalId, 'review', {'rating': rating, 'comment': comment});
 

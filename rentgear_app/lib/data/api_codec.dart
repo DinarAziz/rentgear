@@ -99,6 +99,8 @@ abstract final class ApiCodec {
         at: _time(j['at'])!,
         rentalId: j['rentalId'] as String?,
         equipmentName: j['equipmentName'] as String?,
+        reply: j['reply'] as String?,
+        repliedAt: _time(j['repliedAt']),
       );
 
   /// Server hanya mengirim nomor dokumen yang sudah disamarkan.

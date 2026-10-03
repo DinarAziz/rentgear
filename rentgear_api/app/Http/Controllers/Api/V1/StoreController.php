@@ -41,6 +41,20 @@ class StoreController extends Controller
         return ApiResponse::ok(Review::where('provider_id', $id)->orderByDesc('at')->get()->map(Present::review(...)));
     }
 
+    /** Penyedia membalas ulasan tokonya. Balasan baru menggantikan yang lama. */
+    public function reply(Request $request, string $id): JsonResponse
+    {
+        $review = Review::findOrFail($id);
+        $user = $request->user();
+        if (! $user->isProvider() || $user->provider_id !== $review->provider_id) {
+            throw new ApiException('FORBIDDEN', 'Hanya pemilik toko yang bisa membalas ulasan.');
+        }
+        $data = $request->validate(['reply' => 'required|string|max:500']);
+        $review->update(['reply' => trim($data['reply']), 'replied_at' => now()]);
+
+        return ApiResponse::ok(Present::review($review));
+    }
+
     public function follow(Request $request, string $id): JsonResponse
     {
         return $this->setFollow($request, $id, true);

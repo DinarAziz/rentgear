@@ -33,4 +33,20 @@ class ReviewTest extends ApiTestCase
 
         $this->assertApiError($this->postJson('/api/v1/rentals/r-5/review', ['rating' => 5]), 'ALREADY_REVIEWED', 409);
     }
+
+    public function test_only_the_store_owner_replies_to_a_review(): void
+    {
+        // rv-1 adalah ulasan untuk Arjuna Outdoor (toko Sari).
+        $this->assertApiError($this->as('budi')->putJson('/api/v1/reviews/rv-1/reply', ['reply' => 'Halo']), 'FORBIDDEN', 403);
+        $this->assertApiError($this->as('dewi')->putJson('/api/v1/reviews/rv-1/reply', ['reply' => 'Halo']), 'FORBIDDEN', 403);
+        $this->assertApiError($this->as('sari')->putJson('/api/v1/reviews/rv-1/reply', ['reply' => '   ']), 'VALIDATION', 422);
+
+        $this->putJson('/api/v1/reviews/rv-1/reply', ['reply' => '  Terima kasih, Kak.  '])
+            ->assertOk()->assertJsonPath('data.reply', 'Terima kasih, Kak.');
+        $this->putJson('/api/v1/reviews/rv-1/reply', ['reply' => 'Terima kasih sudah menyewa.'])->assertOk();
+
+        $review = collect($this->as('budi')->getJson('/api/v1/providers/p-arjuna/reviews')->json('data'))->firstWhere('id', 'rv-1');
+        $this->assertSame('Terima kasih sudah menyewa.', $review['reply']);
+        $this->assertNotNull($review['repliedAt']);
+    }
 }

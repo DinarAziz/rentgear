@@ -57,8 +57,11 @@ butuh API key atau akun penagihan:
 - Penyedia mengatur titik tokonya di Profil, "Lokasi toko di peta", dengan menggeser peta. Di server: `PUT
   /api/v1/provider/location`.
 
-Belum dibuat: rute dan perkiraan waktu tempuh di dalam aplikasi, pencarian alamat di peta, dan balasan penyedia atas
-ulasan. Ubin peta diambil dari server publik OpenStreetMap, yang cukup untuk demo; untuk pemakaian ramai perlu
+Balasan toko atas ulasan (ditambahkan 3 Oktober 2026): pemilik toko membuka "Halaman toko dan ulasan" dari Profil,
+lalu menekan "Balas" pada sebuah ulasan. Satu ulasan punya satu balasan, dan balasan baru menggantikan yang lama.
+Balasan tampil di bawah ulasan untuk semua pengguna. Di server: `PUT /api/v1/reviews/{id}/reply`.
+
+Belum dibuat: rute dan perkiraan waktu tempuh di dalam aplikasi, dan pencarian alamat di peta. Ubin peta diambil dari server publik OpenStreetMap, yang cukup untuk demo; untuk pemakaian ramai perlu
 penyedia ubin sendiri.
 
 ## 3. Server Laravel (selesai)
