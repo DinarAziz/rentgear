@@ -718,3 +718,8 @@ either (covered by tests).
 
 Differences from `../docs/02-ALGORITMA.md` (ALG-3): photos belong to the rental, not to a physical unit, and there is
 no 0 to 100 condition score or checklist.
+
+Later on 2026-10-04 the quota had reset. The emulator showed the fine opinion dialog for INV-DEMO-0004 with the photo
+finding: "Denda wajar", Rp120.000, and "Dari 1 foto saat diserahkan dan 1 foto saat kembali: Foto saat kembali
+menunjukkan robekan berbentuk zig-zag yang jelas pada sisi kiri pintu tenda, yang tidak ada pada foto saat
+diserahkan." The request was made by the user on the emulator; the screenshot was taken without another AI call.
