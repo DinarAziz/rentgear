@@ -133,4 +133,61 @@ void main() {
     expect(find.text('Blacklist'), findsOneWidget);
     expect(find.text('Cabut blacklist'), findsOneWidget);
   });
+
+  testWidgets('admin dashboard lists what needs action and recent rentals', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Admin'));
+    await tester.pumpAndSettle();
+    final pendingRow = find.text('1 penyedia menunggu verifikasi');
+    final page = find.byType(Scrollable).first;
+    expect(find.text('Perlu tindakan'), findsOneWidget);
+    expect(pendingRow, findsOneWidget);
+
+    await tester.scrollUntilVisible(find.text('Transaksi terbaru'), 300, scrollable: page);
+    expect(find.text('Lihat semua'), findsOneWidget);
+
+    // Baris penyedia menunggu membuka tab Penyedia.
+    await tester.scrollUntilVisible(pendingRow, -300, scrollable: page);
+    await tester.tap(pendingRow);
+    await tester.pumpAndSettle();
+    expect(find.text('Verifikasi Penyedia'), findsOneWidget);
+  });
+
+  testWidgets('blacklisted customer cannot open the booking form', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Admin'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Penyewa'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Masukkan blacklist').first);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Tidak mengembalikan alat.');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kirim'));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Profil'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Keluar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Keluar').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Penyewa · Budi'));
+    await tester.pumpAndSettle();
+    const message = 'Akun Anda masuk blacklist, jadi belum bisa membuat booking baru. '
+        'Alasan: Tidak mengembalikan alat. Hubungi admin untuk peninjauan.';
+    expect(find.text(message), findsOneWidget);
+
+    await tester.tap(find.text('Arjuna Outdoor'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tenda Dome 4 Orang'));
+    await tester.pumpAndSettle();
+    expect(find.text(message), findsOneWidget);
+    await tester.tap(find.text('Sewa Sekarang'));
+    await tester.pumpAndSettle();
+    expect(find.text('Jaminan 1'), findsNothing);
+  });
 }

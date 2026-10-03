@@ -122,7 +122,7 @@ final class RentalFlowService
             $this->requireRenter($r, $actor);
             // Sama dengan aplikasi lokal: bukti langsung dianggap sah. Pencocokan
             // nominal menunggu payment gateway.
-            $this->transition($r, RentalStatus::Paid, $actor, 'Bukti bayar diunggah');
+            $this->transition($r, RentalStatus::Paid, $actor, 'Bukti transfer diunggah');
             $r->update(['payment_proof_path' => $proof->storeAs('payments', "{$r->id}.".$proof->extension(), 'local')]);
         });
     }

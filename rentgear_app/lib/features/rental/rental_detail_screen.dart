@@ -158,7 +158,7 @@ class _Body extends StatelessWidget {
           ),
         ],
         if (r.paymentProof != null) ...[
-          const SectionTitle('Bukti bayar'),
+          const SectionTitle('Bukti transfer'),
           Card(
             clipBehavior: Clip.antiAlias,
             child: ListTile(
@@ -349,13 +349,13 @@ class _ActionBar extends StatelessWidget {
         actions.add(
           FilledButton.icon(
             icon: const Icon(Icons.upload_file),
-            label: const Text('Upload bukti bayar'),
+            label: const Text('Upload bukti transfer'),
             onPressed: () async {
               final bytes = await _pickPaymentProof(context, r.grandTotal);
               if (bytes == null || !context.mounted) return;
               await act(
                 () => state.repo.submitPayment(r.id, user, bytes),
-                'Bukti bayar terkirim.',
+                'Bukti transfer terkirim.',
               );
             },
           ),
@@ -553,7 +553,7 @@ class _ActionBar extends StatelessWidget {
                   title: 'Kembalikan jaminan',
                   message:
                       'Serahkan semua dokumen asli jaminan ke ${r.customerName}. $settlement Transaksi akan ditutup.',
-                  confirmLabel: 'Sudah dikembalikan',
+                  confirmLabel: 'Selesaikan',
                 );
                 if (!ok || !context.mounted) return;
                 await act(
@@ -601,7 +601,7 @@ Future<Uint8List?> _pickPaymentProof(BuildContext context, double total) async {
   final ok = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Kirim bukti bayar?'),
+      title: const Text('Kirim bukti transfer?'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

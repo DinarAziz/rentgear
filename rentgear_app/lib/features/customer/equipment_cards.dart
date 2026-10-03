@@ -102,7 +102,7 @@ Widget _meta(Equipment e) => Wrap(
   children: [
     if (e.rating > 0)
       Text(
-        '★ ${e.rating.toStringAsFixed(1)}',
+        '★ ${bintang(e.rating)}',
         style: const TextStyle(fontSize: 13),
       ),
     Text(

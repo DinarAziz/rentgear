@@ -184,7 +184,7 @@ void main() {
     expect(g.photo, isNull);
     expect(r.logs.map((l) => l.to), [RentalStatus.pendingConfirmation, RentalStatus.returned]);
     expect(r.logs.last.note, contains('Terlambat 2 hari'));
-    // Tanpa foto jaminan dan bukti bayar, tidak ada unduhan tambahan.
+    // Tanpa foto jaminan dan bukti transfer, tidak ada unduhan tambahan.
     expect(seen.length, 1);
   });
 

@@ -4,6 +4,14 @@ import 'package:provider/provider.dart';
 import '../domain/models.dart';
 import '../state/app_state.dart';
 
+/// Kalimat untuk penyewa yang masuk blacklist. Alasan dari admin bisa
+/// diakhiri titik atau tidak, jadi titiknya dirapikan di sini.
+String blacklistMessage(BlacklistEntry entry) {
+  final reason = entry.reason.trim().replaceFirst(RegExp(r'[.\s]+$'), '');
+  return 'Akun Anda masuk blacklist, jadi belum bisa membuat booking baru. '
+      'Alasan: $reason. Hubungi admin untuk peninjauan.';
+}
+
 /// Pemberitahuan untuk penyewa yang masuk blacklist. Tidak memakan tempat
 /// selama memuat atau bila penyewa tidak di-blacklist.
 class BlacklistNotice extends StatefulWidget {
@@ -40,8 +48,7 @@ class _BlacklistNoticeState extends State<BlacklistNotice> {
             border: Border.all(color: Colors.red.shade200),
           ),
           child: Text(
-            'Akun Anda masuk blacklist, jadi belum bisa membuat booking baru. '
-            'Alasan: ${entry.reason} Hubungi admin untuk peninjauan.',
+            blacklistMessage(entry),
             style: TextStyle(fontSize: 13, color: Colors.red.shade900),
           ),
         );

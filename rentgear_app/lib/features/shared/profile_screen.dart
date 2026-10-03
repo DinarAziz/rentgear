@@ -57,11 +57,20 @@ class ProfileScreen extends StatelessWidget {
                     ListTile(
                       leading: const Icon(Icons.storefront_outlined),
                       title: Text(p.businessName, style: const TextStyle(fontWeight: FontWeight.w600)),
-                      subtitle: Text(p.address),
-                      trailing: Pill(p.status.label,
-                          color: p.status == ProviderStatus.verified
-                              ? Colors.green.shade800
-                              : Colors.orange.shade800),
+                      // Status di bawah alamat, supaya nama toko tidak terpotong di HP.
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(p.address),
+                          const SizedBox(height: 6),
+                          Pill(p.status.label,
+                              color: switch (p.status) {
+                                ProviderStatus.verified => Colors.green.shade800,
+                                ProviderStatus.pending => Colors.orange.shade800,
+                                ProviderStatus.rejected => Colors.red.shade700,
+                              }),
+                        ],
+                      ),
                     ),
                     if (p.bankAccount case final bank?)
                       ListTile(

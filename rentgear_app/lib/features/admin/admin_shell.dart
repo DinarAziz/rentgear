@@ -10,6 +10,7 @@ import '../../state/app_state.dart';
 import '../../widgets/common.dart';
 import '../../widgets/motion.dart';
 import '../customer/my_rentals_screen.dart';
+import '../rental/rental_detail_screen.dart';
 import '../shared/profile_screen.dart';
 import 'admin_customers_screen.dart';
 
@@ -27,12 +28,15 @@ class _AdminShellState extends State<AdminShell> {
   Widget build(BuildContext context) => AdaptiveShell(
     selectedIndex: _index,
     onSelect: (i) => setState(() => _index = i),
-    pages: const [
-      AdminDashboardScreen(),
-      AdminProvidersScreen(),
-      AdminCustomersScreen(),
-      AdminRentalsScreen(),
-      ProfileScreen(),
+    pages: [
+      AdminDashboardScreen(
+        onOpenProviders: () => setState(() => _index = 1),
+        onOpenRentals: () => setState(() => _index = 3),
+      ),
+      const AdminProvidersScreen(),
+      const AdminCustomersScreen(),
+      const AdminRentalsScreen(),
+      const ProfileScreen(),
     ],
     destinations: const [
       NavigationDestination(
@@ -54,7 +58,17 @@ class _AdminShellState extends State<AdminShell> {
 }
 
 class AdminDashboardScreen extends StatelessWidget {
-  const AdminDashboardScreen({super.key});
+  const AdminDashboardScreen({
+    super.key,
+    required this.onOpenProviders,
+    required this.onOpenRentals,
+  });
+
+  final VoidCallback onOpenProviders;
+  final VoidCallback onOpenRentals;
+
+  /// Jumlah transaksi terbaru yang tampil di dashboard.
+  static const _recentCount = 6;
 
   @override
   Widget build(BuildContext context) {
@@ -88,14 +102,14 @@ class AdminDashboardScreen extends StatelessWidget {
               .length;
           final fineReviews = rentals
               .where((r) => r.damageReview == DamageReview.pending)
-              .length;
+              .toList();
 
           final stats = [
             ('Total transaksi', '${rentals.length}', Icons.receipt_long),
             ('Transaksi aktif', '${active.length}', Icons.sync),
             ('Jaminan dipegang', '$held dokumen', Icons.badge),
             ('Penyedia menunggu', '$pending', Icons.hourglass_top),
-            ('Denda ditinjau', '$fineReviews', Icons.gavel_outlined),
+            ('Denda ditinjau', '${fineReviews.length}', Icons.gavel_outlined),
             ('Nilai sewa selesai', rupiah(revenue), Icons.payments_outlined),
           ];
           // Card height follows the system font scale so large text does not overflow.
@@ -106,57 +120,145 @@ class AdminDashboardScreen extends StatelessWidget {
             FormFactor.tablet => 3,
             FormFactor.desktop => stats.length,
           };
-          return GridView(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: columns,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              mainAxisExtent: 56 + 72 * textScale,
-            ),
+          Widget rentalCards(Iterable<Rental> items) => _CardWrap(
             children: [
-              for (final (label, value, icon) in stats)
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Icon(
-                          icon,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            value,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          label,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.black54,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
+              for (final r in items)
+                RentalCard(
+                  rental: r,
+                  showCustomer: true,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => RentalDetailScreen(rentalId: r.id),
                     ),
                   ),
                 ),
+            ],
+          );
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              GridView(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: columns,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  mainAxisExtent: 56 + 72 * textScale,
+                ),
+                children: [
+                  for (final (label, value, icon) in stats)
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Icon(
+                              icon,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                value,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              label,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.black54,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SectionTitle('Perlu tindakan'),
+              if (pending == 0 && fineReviews.isEmpty)
+                const Text(
+                  'Tidak ada yang menunggu keputusan admin.',
+                  style: TextStyle(color: Colors.black54),
+                ),
+              if (pending > 0)
+                Card(
+                  clipBehavior: Clip.antiAlias,
+                  child: ListTile(
+                    leading: const Icon(Icons.hourglass_top),
+                    title: Text('$pending penyedia menunggu verifikasi'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: onOpenProviders,
+                  ),
+                ),
+              if (fineReviews.isNotEmpty) ...[
+                if (pending > 0) const SizedBox(height: 10),
+                const Text(
+                  'Denda kerusakan menunggu keputusan:',
+                  style: TextStyle(color: Colors.black54, fontSize: 13),
+                ),
+                const SizedBox(height: 8),
+                rentalCards(fineReviews),
+              ],
+              SectionTitle(
+                'Transaksi terbaru',
+                trailing: TextButton(
+                  onPressed: onOpenRentals,
+                  child: const Text('Lihat semua'),
+                ),
+              ),
+              if (rentals.isEmpty)
+                const Text(
+                  'Belum ada transaksi.',
+                  style: TextStyle(color: Colors.black54),
+                )
+              else
+                rentalCards(rentals.take(_recentCount)),
             ],
           );
         },
       ),
     );
   }
+}
+
+/// Kartu berjajar 1 sampai 3 kolom di dalam halaman yang sudah bisa digulir.
+class _CardWrap extends StatelessWidget {
+  const _CardWrap({required this.children});
+
+  final List<Widget> children;
+
+  static const double _gap = 10;
+  static const double _minWidth = 340;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, c) {
+      final columns = ((c.maxWidth + _gap) / (_minWidth + _gap)).floor().clamp(
+        1,
+        3,
+      );
+      final width = (c.maxWidth - _gap * (columns - 1)) / columns;
+      return Wrap(
+        spacing: _gap,
+        runSpacing: _gap,
+        children: [
+          for (final child in children) SizedBox(width: width, child: child),
+        ],
+      );
+    },
+  );
 }
 
 class AdminProvidersScreen extends StatelessWidget {

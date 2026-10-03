@@ -567,7 +567,7 @@ class LocalRentGearRepository implements RentGearRepository {
         _requireRenter(r, actor);
         // Versi mock: bukti langsung dianggap sah. Di server, bukti masuk
         // tabel payments berstatus pending dan diverifikasi dulu.
-        _transition(r, RentalStatus.paid, actor, note: 'Bukti bayar diunggah');
+        _transition(r, RentalStatus.paid, actor, note: 'Bukti transfer diunggah');
         r.paymentProof = proof;
         return r;
       });

@@ -7,6 +7,7 @@ import '../../core/theme.dart';
 import '../../domain/guarantee.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
+import '../../widgets/blacklist_notice.dart';
 import '../../widgets/common.dart';
 import '../../widgets/photo_widgets.dart';
 import 'booking_screen.dart';
@@ -17,10 +18,13 @@ class EquipmentDetailScreen extends StatelessWidget {
 
   final String equipmentId;
 
-  Future<(Equipment, ProviderProfile)> _load(AppState state) async {
+  Future<(Equipment, ProviderProfile, BlacklistEntry?)> _load(
+    AppState state,
+  ) async {
     final e = await state.repo.equipment(equipmentId);
     final p = await state.repo.provider(e.providerId);
-    return (e, p);
+    final blocked = await state.repo.blacklistOf(state.currentUser.id);
+    return (e, p, blocked);
   }
 
   @override
@@ -28,18 +32,35 @@ class EquipmentDetailScreen extends StatelessWidget {
     final state = context.read<AppState>();
     return Scaffold(
       appBar: AppBar(title: const Text('Detail Alat')),
-      body: AsyncView<(Equipment, ProviderProfile)>(
+      body: AsyncView<(Equipment, ProviderProfile, BlacklistEntry?)>(
         load: () => _load(state),
         builder: (context, data) {
-          final (e, p) = data;
-          final rentButton = FilledButton(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (_) => BookingScreen(equipment: e, provider: p),
+          final (e, p, blocked) = data;
+          // Penyewa blacklist dihentikan di sini, sebelum mengisi form booking.
+          final rentButton = Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (blocked != null) ...[
+                Text(
+                  blacklistMessage(blocked),
+                  style: TextStyle(fontSize: 13, color: Colors.red.shade900),
+                ),
+                const SizedBox(height: 8),
+              ],
+              FilledButton(
+                onPressed: blocked != null
+                    ? null
+                    : () => Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (_) =>
+                              BookingScreen(equipment: e, provider: p),
+                        ),
+                      ),
+                child: const Text('Sewa Sekarang'),
               ),
-            ),
-            child: const Text('Sewa Sekarang'),
+            ],
           );
           final info = [
             Text(
@@ -55,10 +76,7 @@ class EquipmentDetailScreen extends StatelessWidget {
               runSpacing: 8,
               children: [
                 if (e.rating > 0)
-                  Pill(
-                    '★ ${e.rating.toStringAsFixed(1)}',
-                    color: Colors.amber.shade800,
-                  ),
+                  Pill('★ ${bintang(e.rating)}', color: Colors.amber.shade800),
                 Pill(
                   'Kondisi ${e.conditionScore}/100',
                   color: AppColors.forest,

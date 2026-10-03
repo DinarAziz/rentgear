@@ -460,3 +460,59 @@ Plan:
    a Custom Tab (`url_launcher` is already installed). Proof upload is no longer needed once the webhook works.
    `LocalRentGearRepository` has no server, so this needs an HTTP repository, or a small payment client used alongside it.
 4. Demo: pay with the Midtrans sandbox simulator (VA/QRIS).
+
+## Session (2026-10-03, Redmi and web check of fines, blacklist, stores and server mode)
+
+Everything below ran on the Redmi 17 over USB with a debug APK, and on the web build in Playwright WebKit.
+`flutter analyze` is clean. 63 app tests and 86 server tests pass.
+
+Checked on the Redmi in local mode, on data saved by an older build (schema version 2, loaded without a reset):
+
+- Store list, store page, "Ikuti" (followers 1 to 2, "Diikuti" pill on the list).
+- INV-DEMO-0004, 5 days late: provider Semeru receives it as "Rusak ringan" with Rp50.000 and a note. Late fee
+  Rp450.000, shortfall Rp350.000.
+- Budi objects to the damage fee, the status becomes "Ditinjau admin". Admin sets Rp20.000 with a note, the shortfall
+  becomes Rp320.000, and Budi's record shows 2 violations.
+- Admin blacklists Budi with a reason, Budi sees the notice on the catalog, admin removes the blacklist.
+- Admin rejects Puncak Outdoor ("Ditolak" badge).
+- Semeru closes INV-DEMO-0004 ("Selesai").
+
+Checked in server mode (`API_URL=http://localhost:8000`, `adb reverse tcp:8000 tcp:8000`, database reseeded):
+
+- Redmi, Budi: books Carrier 60L for 20-21 Oct with the KTP specimen from the gallery (INV-20261003-0001).
+- WebKit at 1440x900, Arjuna: sees the booking and the KTP photo, marks it valid and confirms. The phone changes to
+  "Menunggu pembayaran" without a touch.
+- Redmi: uploads the transfer proof from the gallery, status "Siap diambil".
+- WebKit: handover, then return as "Rusak berat" with Rp50.000, which goes to admin review.
+- Redmi, admin: the dashboard lists the rental under "Perlu tindakan"; admin sets Rp30.000, deposit refund Rp45.000.
+- WebKit: closes the rental, then adds a new item with a photo through the equipment form.
+- The web build also opens in the phone's own browser (Firefox on the Redmi) through `adb reverse tcp:8081`.
+
+Fixed this session:
+
+- A blacklisted customer could open and fill the booking form and was only stopped on submit. The equipment detail
+  page now shows the blacklist message and disables "Sewa Sekarang".
+- Blacklist notice: the reason ran into the next sentence when it had no full stop (`blacklistMessage`).
+- Admin had to search "Semua Transaksi" for a fine under review. The dashboard now has "Perlu tindakan" (pending
+  providers, fines waiting for a decision) and "Transaksi terbaru", which also fills the desktop dashboard.
+- Gear rating used a decimal point ("4.7") while the store used a comma. Both use `bintang()` now.
+- "Kembalikan jaminan" dialog: the confirm label is "Selesaikan", so both buttons fit on one line.
+- Provider profile: the status pill sits under the address, so the shop name stays on one line. A rejected shop is red.
+- "bukti bayar" is "bukti transfer" everywhere, in the app and in the server's status note.
+
+Other changes: `../webapp/` and `../rentgear-web.zip` are rebuilt from this code (local mode). The Redmi has the
+local-mode debug APK. `tool/webkit_drive.mjs` drives the web build in WebKit the way `tool/adb_drive.sh` drives the
+phone; it needs the `playwright` package in `../promo/` and `npx playwright install webkit`.
+
+Not done:
+
+- The real Safari app only loaded the page (title "RentGear"). Driving it needs Safari > Settings > Developer >
+  "Allow remote automation", which asks for the Mac password, and screenshots need the Screen Recording permission.
+  The interaction checks ran in Playwright WebKit instead.
+- The snackbar covers the bottom action button for a few seconds after an action on the rental detail page.
+- On the Redmi the local data still holds this session's test results (INV-DEMO-0004 finished, Puncak Outdoor
+  rejected). "Reset data demo" in Profil clears them. The server database holds INV-20261003-0001 and the test item
+  "Tenda Keluarga Uji"; `php artisan migrate:fresh --seed` clears them.
+- The servers started for the test are stopped. MySQL still runs as a brew service.
+
+Next: Google login (stage 4) and the Gemini features (stage 5), both waiting for credentials from the user.
