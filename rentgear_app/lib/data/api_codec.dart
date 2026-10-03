@@ -59,6 +59,9 @@ abstract final class ApiCodec {
         suggestedFee: _double(j['suggestedFee']),
         explanation: j['explanation'] as String,
         proposedFee: _double(j['proposedFee']),
+        photoFinding: (j['photoFinding'] as String?) ?? '',
+        photosBefore: (j['photosBefore'] as int?) ?? 0,
+        photosAfter: (j['photosAfter'] as int?) ?? 0,
       );
 
   static AiRisk aiRisk(Map<String, dynamic> j) => AiRisk(

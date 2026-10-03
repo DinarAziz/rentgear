@@ -330,6 +330,13 @@ class HttpRentGearRepository implements RentGearRepository {
     if (json['hasPaymentProof'] == true) {
       rental.paymentProof = await _file('files/payments/$id');
     }
+    final condition = ((json['conditionPhotos'] as List?) ?? const []).cast<Map<String, dynamic>>();
+    final bytes = await Future.wait([for (final p in condition) _file('files/condition/${p['id']}')]);
+    rental.conditionPhotos.addAll([
+      for (final (i, p) in condition.indexed)
+        if (bytes[i] case final photo?)
+          ConditionPhoto(phase: _phases[p['phase']]!, bytes: photo, at: DateTime.parse(p['at'] as String).toLocal()),
+    ]);
     return rental;
   }
 
@@ -362,6 +369,17 @@ class HttpRentGearRepository implements RentGearRepository {
   @override
   Future<Rental> cancelBooking(String rentalId, AppUser actor, String reason) =>
       _action(rentalId, 'cancel', {'reason': reason});
+
+  /// Nama tahap foto kondisi di server.
+  static const _phases = {'handover': ConditionPhase.handover, 'return': ConditionPhase.returned};
+
+  /// Jawaban server hanya berisi daftar foto; fotonya diunduh lewat [rental].
+  @override
+  Future<Rental> addConditionPhoto(String rentalId, AppUser actor, ConditionPhase phase, Uint8List photo) async {
+    await _multipart('rentals/$rentalId/condition-photos',
+        fields: {'phase': phase == ConditionPhase.handover ? 'handover' : 'return'}, files: {'photo': photo});
+    return rental(rentalId);
+  }
 
   @override
   Future<Rental> submitPayment(String rentalId, AppUser actor, Uint8List proof) async =>

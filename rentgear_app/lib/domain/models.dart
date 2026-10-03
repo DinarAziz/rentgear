@@ -315,6 +315,13 @@ class Rental {
   /// Ulasan penyewa untuk toko, diisi setelah transaksi selesai.
   Review? review;
 
+  /// Foto kondisi alat saat diserahkan dan saat kembali, urut waktu.
+  /// Hanya ditambah, tidak pernah dihapus.
+  final List<ConditionPhoto> conditionPhotos = [];
+
+  List<ConditionPhoto> conditionPhotosOf(ConditionPhase phase) =>
+      [for (final p in conditionPhotos) if (p.phase == phase) p];
+
   int get durationDays => inclusiveDays(startDate, endDate);
 
   /// Mis. "Sepatu Hiking × 1 (ukuran 42)".
@@ -550,7 +557,16 @@ class AiFineOpinion {
     required this.suggestedFee,
     required this.explanation,
     required this.proposedFee,
+    this.photoFinding = '',
+    this.photosBefore = 0,
+    this.photosAfter = 0,
   });
+
+  /// Apa yang terlihat dari perbandingan foto kondisi. Kosong bila tidak
+  /// ada foto.
+  final String photoFinding;
+  final int photosBefore;
+  final int photosAfter;
 
   /// `wajar`, `terlalu_tinggi`, `terlalu_rendah`, atau `perlu_bukti`.
   final String verdict;
@@ -579,3 +595,38 @@ class AiRisk {
   final String summary;
   final List<String> factors;
 }
+
+/// Kapan foto kondisi alat diambil.
+enum ConditionPhase {
+  handover('Saat diserahkan'),
+  returned('Saat kembali');
+
+  const ConditionPhase(this.label);
+  final String label;
+}
+
+/// Satu foto kondisi alat pada sebuah transaksi.
+class ConditionPhoto {
+  const ConditionPhoto({required this.phase, required this.bytes, required this.at});
+
+  final ConditionPhase phase;
+  final Uint8List bytes;
+  final DateTime at;
+}
+
+/// Paling banyak foto kondisi per tahap.
+const maxConditionPhotos = 4;
+
+/// Kenapa foto kondisi tidak bisa ditambah pada [status], atau `null` bila
+/// boleh. Foto serah terima: selama alat belum kembali. Foto pengembalian:
+/// setelah alat diterima dan sebelum transaksi ditutup.
+String? conditionPhotoError(ConditionPhase phase, RentalStatus status) => switch (phase) {
+  ConditionPhase.handover =>
+    status == RentalStatus.paid || status == RentalStatus.pickedUp
+        ? null
+        : 'Foto serah terima hanya bisa ditambah sebelum alat kembali.',
+  ConditionPhase.returned =>
+    status == RentalStatus.returned
+        ? null
+        : 'Foto pengembalian hanya bisa ditambah setelah alat diterima dan sebelum transaksi ditutup.',
+};

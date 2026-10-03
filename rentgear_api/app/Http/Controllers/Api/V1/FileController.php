@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\ConditionPhoto;
 use App\Models\Guarantee;
 use App\Models\Rental;
 use App\Support\ApiException;
@@ -27,6 +28,14 @@ class FileController extends Controller
         RentalController::authorizeView($rental, $request);
 
         return $this->stream('local', $rental->payment_proof_path);
+    }
+
+    public function condition(Request $request, string $photoId): StreamedResponse
+    {
+        $photo = ConditionPhoto::find($photoId) ?? throw new ApiException('NOT_FOUND', 'Foto tidak ditemukan.');
+        RentalController::authorizeView(Rental::findOrFail($photo->rental_id), $request);
+
+        return $this->stream('local', $photo->path);
     }
 
     /** Foto alat bersifat publik: tampil di katalog tanpa login. */

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Domain\Fines\ReturnCondition;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\Present;
+use App\Models\ConditionPhoto;
 use App\Models\Rental;
 use App\Services\BookingService;
 use App\Services\RentalFlowService;
@@ -12,6 +13,7 @@ use App\Support\ApiException;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class RentalController extends Controller
@@ -20,7 +22,7 @@ class RentalController extends Controller
 
     private function present(Rental $rental): JsonResponse
     {
-        return ApiResponse::ok(Present::rental($rental->fresh(['guarantees', 'logs', 'review'])));
+        return ApiResponse::ok(Present::rental($rental->fresh(['guarantees', 'logs', 'review', 'conditionPhotos'])));
     }
 
     private function reason(Request $request): string
@@ -32,7 +34,7 @@ class RentalController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
-        $rentals = Rental::with('guarantees', 'logs', 'review')
+        $rentals = Rental::with('guarantees', 'logs', 'review', 'conditionPhotos')
             ->when($user->isCustomer(), fn ($q) => $q->where('customer_id', $user->id))
             ->when($user->isProvider(), fn ($q) => $q->where('provider_id', $user->provider_id))
             ->orderByDesc('created_at')->orderByDesc('id')
@@ -118,6 +120,16 @@ class RentalController extends Controller
         $request->validate(['proof' => 'required|image|max:8192']);
 
         return $this->present($this->flow->submitPayment($id, $request->user(), $request->file('proof')));
+    }
+
+    public function conditionPhoto(Request $request, string $id): JsonResponse
+    {
+        $data = $request->validate([
+            'phase' => ['required', Rule::in([ConditionPhoto::HANDOVER, ConditionPhoto::RETURN])],
+            'photo' => 'required|image|max:8192',
+        ]);
+
+        return $this->present($this->flow->addConditionPhoto($id, $request->user(), $data['phase'], $request->file('photo')));
     }
 
     public function handover(Request $request, string $id): JsonResponse

@@ -135,6 +135,10 @@ class LocalCodec {
         'createdAt': _date(r.createdAt),
         'cancelReason': r.cancelReason,
         'paymentProof': r.paymentProof == null ? null : savePhoto('${r.id}-payment', r.paymentProof!),
+        'conditionPhotos': [
+          for (final (i, p) in r.conditionPhotos.indexed)
+            {'phase': p.phase.name, 'at': _date(p.at), 'file': savePhoto('${r.id}-condition-$i', p.bytes)},
+        ],
         'returnedAt': _date(r.returnedAt),
         'returnCondition': r.returnCondition?.name,
         'lateFee': r.lateFee,
@@ -191,6 +195,12 @@ class LocalCodec {
       )
         ..cancelReason = j['cancelReason'] as String?
         ..paymentProof = loadPhoto(j['paymentProof'] as String?)
+        // Foto yang berkasnya hilang dilewati; data lama belum punya kunci ini.
+        ..conditionPhotos.addAll([
+          for (final p in ((j['conditionPhotos'] as List?) ?? const []).cast<Map<String, dynamic>>())
+            if (loadPhoto(p['file'] as String?) case final bytes?)
+              ConditionPhoto(phase: ConditionPhase.values.byName(p['phase'] as String), bytes: bytes, at: _parse(p['at'])!),
+        ])
         // Kolom denda belum ada di data versi 2, jadi semuanya boleh kosong.
         ..returnedAt = _parse(j['returnedAt'])
         ..returnCondition = _byName(ReturnCondition.values, j['returnCondition'])

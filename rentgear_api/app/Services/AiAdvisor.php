@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Domain\Fines\BlacklistPolicy;
+use App\Models\ConditionPhoto;
 use App\Models\Equipment;
 use App\Models\Rental;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Tiga saran AI: paket alat untuk penyewa, pendapat atas denda kerusakan, dan tingkat risiko penyewa untuk admin.
@@ -101,6 +103,23 @@ final class AiAdvisor
             'denda_terlambat' => (float) $r->late_fee,
         ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
+        // Foto kondisi alat (bukan foto orang atau dokumen) ikut dikirim bila ada.
+        $photos = $r->conditionPhotos;
+        $before = $photos->where('phase', ConditionPhoto::HANDOVER)->count();
+        $after = $photos->where('phase', ConditionPhoto::RETURN)->count();
+        $disk = Storage::disk('local');
+        $images = $photos->filter(fn (ConditionPhoto $p) => $disk->exists($p->path))->values()
+            ->map(fn (ConditionPhoto $p, int $i) => [
+                'label' => 'Foto '.($i + 1).': '.($p->phase === ConditionPhoto::HANDOVER ? 'saat diserahkan ke penyewa' : 'saat kembali dari penyewa'),
+                'mime' => $disk->mimeType($p->path) ?: 'image/jpeg',
+                'data' => base64_encode($disk->get($p->path)),
+            ])->all();
+        $photoRule = $images === []
+            ? 'Tidak ada foto kondisi alat. Isi "temuan_foto" dengan teks kosong.'
+            : "Terlampir $before foto saat diserahkan dan $after foto saat kembali. Bandingkan keduanya. Di \"temuan_foto\" "
+                .'tulis paling banyak dua kalimat: kerusakan apa yang terlihat baru muncul, atau katakan bila foto tidak '
+                .'cukup jelas atau tidak bisa dibandingkan. Jangan mengarang kerusakan yang tidak terlihat.';
+
         $answer = $this->gemini->json(<<<PROMPT
             Kamu membantu admin marketplace sewa alat hiking menilai denda kerusakan. Aturan platform:
             denda kerusakan ditetapkan penyedia, paling tinggi sebesar total deposit, dan harus sebanding dengan
@@ -109,7 +128,9 @@ final class AiAdvisor
             Data transaksi:
             $facts
 
-            Nilai apakah denda yang diusulkan wajar untuk kondisi dan catatan itu. Bila catatan terlalu singkat untuk
+            $photoRule
+
+            Nilai apakah denda yang diusulkan wajar untuk kondisi, catatan, dan foto itu. Bila bukti terlalu sedikit untuk
             menilai, pilih "perlu_bukti". "denda_saran" dalam rupiah, antara 0 dan total deposit. "penjelasan" paling
             banyak tiga kalimat dalam bahasa Indonesia, tanpa menyebut dirimu sebagai AI.
             PROMPT, [
@@ -118,9 +139,10 @@ final class AiAdvisor
                 'penilaian' => ['type' => 'STRING', 'enum' => ['wajar', 'terlalu_tinggi', 'terlalu_rendah', 'perlu_bukti']],
                 'denda_saran' => ['type' => 'NUMBER'],
                 'penjelasan' => self::STRING,
+                'temuan_foto' => self::STRING,
             ],
-            'required' => ['penilaian', 'denda_saran', 'penjelasan'],
-        ]);
+            'required' => ['penilaian', 'denda_saran', 'penjelasan', 'temuan_foto'],
+        ], $images);
 
         return [
             'verdict' => (string) ($answer['penilaian'] ?? 'perlu_bukti'),
@@ -128,6 +150,8 @@ final class AiAdvisor
             'suggestedFee' => max(0.0, min((float) ($answer['denda_saran'] ?? 0), $deposit)),
             'explanation' => (string) ($answer['penjelasan'] ?? ''),
             'proposedFee' => (float) $r->damage_fee, 'depositTotal' => $deposit,
+            'photoFinding' => $images === [] ? '' : trim((string) ($answer['temuan_foto'] ?? '')),
+            'photosBefore' => $before, 'photosAfter' => $after,
         ];
     }
 

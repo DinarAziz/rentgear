@@ -125,6 +125,10 @@ final class Present
             'lateFee' => $r->late_fee, 'damageFee' => $r->damage_fee, 'damageNote' => $r->damage_note,
             'damageReview' => $r->damage_review, 'reviewReason' => $r->review_reason, 'reviewNote' => $r->review_note,
             'guarantees' => $r->guarantees->map(self::guarantee(...))->all(),
+            // Fotonya diunduh lewat `files/condition/{id}`.
+            'conditionPhotos' => $r->conditionPhotos->map(fn ($p) => [
+                'id' => (string) $p->id, 'phase' => $p->phase, 'at' => self::time($p->at),
+            ])->all(),
             'logs' => $r->logs->map(fn ($l) => [
                 'from' => $l->from, 'to' => $l->to, 'actorName' => $l->actor_name,
                 'at' => self::time($l->at), 'note' => $l->note,

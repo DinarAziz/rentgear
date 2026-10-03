@@ -307,4 +307,17 @@ void main() {
     expect(find.text('Peta'), findsOneWidget);
     expect(find.text('Saran AI'), findsNothing);
   });
+
+  testWidgets('the store sees where to add condition photos on a paid rental', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Penyedia · Arjuna'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('INV-DEMO-0003'));
+    await tester.pumpAndSettle();
+    expect(find.text('Foto kondisi alat'), findsOneWidget);
+    expect(find.text('Saat diserahkan'), findsOneWidget);
+    expect(find.text('Belum ada foto.'), findsNWidgets(2));
+    // Hanya tahap serah terima yang bisa diisi sekarang.
+    expect(find.text('Tambah'), findsOneWidget);
+  });
 }

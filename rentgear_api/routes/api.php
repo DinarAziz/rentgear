@@ -50,6 +50,7 @@ Route::prefix('v1')->group(function () {
         Route::post('rentals/{id}/reject', [RentalController::class, 'reject']);
         Route::post('rentals/{id}/cancel', [RentalController::class, 'cancel']);
         Route::post('rentals/{id}/payment', [RentalController::class, 'payment']);
+        Route::post('rentals/{id}/condition-photos', [RentalController::class, 'conditionPhoto']);
         Route::post('rentals/{id}/handover', [RentalController::class, 'handover']);
         Route::post('rentals/{id}/return', [RentalController::class, 'receiveReturn']);
         Route::post('rentals/{id}/complete', [RentalController::class, 'complete']);
@@ -59,6 +60,7 @@ Route::prefix('v1')->group(function () {
 
         Route::get('files/guarantees/{guaranteeId}', [FileController::class, 'guarantee']);
         Route::get('files/payments/{rentalId}', [FileController::class, 'payment']);
+        Route::get('files/condition/{photoId}', [FileController::class, 'condition']);
 
         Route::put('providers/{id}/status', [AdminController::class, 'providerStatus']);
         Route::get('customers', [AdminController::class, 'customers']);

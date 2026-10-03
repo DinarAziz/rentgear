@@ -102,8 +102,11 @@ class AiTest extends ApiTestCase
     public function test_the_app_keeps_working_when_ai_is_down_or_not_configured(): void
     {
         Http::fake(['generativelanguage.googleapis.com/*' => Http::response(['error' => 'quota'], 429)]);
-        $this->assertApiError($this->as('budi')->postJson('/api/v1/ai/recommend', ['trip' => 'Semeru', 'people' => 2, 'days' => 2]),
-            'AI_UNAVAILABLE', 503);
+        $response = $this->as('budi')->postJson('/api/v1/ai/recommend', ['trip' => 'Semeru', 'people' => 2, 'days' => 2]);
+        $this->assertApiError($response, 'AI_UNAVAILABLE', 503);
+        $this->assertSame('Kuota AI sedang habis. Coba lagi beberapa menit lagi.', $response->json('error.message'));
+        // Kuota habis tidak dicoba ulang.
+        Http::assertSentCount(1);
 
         Http::fake(['generativelanguage.googleapis.com/*' => Http::response(['candidates' => [['content' => ['parts' => [['text' => 'bukan json']]]]]])]);
         $this->assertApiError($this->postJson('/api/v1/ai/recommend', ['trip' => 'Semeru', 'people' => 2, 'days' => 2]), 'AI_UNAVAILABLE', 503);

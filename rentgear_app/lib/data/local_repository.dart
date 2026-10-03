@@ -648,6 +648,20 @@ class LocalRentGearRepository implements RentGearRepository {
       });
 
   @override
+  Future<Rental> addConditionPhoto(String rentalId, AppUser actor, ConditionPhase phase, Uint8List photo) =>
+      _mutate(() {
+        final r = _rentalById(rentalId);
+        _requireOwner(r, actor);
+        final error = conditionPhotoError(phase, r.status);
+        if (error != null) throw AppException('INVALID_STATE', error);
+        if (r.conditionPhotosOf(phase).length >= maxConditionPhotos) {
+          throw const AppException('VALIDATION', 'Paling banyak $maxConditionPhotos foto per tahap.');
+        }
+        r.conditionPhotos.add(ConditionPhoto(phase: phase, bytes: photo, at: DateTime.now()));
+        return r;
+      });
+
+  @override
   Future<Rental> handover(String rentalId, AppUser actor) => _mutate(() {
         final r = _rentalById(rentalId);
         _requireOwner(r, actor);

@@ -6,6 +6,7 @@ use App\Domain\Fines\FineCalculator;
 use App\Domain\Fines\ReturnCondition;
 use App\Domain\Rental\RentalStateMachine;
 use App\Domain\Rental\RentalStatus;
+use App\Models\ConditionPhoto;
 use App\Models\Rental;
 use App\Models\Review;
 use App\Models\User;
@@ -125,6 +126,31 @@ final class RentalFlowService
             // nominal menunggu payment gateway.
             $this->transition($r, RentalStatus::Paid, $actor, 'Bukti transfer diunggah');
             $r->update(['payment_proof_path' => $proof->storeAs('payments', "{$r->id}.".$proof->extension(), 'local')]);
+        });
+    }
+
+    /**
+     * Penyedia menambah foto kondisi alat: saat diserahkan (sebelum atau sesudah serah terima, selama alat belum
+     * kembali) atau saat kembali (setelah alat diterima, sebelum transaksi ditutup). Foto tidak bisa dihapus.
+     */
+    public function addConditionPhoto(string $rentalId, User $actor, string $phase, UploadedFile $photo): Rental
+    {
+        return $this->on($rentalId, function (Rental $r) use ($actor, $phase, $photo) {
+            $this->requireOwner($r, $actor);
+            [$allowed, $error] = $phase === ConditionPhoto::HANDOVER
+                ? [['paid', 'pickedUp'], 'Foto serah terima hanya bisa ditambah sebelum alat kembali.']
+                : [['returned'], 'Foto pengembalian hanya bisa ditambah setelah alat diterima dan sebelum transaksi ditutup.'];
+            if (! in_array($r->status, $allowed, true)) {
+                throw new ApiException('INVALID_STATE', $error);
+            }
+            $count = $r->conditionPhotos()->where('phase', $phase)->count();
+            if ($count >= ConditionPhoto::MAX_PER_PHASE) {
+                throw new ApiException('VALIDATION', 'Paling banyak '.ConditionPhoto::MAX_PER_PHASE.' foto per tahap.');
+            }
+            $name = $phase.'-'.($count + 1).'.'.$photo->extension();
+            $r->conditionPhotos()->create([
+                'phase' => $phase, 'path' => $photo->storeAs("condition/{$r->id}", $name, 'local'), 'at' => now(),
+            ]);
         });
     }
 

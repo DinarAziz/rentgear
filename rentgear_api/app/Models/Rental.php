@@ -41,6 +41,11 @@ class Rental extends Model
         return $this->hasOne(Review::class);
     }
 
+    public function conditionPhotos(): HasMany
+    {
+        return $this->hasMany(ConditionPhoto::class)->orderBy('id');
+    }
+
     public function depositTotal(): float
     {
         return $this->deposit_snapshot * $this->qty;

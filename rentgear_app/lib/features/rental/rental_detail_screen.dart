@@ -14,6 +14,7 @@ import '../../widgets/guarantee_widgets.dart';
 import '../../widgets/motion.dart';
 import '../../widgets/photo_widgets.dart';
 import '../customer/provider_store_screen.dart';
+import 'condition_photos.dart';
 import 'fine_widgets.dart';
 
 /// Detail transaksi untuk semua role. Tombol aksi menyesuaikan role & status.
@@ -190,6 +191,10 @@ class _Body extends StatelessWidget {
               ),
             ),
           ),
+        ],
+        if (ConditionPhotosSection.visibleFor(r, user)) ...[
+          const SectionTitle('Foto kondisi alat'),
+          ConditionPhotosSection(rental: r),
         ],
         SectionTitle('Jaminan (${r.guarantees.length})'),
         _GuaranteeHint(rental: r, role: user.role),
@@ -443,6 +448,14 @@ class _ActionBar extends StatelessWidget {
                 InfoRow('Saran AI', rupiah(o.suggestedFee)),
                 const SizedBox(height: 8),
                 Text(o.explanation),
+                const SizedBox(height: 10),
+                Text(
+                  o.photoFinding.isEmpty
+                      ? 'Tidak ada foto kondisi yang bisa dibandingkan.'
+                      : 'Dari ${o.photosBefore} foto saat diserahkan dan '
+                            '${o.photosAfter} foto saat kembali: ${o.photoFinding}',
+                  style: const TextStyle(fontSize: 13, color: Colors.black54),
+                ),
               ],
             ),
           ),

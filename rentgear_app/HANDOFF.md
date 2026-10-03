@@ -682,3 +682,39 @@ Later on the emulator (2026-10-04, same server-mode build), three checks that we
 - The audit trail in server mode: the admin's AI requests and the logins are listed, newest first.
 - A customer's view of a store reply: Budi opens Arjuna Outdoor and sees "Balasan toko, 3 Okt 2026" under Sinta
   Maharani's review, with no "Balas" button.
+
+## Session (2026-10-04, condition photos)
+
+Reader-facing description: `../docs/08-RENCANA-KERJA.md`, section 5, "Foto kondisi alat".
+
+- Model: `Rental.conditionPhotos` (`ConditionPhoto` with `ConditionPhase.handover` or `.returned`, bytes, time),
+  `conditionPhotoError`, `maxConditionPhotos` (4 per phase). Repository operation `addConditionPhoto`. Only the owning
+  store adds photos: handover photos while the status is `paid` or `pickedUp`, return photos while it is `returned`.
+  Photos are optional and cannot be removed.
+- Local data keeps them under `conditionPhotos` in each rental. Server: table `condition_photos`, route
+  `POST rentals/{id}/condition-photos` (`phase` = `handover` or `return`, `photo`), files on the private disk under
+  `condition/{rentalId}/`, served by `GET files/condition/{id}` to the renter, the store owner and admin.
+- UI: `lib/features/rental/condition_photos.dart`, shown on the rental detail above "Jaminan" when photos exist or the
+  store can add one.
+- AI: `AiAdvisor::fineOpinion` attaches the photos (labelled by phase) and returns `photoFinding`, `photosBefore`,
+  `photosAfter`. The dialog shows the finding under the explanation.
+- `GeminiClient` now logs the reason of a failure to `storage/logs/laravel.log`, retries once only when the connection
+  fails, and answers "Kuota AI sedang habis" on a 429.
+- Tests: 86 app and 104 server pass. The deck shows 190. The migration was run with `migrate:fresh --seed`, so the
+  server database is back to demo data plus this session's photos on INV-DEMO-0004.
+
+Checked on the emulator in server mode: Dewi adds a handover photo and a return photo to INV-DEMO-0004 from the
+gallery; both show with their time. The two test images are `rentgear_kondisi_awal.jpg` and
+`rentgear_kondisi_robek.jpg` in the emulator's `/sdcard/Pictures/`; the second is the same tent photo with a tear
+drawn on it, not real damage.
+
+Checked against the real Gemini through the server: the finding was "robekan berbentuk zig-zag yang jelas pada sisi
+kiri pintu tenda, yang tidak ada pada foto saat diserahkan".
+
+Not checked: the AI dialog with the photo finding on a device. The free-tier Gemini quota ran out during repeated
+testing (HTTP 429), and it was still out at the end of the session. The emulator showed the quota message instead.
+Retry it once after the quota resets, and do not call the AI routes in a loop. Local mode on a device was not checked
+either (covered by tests).
+
+Differences from `../docs/02-ALGORITMA.md` (ALG-3): photos belong to the rental, not to a physical unit, and there is
+no 0 to 100 condition score or checklist.

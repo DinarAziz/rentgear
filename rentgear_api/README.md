@@ -84,8 +84,11 @@ diganti dengan `GEMINI_MODEL` (bawaan `gemini-2.5-flash`). Tiga rute, semuanya h
 - `POST /api/v1/ai/rentals/{id}/fine-opinion`: pendapat atas denda kerusakan, admin saja.
 - `POST /api/v1/ai/customers/{id}/risk`: tingkat risiko penyewa, admin saja.
 
-Tanpa kunci, atau bila Gemini tidak menjawab, rute ini menjawab `AI_UNAVAILABLE` (503) dan rute lain tetap jalan.
-Identitas penyewa tidak dikirim ke Gemini.
+Tanpa kunci, bila Gemini tidak menjawab, atau bila kuotanya habis (429), rute ini menjawab `AI_UNAVAILABLE` (503) dan
+rute lain tetap jalan. Sebabnya dicatat di `storage/logs/laravel.log`. Identitas penyewa tidak dikirim ke Gemini.
+
+Foto kondisi alat (`POST /api/v1/rentals/{id}/condition-photos`, isian `phase` = `handover` atau `return`, dan
+`photo`) disimpan di disk privat dan ikut dikirim ke Gemini saat admin meminta pendapat atas denda.
 
 ## Jejak audit
 

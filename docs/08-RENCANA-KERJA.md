@@ -11,7 +11,7 @@ diambil, supaya tiap tahap bisa dikerjakan terpisah.
 | 2 | Katalog per penyedia: halaman toko, rating, komentar, follow, lokasi di peta | Selesai, lihat bagian 2 |
 | 3 | Server Laravel + MySQL, lalu Flutter bisa memilih data lokal atau server | Selesai, lihat bagian 3 |
 | 4 | Daftar dan login dengan akun Google, dan jejak audit admin | Kode selesai; login Google menunggu client ID, lihat bagian 4 |
-| 5 | Fitur AI dengan Gemini | Tiga saran AI selesai, pemeriksaan foto belum, lihat bagian 5 |
+| 5 | Fitur AI dengan Gemini | Selesai: tiga saran AI dan perbandingan foto kondisi, lihat bagian 5 |
 | 6 | Aturan denda yang bisa diatur penyedia | Belum, lihat bagian 6 |
 | 7 | Payment gateway dan versi iOS | Menyusul |
 
@@ -144,9 +144,22 @@ Aturan yang dipegang:
 - Tombol AI hanya tampil saat aplikasi memakai server. Rute AI dibatasi 15 permintaan per menit.
 - Permintaan admin ke AI ikut tercatat di jejak audit.
 
-Belum dibuat: pemeriksaan kondisi alat dari foto sebelum dan sesudah sewa (ALG-3). Itu butuh foto kondisi saat
-serah terima dan saat kembali, yang belum ada di aplikasi. Skor dan penyusunan paket yang sepenuhnya deterministik
-seperti di `02-ALGORITMA.md` (ALG-1) juga belum; saat ini pemilihan alat dilakukan AI lalu diperiksa server.
+### Foto kondisi alat (ditambahkan 4 Oktober 2026)
+
+- Toko menambah foto alat "saat diserahkan" (selama alat belum kembali) dan "saat kembali" (setelah alat diterima,
+  sebelum transaksi ditutup), paling banyak 4 foto per tahap, dari bagian "Foto kondisi alat" di detail transaksi.
+- Foto tidak wajib, dan foto yang sudah tersimpan tidak bisa dihapus. Penyewa, toko, dan admin bisa melihatnya; orang
+  lain tidak.
+- Saat admin menekan "Minta pendapat AI", foto kedua tahap ikut dikirim. AI menulis apa yang terlihat baru rusak, atau
+  mengatakan fotonya tidak cukup jelas. Yang dikirim hanya foto alat, bukan foto orang atau dokumen.
+- Di server: `POST /api/v1/rentals/{id}/condition-photos` dan `GET /api/v1/files/condition/{id}`.
+
+Berbeda dari `02-ALGORITMA.md` (ALG-3): foto melekat pada transaksi, bukan pada unit alat, karena aplikasi belum
+mencatat unit satu per satu. Skor kondisi 0 sampai 100 dan daftar periksa belum dibuat. Skor dan penyusunan paket yang
+sepenuhnya deterministik (ALG-1) juga belum; saat ini pemilihan alat dilakukan AI lalu diperiksa server.
+
+Kunci Gemini yang dipakai adalah paket gratis. Kuotanya habis saat diuji berulang-ulang, dan server lalu menjawab
+"Kuota AI sedang habis". Untuk demo, jangan menekan tombol AI berkali-kali dalam satu menit.
 
 ## 6. Aturan denda yang bisa diatur penyedia (belum dibuat)
 
