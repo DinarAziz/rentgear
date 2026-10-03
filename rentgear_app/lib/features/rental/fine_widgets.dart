@@ -78,9 +78,9 @@ class FineSection extends StatelessWidget {
                         bold: true,
                       ),
                       const SizedBox(height: 6),
-                      const Text(
-                        'Denda bertambah 1,5 kali tarif harian untuk tiap hari terlambat, '
-                        'sampai alat dikembalikan.',
+                      Text(
+                        'Denda bertambah ${kali(r.finePolicy.lateMultiplier)} tarif harian '
+                        'untuk tiap hari terlambat, sampai alat dikembalikan.',
                         style: _hint,
                       ),
                     ],
@@ -163,7 +163,15 @@ class _ReturnCheckDialogState extends State<_ReturnCheckDialog> {
                   ChoiceChip(
                     label: Text(c.label),
                     selected: _condition == c,
-                    onSelected: (_) => setState(() => _condition = c),
+                    // Nominal diisi dari pedoman toko; penyedia boleh mengubahnya.
+                    onSelected: (_) => setState(() {
+                      _condition = c;
+                      final guide = r.finePolicy.guidelineFee(
+                        c,
+                        r.depositTotal,
+                      );
+                      _fee.text = guide > 0 ? ribuan(guide) : '';
+                    }),
                   ),
               ],
             ),
@@ -177,9 +185,11 @@ class _ReturnCheckDialogState extends State<_ReturnCheckDialog> {
                   labelText: 'Denda kerusakan',
                   prefixText: 'Rp ',
                   helperText:
+                      'Pedoman toko untuk ${_condition.label.toLowerCase()}: '
+                      '${rupiah(r.finePolicy.guidelineFee(_condition, r.depositTotal))}. '
                       'Maksimal ${rupiah(r.depositTotal)} (sebesar deposit). '
                       'Di atas ${rupiah(r.depositTotal * damageReviewShare)} ditinjau admin.',
-                  helperMaxLines: 3,
+                  helperMaxLines: 5,
                   errorText: _fee.text.isEmpty ? null : error,
                   errorMaxLines: 2,
                 ),
@@ -316,4 +326,56 @@ class _DamageDecisionDialogState extends State<_DamageDecisionDialog> {
       ],
     );
   }
+}
+
+/// "1,5 kali", "2 kali".
+String kali(double multiplier) {
+  final text = multiplier == multiplier.roundToDouble()
+      ? multiplier.toStringAsFixed(0)
+      : multiplier.toStringAsFixed(1).replaceAll('.', ',');
+  return '$text kali';
+}
+
+/// Aturan denda toko, ditampilkan ke penyewa sebelum memesan.
+class FinePolicyInfo extends StatelessWidget {
+  const FinePolicyInfo({super.key, required this.policy});
+
+  final FinePolicy policy;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    child: Padding(
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InfoRow(
+            'Terlambat, per hari',
+            '${kali(policy.lateMultiplier)} tarif harian',
+          ),
+          InfoRow(
+            'Masa tenggang',
+            policy.graceHours == 0 ? 'Tidak ada' : '${policy.graceHours} jam',
+          ),
+          const Divider(),
+          InfoRow(
+            'Rusak ringan',
+            'sekitar ${policy.minorDamagePercent}% deposit',
+          ),
+          InfoRow(
+            'Rusak berat',
+            'sekitar ${policy.majorDamagePercent}% deposit',
+          ),
+          InfoRow('Hilang', 'sekitar ${policy.lostPercent}% deposit'),
+          const SizedBox(height: 6),
+          const Text(
+            'Denda kerusakan ditetapkan toko saat alat kembali dan tidak pernah '
+            'melebihi deposit. Anda bisa mengajukan keberatan ke admin. Aturan '
+            'ini dikunci saat Anda memesan.',
+            style: _hint,
+          ),
+        ],
+      ),
+    ),
+  );
 }

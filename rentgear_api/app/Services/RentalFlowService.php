@@ -177,7 +177,8 @@ final class RentalFlowService
             }
 
             $now = now();
-            $days = FineCalculator::lateDays($r->end_date, $now);
+            $policy = $r->finePolicy();
+            $days = $policy->lateDays($r->end_date, $now);
             $needsReview = FineCalculator::needsAdminReview($damageFee, $r->depositTotal());
             $this->transition($r, RentalStatus::Returned, $actor, implode('. ', array_filter([
                 "Kondisi alat: {$condition->label()}",
@@ -186,7 +187,7 @@ final class RentalFlowService
             $r->update([
                 'returned_at' => $now,
                 'return_condition' => $condition->value,
-                'late_fee' => FineCalculator::lateFee($r->price_per_day_snapshot, $r->qty, $days),
+                'late_fee' => $policy->lateFee($r->price_per_day_snapshot, $r->qty, $days),
                 'damage_fee' => $damageFee,
                 'damage_note' => $damageNote === null ? null : trim($damageNote),
                 'damage_review' => $needsReview ? 'pending' : 'none',

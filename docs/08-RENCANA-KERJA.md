@@ -12,7 +12,7 @@ diambil, supaya tiap tahap bisa dikerjakan terpisah.
 | 3 | Server Laravel + MySQL, lalu Flutter bisa memilih data lokal atau server | Selesai, lihat bagian 3 |
 | 4 | Daftar dan login dengan akun Google, dan jejak audit admin | Kode selesai; login Google menunggu client ID, lihat bagian 4 |
 | 5 | Fitur AI dengan Gemini | Selesai: tiga saran AI dan perbandingan foto kondisi, lihat bagian 5 |
-| 6 | Aturan denda yang bisa diatur penyedia | Belum, lihat bagian 6 |
+| 6 | Aturan denda yang bisa diatur penyedia | Selesai, lihat bagian 6 |
 | 7 | Payment gateway dan versi iOS | Menyusul |
 
 ## 1. Denda dan blacklist (selesai)
@@ -161,25 +161,26 @@ sepenuhnya deterministik (ALG-1) juga belum; saat ini pemilihan alat dilakukan A
 Kunci Gemini yang dipakai adalah paket gratis. Kuotanya habis saat diuji berulang-ulang, dan server lalu menjawab
 "Kuota AI sedang habis". Untuk demo, jangan menekan tombol AI berkali-kali dalam satu menit.
 
-## 6. Aturan denda yang bisa diatur penyedia (belum dibuat)
+## 6. Aturan denda yang bisa diatur penyedia (selesai)
 
-Permintaan pemilik proyek pada 3 Oktober 2026: aturan denda jangan kaku, dan penyedia bisa mengaturnya sendiri.
+Dibuat 4 Oktober 2026 atas permintaan pemilik proyek: aturan denda jangan kaku, dan penyedia bisa mengaturnya.
+Keputusan pemilik proyek pada hari yang sama: penyedia mengatur pengali denda terlambat, masa tenggang, dan pedoman
+denda kerusakan; pengali dibatasi 1 sampai 2 kali; aturan dikunci saat booking.
 
-Saat ini semua toko memakai angka yang sama dan angkanya tertulis di kode (`rentgear_app/lib/domain/fines.dart` dan
-`rentgear_api/app/Domain/Fines/`): denda terlambat 1,5 kali tarif harian, denda kerusakan paling tinggi sebesar
-deposit, tinjauan admin bila denda di atas 50% deposit, dan blacklist otomatis setelah 3 pelanggaran.
+- Penyedia membuka Profil, "Aturan denda", lalu menggeser tiga hal:
+  - denda per hari terlambat, 1 sampai 2 kali tarif harian (bawaan 1,5 kali);
+  - masa tenggang, 0 sampai 12 jam setelah hari terakhir sewa (bawaan tidak ada);
+  - pedoman denda kerusakan dalam persen deposit untuk rusak ringan, rusak berat, dan hilang (bawaan 25, 60, 100).
+- Pedoman kerusakan bukan batas. Ia menjadi isian awal saat penyedia menerima alat kembali, dan penyedia tetap boleh
+  mengubah nominalnya sesuai kerusakan.
+- Penyewa melihat "Aturan denda toko" di halaman detail alat, sebelum memesan.
+- Tiap sewa menyimpan salinan aturan saat booking dibuat. Bila toko mengubah aturannya, sewa yang sudah dipesan tidak
+  ikut berubah.
+- Pendapat AI atas denda memakai pedoman toko sebagai acuan.
 
-Rencananya aturan denda menjadi bagian dari pengaturan toko, seperti aturan jaminan sekarang. Yang perlu diputuskan
-sebelum dikerjakan:
+Yang tetap diatur platform, sama untuk semua toko, karena melindungi penyewa: denda kerusakan tidak boleh melebihi
+deposit, denda di atas separuh deposit ditinjau admin, penyewa boleh mengajukan keberatan, dan blacklist otomatis
+berlaku setelah 3 pelanggaran.
 
-- Apa saja yang boleh diatur penyedia: pengali denda terlambat, masa tenggang, pedoman denda per tingkat kerusakan
-  (rusak ringan, rusak berat, hilang).
-- Batas dari platform supaya penyewa tetap terlindungi, misalnya pengali paling tinggi dan denda kerusakan tetap
-  tidak boleh melebihi deposit.
-- Apakah ambang tinjauan admin dan blacklist otomatis tetap diatur platform. Usulannya tetap di platform, karena
-  keduanya melindungi penyewa dari toko.
-- Aturan mana yang berlaku untuk sewa yang sedang berjalan. Usulannya aturan dikunci saat booking dibuat, seperti
-  harga dan deposit.
-
-Penyewa harus bisa melihat aturan denda toko sebelum memesan. Pedoman denda per tingkat kerusakan juga akan dipakai
-sebagai acuan pendapat AI atas denda, yang sekarang menilai tanpa pedoman.
+Kodenya: `FinePolicy` di `rentgear_app/lib/domain/fines.dart` dan `rentgear_api/app/Domain/Fines/FinePolicy.php`.
+Di server: `PUT /api/v1/provider/fine-policy`.

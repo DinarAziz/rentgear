@@ -88,6 +88,10 @@ abstract class RentGearRepository {
   Future<ProviderProfile> updateGuaranteePolicy(
       String providerId, GuaranteePolicy policy, AppUser actor);
 
+  /// Penyedia mengatur aturan denda tokonya. Berlaku untuk booking berikutnya,
+  /// bukan sewa yang sudah dipesan.
+  Future<ProviderProfile> updateFinePolicy(String providerId, FinePolicy policy, AppUser actor);
+
   /// Penyedia memindahkan titik tokonya di peta.
   Future<ProviderProfile> updateProviderLocation(
       String providerId, AppUser actor, {required double latitude, required double longitude});

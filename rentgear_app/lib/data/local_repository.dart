@@ -128,6 +128,7 @@ class LocalRentGearRepository implements RentGearRepository {
           p.id: {
             'status': p.status.name,
             'policy': codec.policy(p.policy),
+            'finePolicy': p.finePolicy.toJson(),
             'latitude': p.latitude,
             'longitude': p.longitude,
           },
@@ -168,6 +169,7 @@ class LocalRentGearRepository implements RentGearRepository {
       p
         ..status = ProviderStatus.values.byName(saved['status'] as String)
         ..policy = codec.policyFrom(saved['policy'] as Map<String, dynamic>)
+        ..finePolicy = FinePolicy.fromJson(saved['finePolicy'] as Map<String, dynamic>?)
         // Data lama belum menyimpan lokasi; pakai titik bawaan toko.
         ..latitude = (saved['latitude'] as num?)?.toDouble() ?? p.latitude
         ..longitude = (saved['longitude'] as num?)?.toDouble() ?? p.longitude;
@@ -559,7 +561,9 @@ class LocalRentGearRepository implements RentGearRepository {
           logs: [
             StatusLog(from: null, to: RentalStatus.pendingConfirmation, actorName: customer.name, at: now),
           ],
-        );
+        )
+          // Aturan denda ikut dikunci, seperti harga dan deposit.
+          ..finePolicy = p.finePolicy;
         _rentals.add(rental);
         _idempotency[req.idempotencyKey] = id;
         return rental;
@@ -694,8 +698,8 @@ class LocalRentGearRepository implements RentGearRepository {
         if (error != null) throw AppException('VALIDATION', error);
 
         final now = DateTime.now();
-        final days = lateDays(r.endDate, now);
-        final lateFee = lateFeeFor(pricePerDay: r.pricePerDaySnapshot, qty: r.qty, days: days);
+        final days = r.finePolicy.lateDays(r.endDate, now);
+        final lateFee = r.finePolicy.lateFee(pricePerDay: r.pricePerDaySnapshot, qty: r.qty, days: days);
         final needsReview = needsAdminReview(damageFee, r.depositTotal);
         _transition(r, RentalStatus.returned, actor,
             note: [
@@ -832,6 +836,18 @@ class LocalRentGearRepository implements RentGearRepository {
               'Jenis jaminan yang diterima lebih sedikit dari jumlah jaminan yang diminta.');
         }
         p.policy = policy;
+        return p;
+      });
+
+  @override
+  Future<ProviderProfile> updateFinePolicy(String providerId, FinePolicy policy, AppUser actor) => _mutate(() {
+        final p = _providerById(providerId);
+        if (actor.providerId != p.id) {
+          throw const AppException('FORBIDDEN', 'Bukan toko Anda.');
+        }
+        final error = policy.error;
+        if (error != null) throw AppException('VALIDATION', error);
+        p.finePolicy = policy;
         return p;
       });
 

@@ -320,4 +320,44 @@ void main() {
     // Hanya tahap serah terima yang bisa diisi sekarang.
     expect(find.text('Tambah'), findsOneWidget);
   });
+
+  testWidgets('the store edits its fine rules and the renter sees them', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Penyedia · Arjuna'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Profil'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Aturan denda'));
+    await tester.pumpAndSettle();
+    expect(find.text('Aturan Denda'), findsOneWidget);
+    expect(find.text('1,5 kali tarif harian'), findsOneWidget);
+    // Belum ada yang diubah, jadi belum bisa disimpan.
+    final save = find.widgetWithText(FilledButton, 'Simpan aturan denda');
+    expect(tester.widget<FilledButton>(save).onPressed, isNull);
+
+    // Geser pengali ke paling kanan (2 kali).
+    await tester.drag(find.byType(Slider).first, const Offset(600, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('2 kali tarif harian'), findsOneWidget);
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(find.text('Keluar'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('Keluar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Keluar').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Penyewa · Budi'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Arjuna Outdoor'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tenda Dome 4 Orang'));
+    await tester.pumpAndSettle();
+    final detail = find.ancestor(of: find.text('Harga'), matching: find.byType(Scrollable)).first;
+    await tester.scrollUntilVisible(find.text('Aturan denda toko'), 300, scrollable: detail);
+    await tester.scrollUntilVisible(find.text('2 kali tarif harian'), 200, scrollable: detail);
+    expect(find.text('2 kali tarif harian'), findsOneWidget);
+  });
 }

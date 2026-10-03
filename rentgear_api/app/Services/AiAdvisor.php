@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Domain\Fines\BlacklistPolicy;
+use App\Domain\Fines\ReturnCondition;
 use App\Models\ConditionPhoto;
 use App\Models\Equipment;
 use App\Models\Rental;
@@ -101,6 +102,9 @@ final class AiAdvisor
             'denda_kerusakan_diusulkan' => (float) $r->damage_fee,
             'catatan_penyedia' => $r->damage_note, 'keberatan_penyewa' => $r->review_reason,
             'denda_terlambat' => (float) $r->late_fee,
+            // Pedoman toko yang berlaku saat booking. Bukan batas, tetapi acuan kewajaran.
+            'pedoman_denda_toko_untuk_kondisi_ini' => $r->return_condition === null ? null
+                : $r->finePolicy()->guidelineFee(ReturnCondition::from($r->return_condition), $deposit),
         ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
         // Foto kondisi alat (bukan foto orang atau dokumen) ikut dikirim bila ada.
@@ -130,7 +134,8 @@ final class AiAdvisor
 
             $photoRule
 
-            Nilai apakah denda yang diusulkan wajar untuk kondisi, catatan, dan foto itu. Bila bukti terlalu sedikit untuk
+            Nilai apakah denda yang diusulkan wajar untuk kondisi, catatan, dan foto itu. Pedoman denda toko sudah
+            diketahui penyewa saat memesan: denda yang jauh di atas pedoman perlu alasan yang terlihat di catatan atau foto. Bila bukti terlalu sedikit untuk
             menilai, pilih "perlu_bukti". "denda_saran" dalam rupiah, antara 0 dan total deposit. "penjelasan" paling
             banyak tiga kalimat dalam bahasa Indonesia, tanpa menyebut dirimu sebagai AI.
             PROMPT, [

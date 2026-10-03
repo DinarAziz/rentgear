@@ -32,6 +32,7 @@ Route::prefix('v1')->group(function () {
         Route::post('equipment/{id}', [ProviderController::class, 'updateEquipment']);
         Route::put('provider/guarantee-policy', [ProviderController::class, 'guaranteePolicy']);
         Route::put('provider/location', [ProviderController::class, 'location']);
+        Route::put('provider/fine-policy', [ProviderController::class, 'finePolicy']);
 
         Route::get('providers', [StoreController::class, 'index']);
         Route::get('providers/{id}', [StoreController::class, 'show']);

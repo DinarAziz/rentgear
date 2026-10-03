@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domain\Fines\FinePolicy;
 use App\Models\Concerns\HasStringId;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -23,6 +24,7 @@ class Rental extends Model
             'deposit_snapshot' => 'float',
             'late_fee' => 'float',
             'damage_fee' => 'float',
+            'fine_policy' => 'array',
         ];
     }
 
@@ -44,6 +46,12 @@ class Rental extends Model
     public function conditionPhotos(): HasMany
     {
         return $this->hasMany(ConditionPhoto::class)->orderBy('id');
+    }
+
+    /** Aturan denda toko saat booking dibuat. Sewa lama tanpa salinan memakai aturan bawaan. */
+    public function finePolicy(): FinePolicy
+    {
+        return FinePolicy::fromArray($this->fine_policy);
     }
 
     public function depositTotal(): float

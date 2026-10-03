@@ -347,4 +347,46 @@ void main() {
       expect(shouldAutoBlacklist(violations: 6, baseline: 3), isTrue);
     });
   });
+
+  group('FinePolicy', () {
+    final end = DateTime(2026, 10, 5);
+
+    test('nilai bawaan sama dengan aturan tetap sebelumnya', () {
+      const policy = FinePolicy();
+      expect(policy.error, isNull);
+      expect(policy.lateFee(pricePerDay: 45000, qty: 1, days: 2), 135000);
+      expect(policy.lateDays(end, DateTime(2026, 10, 6, 0, 1)), 1);
+      expect(FinePolicy.fromJson(null), policy);
+      expect(FinePolicy.fromJson(policy.toJson()), policy);
+    });
+
+    test('masa tenggang dan pengali mengubah denda terlambat', () {
+      const policy = FinePolicy(lateMultiplier: 2, graceHours: 3);
+      expect(policy.lateDays(end, DateTime(2026, 10, 6, 2, 59)), 0);
+      expect(policy.lateDays(end, DateTime(2026, 10, 6, 3, 0)), 1);
+      expect(policy.lateDays(end, DateTime(2026, 10, 8, 10)), 3);
+      expect(policy.lateFee(pricePerDay: 45000, qty: 1, days: 2), 180000);
+    });
+
+    test('pedoman denda kerusakan adalah bagian dari deposit', () {
+      const policy = FinePolicy(minorDamagePercent: 20, majorDamagePercent: 50, lostPercent: 100);
+      expect(policy.guidelineFee(ReturnCondition.good, 150000), 0);
+      expect(policy.guidelineFee(ReturnCondition.minorDamage, 150000), 30000);
+      expect(policy.guidelineFee(ReturnCondition.majorDamage, 150000), 75000);
+      expect(policy.guidelineFee(ReturnCondition.lost, 150000), 150000);
+    });
+
+    test('aturan di luar batas platform ditolak', () {
+      expect(const FinePolicy(lateMultiplier: 2.1).error, isNotNull);
+      expect(const FinePolicy(lateMultiplier: 0.9).error, isNotNull);
+      expect(const FinePolicy(graceHours: 13).error, isNotNull);
+      expect(const FinePolicy(lostPercent: 101).error, isNotNull);
+      expect(const FinePolicy(minorDamagePercent: 70, majorDamagePercent: 60).error, isNotNull);
+      expect(
+        const FinePolicy(lateMultiplier: 1, graceHours: 12, minorDamagePercent: 0, majorDamagePercent: 0, lostPercent: 0)
+            .error,
+        isNull,
+      );
+    });
+  });
 }

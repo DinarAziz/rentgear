@@ -102,6 +102,8 @@ final class BookingService
                 'start_date' => $start, 'end_date' => $end,
                 'price_per_day_snapshot' => $equipment->price_per_day,
                 'deposit_snapshot' => $equipment->deposit_amount,
+                // Aturan denda ikut dikunci, seperti harga dan deposit.
+                'fine_policy' => $provider->finePolicy()->toArray(),
                 'status' => 'pendingConfirmation',
             ]);
             foreach ($guarantees as $g) {

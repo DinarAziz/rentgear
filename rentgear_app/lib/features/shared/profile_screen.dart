@@ -7,6 +7,7 @@ import '../../domain/models.dart';
 import '../../state/app_state.dart';
 import '../../widgets/common.dart';
 import '../customer/provider_store_screen.dart';
+import '../provider/fine_policy_screen.dart';
 import '../provider/store_location_screen.dart';
 import 'photo_credits_screen.dart';
 
@@ -84,6 +85,15 @@ class ProfileScreen extends StatelessWidget {
                       title: const Text('Halaman toko dan ulasan'),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => openProviderStore(context, p.id),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.gavel_outlined),
+                      title: const Text('Aturan denda'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(builder: (_) => FinePolicyScreen(provider: p)),
+                      ),
                     ),
                     ListTile(
                       leading: const Icon(Icons.place_outlined),

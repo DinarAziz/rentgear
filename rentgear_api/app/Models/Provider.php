@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domain\Fines\FinePolicy;
 use App\Models\Concerns\HasStringId;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -20,10 +21,16 @@ class Provider extends Model
     {
         return [
             'accepted_types' => 'array',
+            'fine_policy' => 'array',
             'latitude' => 'float',
             'longitude' => 'float',
             'high_value_threshold' => 'float',
         ];
+    }
+
+    public function finePolicy(): FinePolicy
+    {
+        return FinePolicy::fromArray($this->fine_policy);
     }
 
     /**

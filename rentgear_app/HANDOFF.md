@@ -723,3 +723,33 @@ Later on 2026-10-04 the quota had reset. The emulator showed the fine opinion di
 finding: "Denda wajar", Rp120.000, and "Dari 1 foto saat diserahkan dan 1 foto saat kembali: Foto saat kembali
 menunjukkan robekan berbentuk zig-zag yang jelas pada sisi kiri pintu tenda, yang tidak ada pada foto saat
 diserahkan." The request was made by the user on the emulator; the screenshot was taken without another AI call.
+
+## Session (2026-10-04, fine rules per store)
+
+Stage 6 of `../docs/08-RENCANA-KERJA.md`; section 6 there has the reader-facing description and the user's decisions
+(provider sets the late multiplier, the grace period and the damage guideline; multiplier limited to 1 to 2; rules
+locked at booking).
+
+- `FinePolicy` in `lib/domain/fines.dart` and `rentgear_api/app/Domain/Fines/FinePolicy.php`: `lateMultiplier`
+  (1.0 to 2.0, default 1.5), `graceHours` (0 to 12, default 0), `minorDamagePercent`, `majorDamagePercent`,
+  `lostPercent` (0 to 100, non-decreasing, defaults 25, 60, 100). The 12-hour limit on the grace period was chosen
+  here, not by the user.
+- `ProviderProfile.finePolicy` and `Rental.finePolicy`. `createBooking` copies the store's policy onto the rental;
+  the late fee on return uses the rental's copy. Old data without a policy reads as the defaults, so nothing changes
+  for existing rentals.
+- Repository operation `updateFinePolicy`; server route `PUT /api/v1/provider/fine-policy`; columns
+  `providers.fine_policy` and `rentals.fine_policy` (JSON, migration `2026_10_04_010000_add_fine_policy`, run on the
+  `rentgear` database).
+- UI: `lib/features/provider/fine_policy_screen.dart` (Profil > "Aturan denda", sliders with a worked example),
+  `FinePolicyInfo` on the equipment detail page ("Aturan denda toko"), the return dialog prefills the damage fee from
+  the guideline, and the running-fine text uses the rental's multiplier.
+- The AI fine opinion receives the store's guideline amount for the returned condition.
+- Platform rules that stay fixed: damage fee capped by the deposit, admin review above half the deposit, the renter's
+  objection, automatic blacklist after 3 violations.
+- Tests: 93 app and 112 server pass. The deck shows 205.
+
+Checked on the emulator in server mode: Sari sets 2 kali and 3 jam and saves, the `providers` row changes, and Budi
+sees "Aturan denda toko" with the new numbers on Tenda Dome. Not checked through the UI: the prefilled fee in the
+return dialog, and a late fee computed under changed rules on a real rental (both covered by tests).
+
+The server database has Arjuna Outdoor at 2 kali and 3 jam after this check.

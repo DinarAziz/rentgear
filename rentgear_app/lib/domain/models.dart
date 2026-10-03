@@ -67,6 +67,9 @@ class ProviderProfile {
   ProviderStatus status;
   GuaranteePolicy policy;
 
+  /// Aturan denda toko. Berlaku untuk booking berikutnya.
+  FinePolicy finePolicy = const FinePolicy();
+
   /// Lokasi toko di peta. Penyedia bisa memindahkannya.
   double latitude;
   double longitude;
@@ -315,6 +318,9 @@ class Rental {
   /// Ulasan penyewa untuk toko, diisi setelah transaksi selesai.
   Review? review;
 
+  /// Aturan denda toko saat booking dibuat, dikunci seperti harga dan deposit.
+  FinePolicy finePolicy = const FinePolicy();
+
   /// Foto kondisi alat saat diserahkan dan saat kembali, urut waktu.
   /// Hanya ditambah, tidak pernah dihapus.
   final List<ConditionPhoto> conditionPhotos = [];
@@ -339,11 +345,11 @@ class Rental {
   double get fineShortfall => max(0, fineTotal - depositTotal);
 
   /// Hari terlambat sampai [at]; setelah alat kembali, sampai tanggal kembalinya.
-  int lateDaysAt(DateTime at) => lateDays(endDate, returnedAt ?? at);
+  int lateDaysAt(DateTime at) => finePolicy.lateDays(endDate, returnedAt ?? at);
 
   /// Denda terlambat untuk [lateDaysAt]; perkiraan selama alat belum kembali.
   double lateFeeAt(DateTime at) =>
-      lateFeeFor(pricePerDay: pricePerDaySnapshot, qty: qty, days: lateDaysAt(at));
+      finePolicy.lateFee(pricePerDay: pricePerDaySnapshot, qty: qty, days: lateDaysAt(at));
 
   /// Keberatan hanya untuk denda kerusakan yang belum pernah ditinjau admin.
   bool get canObjectToDamageFee =>
