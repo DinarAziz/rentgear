@@ -753,3 +753,38 @@ sees "Aturan denda toko" with the new numbers on Tenda Dome. Not checked through
 return dialog, and a late fee computed under changed rules on a real rental (both covered by tests).
 
 The server database has Arjuna Outdoor at 2 kali and 3 jam after this check.
+
+## Session (2026-10-04, server moved to the Redmi hosting)
+
+The user asked to move the Laravel server to "the hosting on the Redmi". The phone runs Termux with Ubuntu
+(`proot-distro`), nginx on port 80, a Flask panel on 8088 and `cloudflared tunnel run homelab`, which serves
+`rentgear.serverbaik.my.id`. Details for readers: `../rentgear_api/README.md`, "Hosting di HP Redmi".
+
+User decisions: the public site switches to server mode; the admin password on the public server is replaced; the
+Gemini key is copied to the phone.
+
+- Public address: `https://rentgear.serverbaik.my.id` (site) and `/api/v1` (API), same host, no Cloudflare change.
+- On the phone: `/root/rentgear/rentgear_api`, PHP 8.5.4 and Composer from apt, SQLite, `php artisan serve` on
+  127.0.0.1:8000 behind nginx (`deploy/nginx-rentgear.conf`), `schedule:work` beside it. Started by
+  `/root/rentgear/start.sh`, added once to `~/.termux/boot/start-nginx.sh`.
+- Secrets: `rentgear_api/.env.redmi` on the Mac (ignored by git, mode 600) is the source of the phone's `.env`. It
+  holds the app key, the Gemini key, the Google client ID and `DEMO_ADMIN_PASSWORD`. The admin password is in that
+  file only; it was not printed in the chat.
+- Code changes: `DEMO_ADMIN_PASSWORD` (seeder, `config/services.php`), `trustProxies` in `bootstrap/app.php`, the
+  Admin demo chip is hidden when `API_URL` is https, and `rentgear_api/deploy/` (install script, start script, nginx
+  config, Termux launcher).
+- How the phone was driven: Termux's own files are not reachable over adb, so scripts were pushed to `/sdcard/rg/`
+  and started by typing `sh /sdcard/rg/run.sh <name>` into the Termux window with `adb shell input text`. Output goes
+  to `/sdcard/rg/*.log`. The scripts `run.sh`, `install.sh`, `startapi.sh`, `probe.sh`, `bootcheck.sh` are still there.
+- The old site (local mode, build f311eef1ff) is backed up on the phone in `/root/rentgear/backup/`.
+
+Checked from the Mac over the internet: the site loads the new build, Budi logs in, the catalog returns 8 items with
+https photo URLs and the photo loads, admin logs in with the new password and is refused with `password`, the audit
+trail lists the logins, `/.env` and `/up` answer 404. WebKit at 390x844: login page without the Admin chip, Budi's
+catalog with photos. The Redmi has a debug APK built for the public address; its login screen opens.
+
+Not checked: a full rental on the public server, a restart of the phone (the boot line is in place, the reboot was
+not tried), and AI on the public server (the one test call got "Kuota AI sedang habis"). Google sign-in on the
+public site needs `https://rentgear.serverbaik.my.id` added to the web client's JavaScript origins.
+
+`../webapp/` in the repo is still the local-mode build. The Mac's own server and MySQL are untouched.

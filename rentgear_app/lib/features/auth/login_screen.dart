@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/config.dart';
 import '../../core/google_auth.dart';
 import '../../core/responsive.dart';
 import '../../core/theme.dart';
@@ -210,15 +211,17 @@ class _LoginScreenState extends State<LoginScreen> {
         runSpacing: 4,
         children: [
           for (final (label, email, icon) in _demo)
-            ActionChip(
-              avatar: Icon(icon, size: 18),
-              label: Text(label),
-              onPressed: () {
-                _email.text = email;
-                _password.text = LocalRentGearRepository.demoPassword;
-                _login();
-              },
-            ),
+            // Di server publik (https) admin masuk dengan passwordnya sendiri.
+            if (!(apiUrl.startsWith('https://') && email.startsWith('admin@')))
+              ActionChip(
+                avatar: Icon(icon, size: 18),
+                label: Text(label),
+                onPressed: () {
+                  _email.text = email;
+                  _password.text = LocalRentGearRepository.demoPassword;
+                  _login();
+                },
+              ),
         ],
       ),
     ],

@@ -53,7 +53,9 @@ class DemoSeeder extends Seeder
         foreach ($rows as [$id, $name, $email, $phone, $role, $city, $providerId]) {
             User::create([
                 'id' => $id, 'name' => $name, 'email' => $email, 'phone' => $phone, 'role' => $role,
-                'city' => $city, 'provider_id' => $providerId, 'password' => 'password',
+                'city' => $city, 'provider_id' => $providerId,
+                // Di server publik, password admin diganti lewat DEMO_ADMIN_PASSWORD.
+                'password' => $role === User::ADMIN ? config('services.demo.admin_password') : 'password',
             ]);
         }
     }

@@ -19,7 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Di hosting, server ada di belakang nginx dan Cloudflare. Tanpa ini alamat foto menjadi http dan
+        // alamat IP di jejak audit menjadi 127.0.0.1.
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

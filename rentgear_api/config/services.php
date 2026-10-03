@@ -40,6 +40,11 @@ return [
         'client_ids' => array_values(array_filter(array_map('trim', explode(',', (string) env('GOOGLE_CLIENT_IDS', ''))))),
     ],
 
+    // Password akun admin demo. Di server yang terbuka ke internet, isi DEMO_ADMIN_PASSWORD di .env.
+    'demo' => [
+        'admin_password' => env('DEMO_ADMIN_PASSWORD', 'password'),
+    ],
+
     // Kunci Gemini hanya ada di server. Aplikasi tidak pernah menerimanya.
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY'),

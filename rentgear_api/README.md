@@ -47,6 +47,43 @@ flutter run --dart-define=API_URL=http://localhost:8000
 
 Untuk HP di Wi-Fi yang sama tanpa kabel, pakai alamat IP Mac, misalnya `API_URL=http://192.168.1.10:8000`.
 
+## Hosting di HP Redmi (rentgear.serverbaik.my.id)
+
+Situs publik dan API berjalan di HP Redmi: Termux, Ubuntu lewat `proot-distro`, nginx, dan Cloudflare Tunnel. Situs
+ada di `/`, API di `/api`, jadi keduanya satu alamat dan tidak butuh pengaturan Cloudflare tambahan.
+
+- Kode di dalam Ubuntu: `/root/rentgear/rentgear_api`. Database SQLite di `database/database.sqlite`, foto unggahan
+  di `storage/app`. PHP 8.5 dan Composer dari apt.
+- API dijalankan `php artisan serve` di `127.0.0.1:8000` (4 pekerja) dan diteruskan nginx. Konfigurasi nginx ada di
+  `deploy/nginx-rentgear.conf`.
+- `.env` di HP dibuat dari `rentgear_api/.env.redmi` di Mac (diabaikan git). Isinya `APP_DEBUG=false`, kunci Gemini,
+  client ID Google, dan `DEMO_ADMIN_PASSWORD`: password akun admin di server publik. Akun demo penyewa dan penyedia
+  tetap memakai `password`, dan tombol demo Admin tidak tampil pada build yang memakai alamat https.
+- API ikut menyala saat HP dinyalakan lewat `~/.termux/boot/start-nginx.sh`. Log: `~/rentgear-api.log` di Termux.
+
+Memperbarui setelah kode berubah (HP tersambung USB, Termux terbuka):
+
+```bash
+# di Mac: bangun web untuk alamat publik, lalu kemas dan kirim
+flutter build web --release --dart-define=API_URL=https://rentgear.serverbaik.my.id --dart-define=GOOGLE_CLIENT_ID=...
+(cd build/web && zip -qr /tmp/web.zip .)
+tar czf /tmp/api.tgz --exclude=vendor --exclude=.env --exclude=.env.redmi --exclude=storage \
+    --exclude=database/database.sqlite --exclude=tests rentgear_api rentgear_app/assets/equipment
+adb push /tmp/api.tgz /sdcard/rg/api.tgz && adb push /tmp/web.zip /sdcard/rg/web.zip
+adb push rentgear_api/deploy/install.sh /sdcard/rg/install.sh
+
+# di Termux pada HP
+proot-distro login ubuntu -- bash /sdcard/rg/install.sh        # tambah "seed" untuk mengosongkan data
+sh /sdcard/rg/startapi.sh                                       # salinan deploy/termux-start-api.sh
+```
+
+`install.sh` menyimpan cadangan situs dan konfigurasi nginx lama di `/root/rentgear/backup/` sebelum menggantinya, dan
+mengembalikan konfigurasi lama bila nginx menolaknya. Database dan `.env` tidak ditimpa saat memperbarui.
+
+Batasnya: HP harus menyala dan tersambung internet, `php artisan serve` bukan server untuk beban berat, dan database
+SQLite tidak mengunci baris seperti MySQL, jadi jaminan "unit terakhir hanya untuk satu booking" di sini bergantung
+pada kunci tulis SQLite.
+
 ## Login Google
 
 Server memeriksa ID token dari tombol "Masuk dengan Google". Yang perlu disiapkan sekali di

@@ -81,8 +81,12 @@ Kodenya ada di `rentgear_api/`, cara menjalankannya di `rentgear_api/README.md`,
 
 Satu penyimpangan dari `04-DATABASE.md`: peran pengguna disimpan di satu kolom `role`, bukan tabel `user_roles`.
 
-Belum dibuat: deploy ke hosting publik (server masih di Mac pengembang, http), panel admin berbasis web, dan
-pencocokan nominal bukti transfer.
+Hosting publik (4 Oktober 2026): server dan situs berjalan di HP Redmi pemilik proyek, di
+`https://rentgear.serverbaik.my.id` (situs di `/`, API di `/api`), lewat Termux, Ubuntu, nginx, dan Cloudflare Tunnel.
+Database di sana SQLite. Situs publik sekarang memakai server, jadi semua perangkat melihat data yang sama. Password
+admin di server publik berbeda dari akun demo lain. Cara memasang dan memperbarui ada di `rentgear_api/README.md`.
+
+Belum dibuat: panel admin berbasis web dan pencocokan nominal bukti transfer.
 
 ## 4. Login Google dan jejak audit
 
