@@ -788,3 +788,39 @@ not tried), and AI on the public server (the one test call got "Kuota AI sedang 
 public site needs `https://rentgear.serverbaik.my.id` added to the web client's JavaScript origins.
 
 `../webapp/` in the repo is still the local-mode build. The Mac's own server and MySQL are untouched.
+
+## Resume here (state saved 2026-10-04)
+
+Everything through stage 6 of `../docs/08-RENCANA-KERJA.md` is built. 93 app tests and 112 server tests pass,
+`flutter analyze` is clean. All work is committed on `master`; the commits since `2608397` are local only, because
+the user has not asked for a push.
+
+Waiting on the user:
+
+1. Google sign-in. Checked against Google on 2026-10-04: both client IDs exist, but the web client has no Authorized
+   JavaScript origins, which Google reports as "invalid_client". The user has to add
+   `https://rentgear.serverbaik.my.id`, `http://localhost:8081` and `http://localhost` and save. Before asking the
+   user to try again, check with
+   `curl -H "Origin: https://rentgear.serverbaik.my.id" "https://accounts.google.com/gsi/status?client_id=<web id>"`
+   (403 means the origin is still not registered). The Android client still answers `[28444]`; it needs package
+   `id.rentgear.rentgear` and the debug SHA-1 from `keytool`.
+2. A push to GitHub, when the user says so.
+3. NIM, class and lecturer for the deck's title slide (`IDENTITAS` in `../presentasi/deck.js`).
+4. A new Gemini key, since the current one passed through the chat. It is free tier and runs out after a handful of
+   calls; put the new one in `../rentgear_api/.env` and `../rentgear_api/.env.redmi`, then redeploy the env to the
+   phone (see the README).
+
+Not yet checked on a device: a full rental on the public server, a reboot of the Redmi, AI on the public server, the
+prefilled fee in the return dialog, and condition photos in local mode.
+
+Where things run:
+
+- Public: `https://rentgear.serverbaik.my.id` on the Redmi (server mode). The Redmi has a debug APK built for it.
+- Mac: the local Laravel server and the test web servers were stopped at the end of this session; MySQL still runs as
+  a brew service. Start the server again with `php artisan serve --host=0.0.0.0 --port=8000` in `../rentgear_api/`.
+- Emulator Pixel_10 was left running with a build that points at `http://localhost:8000` (needs the Mac server and
+  `adb -s emulator-5554 reverse tcp:8000 tcp:8000`).
+- `../webapp/` and `../rentgear-web.zip` hold the local-mode web build.
+
+Ideas offered and not started: in-app notifications when a rental's status changes, routes and travel time on the
+map, Midtrans Sandbox (needs keys), iOS.
