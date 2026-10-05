@@ -789,7 +789,7 @@ public site needs `https://rentgear.serverbaik.my.id` added to the web client's 
 
 `../webapp/` in the repo is still the local-mode build. The Mac's own server and MySQL are untouched.
 
-## Resume here (state saved 2026-10-04)
+## Earlier resume notes (state saved 2026-10-04, replaced by the section at the end of this file)
 
 Everything through stage 6 of `../docs/08-RENCANA-KERJA.md` is built. 93 app tests and 112 server tests pass,
 `flutter analyze` is clean. All work is committed on `master`; the commits since `2608397` are local only, because
@@ -950,3 +950,46 @@ roles with all icons, Budi's catalog listing the eight verified stores sorted by
 page of Ijen Trekker Rent, and the booking summary with "Deposit (uang jaminan)" and the note under the total. The
 booking was not sent. Still not checked on a device: an admin verifying a newly registered store, the AI advice page
 with the new deposit wording, a complete rental on the public server, and a reboot of the Redmi.
+
+## Resume here (state saved 2026-10-05)
+
+Everything through stage 6 of `../docs/08-RENCANA-KERJA.md` is built, plus registration with email and password and
+six more demo stores. 97 app tests and 120 server tests pass, `flutter analyze` is clean. All work is committed on
+`master`; the commits since `2608397` are local only, because the user has not asked for a push.
+
+Done on 2026-10-05, in order: the public server was brought back after Android ended Termux; Google sign-in was fixed
+(the Android client ID had been used where the web client ID belongs) and the user confirmed it works; the deposit
+label was reworded; registration for renters and providers was added; the deck got a slide of algorithm types and
+current numbers; Cloudflare no longer keeps old site assets; six demo stores were added to the public server.
+
+Waiting on the user:
+
+1. NIM, class and lecturer for the deck's title slide (`IDENTITAS` in `../presentasi/deck.js`).
+2. A push to GitHub, when the user says "push".
+3. The OAuth consent screen status. Other people can sign in with their own Google accounts only when it is
+   "In production"; in "Testing" only listed test users can. The user was told how to publish it and has not answered.
+4. A new Gemini key, since the current one passed through the chat. Put it in `../rentgear_api/.env` and
+   `../rentgear_api/.env.redmi`, then redeploy the env to the phone (see the README).
+5. Whether the old `../rentgear-presentasi-final.pptx.pptx` also has to be updated. Only the web deck was.
+6. Whether Google sign-in was confirmed on the Redmi, in the browser, or both.
+
+Offered and not answered: testing an admin verifying a newly registered store and a complete rental on the public
+server (the admin password would be read from `.env.redmi` without printing it); a reboot of the Redmi to see that
+the server starts by itself (it takes the server down for some minutes, so ask first).
+
+Not yet checked on a device: those three, and the AI advice page with the new deposit wording (held back to save
+the Gemini quota).
+
+Where things run:
+
+- Public: `https://rentgear.serverbaik.my.id` on the Redmi, web build `main.dart.2b9d4d59f9.js`, 9 stores (8
+  verified), 33 items. The Redmi has the debug APK built for it with the web client ID, and was left on Budi's catalog.
+- If the address answers `error code: 1033`, Android ended Termux again: open Termux and run
+  `sh /sdcard/rg/hidup.sh`. The cause is not known.
+- The phone locks itself; then nothing typed over adb arrives. Ask the user to unlock it.
+- Mac: no local server running. `../webapp/` and `../rentgear-web.zip` still hold the old local-mode web build.
+- In the project root, two screenshots of the Google console (the user's) and `rentgear-web.zip` are untracked on
+  purpose.
+
+Ideas offered and not started: in-app notifications when a rental's status changes, routes and travel time on the
+map, Midtrans Sandbox (needs keys), iOS, different photos for the six new stores.
