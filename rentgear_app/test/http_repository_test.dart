@@ -122,6 +122,39 @@ void main() {
     expect(seen.last.headers['accept'], 'application/json');
   });
 
+  test('daftar mengirim isian sesuai peran dan langsung membuka sesi', () async {
+    final api = repo((_) async => ok({'token': 'baru1', 'user': {...userJson, 'role': 'provider', 'providerId': 'p-9'}}));
+    const customer = RegisterRequest(
+      role: UserRole.customer,
+      name: 'Tania Putri',
+      email: 'tania@mail.com',
+      password: 'rahasia123',
+      phone: '081298765432',
+      city: 'Malang',
+    );
+
+    await api.register(customer);
+    expect(seen.single.url.path, '/api/v1/auth/register');
+    final sent = jsonDecode(seen.single.body) as Map<String, dynamic>;
+    expect(sent['role'], 'customer');
+    expect(sent.containsKey('businessName'), isFalse);
+
+    final user = await api.register(const RegisterRequest(
+      role: UserRole.provider,
+      name: 'Tania Putri',
+      email: 'tania@mail.com',
+      password: 'rahasia123',
+      phone: '081298765432',
+      city: 'Malang',
+      businessName: 'Bromo Gear',
+      address: 'Jl. Ijen No. 3',
+      bankAccount: 'BCA 123 a.n. Tania',
+    ));
+    expect(jsonDecode(seen.last.body), containsPair('businessName', 'Bromo Gear'));
+    expect(user.providerId, 'p-9');
+    expect(tokens.read(), 'baru1');
+  });
+
   test('amplop galat menjadi AppException dengan kode yang sama', () async {
     final api = repo((_) async => fail('SLOT_UNAVAILABLE', 'Stok tidak cukup pada tanggal tersebut.', 409));
 

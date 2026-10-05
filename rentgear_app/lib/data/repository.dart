@@ -14,6 +14,9 @@ abstract class RentGearRepository {
 
   Future<AppUser> login(String email, String password);
 
+  /// Daftar akun penyewa atau penyedia, lalu langsung masuk. Hanya ada di server.
+  Future<AppUser> register(RegisterRequest request);
+
   /// Masuk atau daftar dengan ID token dari Google. Hanya ada di server.
   Future<AppUser> loginWithGoogle(String idToken);
 

@@ -162,6 +162,9 @@ class HttpRentGearRepository implements RentGearRepository {
       _startSession('auth/login', {'email': email, 'password': password});
 
   @override
+  Future<AppUser> register(RegisterRequest request) => _startSession('auth/register', request.toJson());
+
+  @override
   Future<AppUser> loginWithGoogle(String idToken) => _startSession('auth/google', {'idToken': idToken});
 
   Future<AppUser> _startSession(String path, Map<String, dynamic> body) async {

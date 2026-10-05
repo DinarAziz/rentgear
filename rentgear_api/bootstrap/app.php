@@ -36,7 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
         $exceptions->render(function (ValidationException $e, Request $request) {
             return $request->is('api/*')
-                ? ApiResponse::error('VALIDATION', implode("\n", $e->validator->errors()->all()), 422) : null;
+                ? ApiResponse::error('VALIDATION', implode("\n", array_unique($e->validator->errors()->all())), 422) : null;
         });
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
             if (! $request->is('api/*')) {

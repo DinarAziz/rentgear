@@ -28,6 +28,7 @@ enum _Filter {
   static const _accessActions = {
     AuditAction.login,
     AuditAction.loginGoogle,
+    AuditAction.register,
     AuditAction.registerGoogle,
     AuditAction.loginFailed,
   };

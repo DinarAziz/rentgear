@@ -375,6 +375,10 @@ class LocalRentGearRepository implements RentGearRepository {
       });
 
   @override
+  Future<AppUser> register(RegisterRequest request) => throw const AppException(
+      'UNSUPPORTED', 'Daftar akun hanya tersedia saat aplikasi terhubung ke server.');
+
+  @override
   Future<AppUser> loginWithGoogle(String idToken) => throw const AppException(
       'UNSUPPORTED', 'Login Google hanya tersedia saat aplikasi terhubung ke server.');
 

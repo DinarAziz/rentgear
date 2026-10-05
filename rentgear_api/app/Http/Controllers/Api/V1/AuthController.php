@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\Present;
+use App\Models\Provider;
 use App\Models\User;
 use App\Services\GoogleTokenVerifier;
 use App\Support\ApiException;
@@ -11,8 +12,10 @@ use App\Support\ApiResponse;
 use App\Support\Audit;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
@@ -26,6 +29,63 @@ class AuthController extends Controller
             throw new ApiException('AUTH_FAILED', 'Email atau password salah.');
         }
         Audit::record($user, Audit::LOGIN);
+
+        return $this->session($user);
+    }
+
+    /** Titik awal toko baru di peta (Alun-alun Malang). Penyedia memindahkannya dari menu Profil. */
+    private const DEFAULT_LOCATION = ['latitude' => -7.9826, 'longitude' => 112.6308];
+
+    private const REGISTER_MESSAGES = [
+        'required' => 'Lengkapi semua isian.',
+        'required_if' => 'Lengkapi data toko.',
+        'max' => 'Salah satu isian terlalu panjang.',
+        'role.in' => 'Pilih daftar sebagai penyewa atau penyedia.',
+        'email.email' => 'Format email tidak benar.',
+        'email.unique' => 'Email sudah terdaftar. Silakan masuk.',
+        'password.min' => 'Password minimal 8 karakter.',
+        'phone.regex' => 'Nomor HP tidak benar.',
+    ];
+
+    /**
+     * Daftar dengan email dan password. Penyewa langsung bisa menyewa. Penyedia mendapat toko berstatus menunggu
+     * verifikasi admin, sehingga alatnya belum tampil di katalog. Akun admin tidak bisa dibuat dari sini.
+     */
+    public function register(Request $request): JsonResponse
+    {
+        $request->merge(['email' => strtolower(trim((string) $request->input('email')))]);
+        $data = $request->validate([
+            'role' => ['required', Rule::in([User::CUSTOMER, User::PROVIDER])],
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|max:150|unique:users,email',
+            'password' => 'required|string|min:8|max:72',
+            'phone' => ['required', 'string', 'regex:/^\+?[0-9]{9,15}$/'],
+            'city' => 'required|string|max:60',
+            'businessName' => 'required_if:role,provider|nullable|string|max:100',
+            'address' => 'required_if:role,provider|nullable|string|max:200',
+            'bankAccount' => 'required_if:role,provider|nullable|string|max:100',
+        ], self::REGISTER_MESSAGES);
+
+        $user = DB::transaction(function () use ($data) {
+            $user = User::create([
+                'id' => 'u-'.strtolower((string) Str::ulid()),
+                'name' => trim($data['name']), 'email' => $data['email'], 'password' => $data['password'],
+                'phone' => $data['phone'], 'city' => trim($data['city']), 'role' => $data['role'],
+            ]);
+            if ($user->isProvider()) {
+                $provider = Provider::create([
+                    'id' => 'p-'.strtolower((string) Str::ulid()), 'owner_id' => $user->id,
+                    'business_name' => trim($data['businessName']), 'city' => $user->city,
+                    'address' => trim($data['address']), 'bank_account' => trim($data['bankAccount']),
+                    'status' => Provider::PENDING, 'accepted_types' => ['ktp'],
+                    ...self::DEFAULT_LOCATION,
+                ]);
+                $user->update(['provider_id' => $provider->id]);
+            }
+
+            return $user;
+        });
+        Audit::record($user, Audit::REGISTER, detail: $user->isProvider() ? 'Penyedia: '.$user->provider->business_name : 'Penyewa');
 
         return $this->session($user);
     }

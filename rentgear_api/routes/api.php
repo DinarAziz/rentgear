@@ -11,9 +11,10 @@ use App\Http\Controllers\Api\V1\StoreController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-    // Dibatasi supaya password tidak bisa ditebak berulang-ulang.
+    // Dibatasi supaya password tidak bisa ditebak berulang-ulang dan akun tidak bisa dibuat beruntun.
     Route::middleware('throttle:20,1')->group(function () {
         Route::post('auth/login', [AuthController::class, 'login']);
+        Route::post('auth/register', [AuthController::class, 'register']);
         Route::post('auth/google', [AuthController::class, 'google']);
     });
     Route::get('media/{path}', [FileController::class, 'media'])->where('path', '.*');

@@ -11,6 +11,7 @@ import '../../data/local_repository.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
 import '../../widgets/google_button.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -193,11 +194,21 @@ class _LoginScreenState extends State<LoginScreen> {
           Center(child: googleRenderedButton()),
         const SizedBox(height: 6),
         const Text(
-          'Belum punya akun? Masuk dengan Google untuk mendaftar sebagai penyewa.',
+          'Akun Google baru terdaftar sebagai penyewa.',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 12, color: Colors.black54),
         ),
       ],
+      // Akun baru disimpan di server, jadi tidak ada di mode data lokal.
+      if (context.read<AppState>().repo.isRemote)
+        TextButton(
+          onPressed: _loading
+              ? null
+              : () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                ),
+          child: const Text('Belum punya akun? Daftar'),
+        ),
       const SizedBox(height: 32),
       const Text(
         'Akun demo (password: password)',

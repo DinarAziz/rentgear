@@ -36,6 +36,45 @@ class AppUser {
   final String? providerId;
 }
 
+/// Isian formulir daftar. Data toko hanya diisi bila [role] penyedia.
+class RegisterRequest {
+  const RegisterRequest({
+    required this.role,
+    required this.name,
+    required this.email,
+    required this.password,
+    required this.phone,
+    required this.city,
+    this.businessName,
+    this.address,
+    this.bankAccount,
+  });
+
+  final UserRole role;
+  final String name;
+  final String email;
+  final String password;
+  final String phone;
+  final String city;
+  final String? businessName;
+  final String? address;
+  final String? bankAccount;
+
+  Map<String, dynamic> toJson() => {
+    'role': role.name,
+    'name': name,
+    'email': email,
+    'password': password,
+    'phone': phone,
+    'city': city,
+    if (role == UserRole.provider) ...{
+      'businessName': businessName,
+      'address': address,
+      'bankAccount': bankAccount,
+    },
+  };
+}
+
 enum ProviderStatus {
   pending('Menunggu verifikasi'),
   verified('Terverifikasi'),
@@ -488,6 +527,7 @@ class AuditEntry {
 abstract final class AuditAction {
   static const login = 'login';
   static const loginGoogle = 'login_google';
+  static const register = 'register';
   static const registerGoogle = 'register_google';
   static const loginFailed = 'login_failed';
   static const providerStatus = 'provider_status';
@@ -500,6 +540,7 @@ abstract final class AuditAction {
   static String label(String action) => switch (action) {
     login => 'Masuk',
     loginGoogle => 'Masuk dengan Google',
+    register => 'Daftar akun',
     registerGoogle => 'Daftar dengan Google',
     loginFailed => 'Gagal masuk',
     providerStatus => 'Status penyedia diubah',

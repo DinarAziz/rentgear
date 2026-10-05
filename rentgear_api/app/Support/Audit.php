@@ -12,6 +12,8 @@ final class Audit
 
     public const LOGIN_GOOGLE = 'login_google';
 
+    public const REGISTER = 'register';
+
     public const REGISTER_GOOGLE = 'register_google';
 
     public const LOGIN_FAILED = 'login_failed';

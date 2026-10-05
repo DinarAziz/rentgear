@@ -13,6 +13,8 @@ class Provider extends Model
 {
     use HasStringId;
 
+    public const PENDING = 'pending';
+
     public const VERIFIED = 'verified';
 
     protected $guarded = [];
