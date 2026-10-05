@@ -355,7 +355,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Tenda Dome 4 Orang'));
     await tester.pumpAndSettle();
-    final detail = find.ancestor(of: find.text('Harga'), matching: find.byType(Scrollable)).first;
+    // Dipegang sebagai widget: "Harga" keluar dari daftar begitu halaman digulir.
+    final detail = find.byWidget(
+      tester.widget(find.ancestor(of: find.text('Harga'), matching: find.byType(Scrollable)).first),
+    );
     await tester.scrollUntilVisible(find.text('Aturan denda toko'), 300, scrollable: detail);
     await tester.scrollUntilVisible(find.text('2 kali tarif harian'), 200, scrollable: detail);
     expect(find.text('2 kali tarif harian'), findsOneWidget);

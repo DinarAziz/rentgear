@@ -316,9 +316,10 @@ class _BookingScreenState extends State<BookingScreen> {
                     : Column(
                         children: [
                           InfoRow('Sewa ${rupiah(e.pricePerDay)} × $_qty unit × $_days hari', rupiah(_subtotal)),
-                          InfoRow('Deposit (dikembalikan)', rupiah(_deposit)),
+                          InfoRow('Deposit (uang jaminan)', rupiah(_deposit)),
                           const Divider(),
                           InfoRow('Total dibayar', rupiah(_total), bold: true),
+                          const DepositNote(),
                         ],
                       ),
               ),

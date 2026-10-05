@@ -195,7 +195,8 @@ class _AiRecommendScreenState extends State<AiRecommendScreen> {
           child: Column(
             children: [
               InfoRow('Perkiraan sewa ${r.days} hari', rupiah(r.rentTotal)),
-              InfoRow('Deposit (dikembalikan)', rupiah(r.depositTotal)),
+              InfoRow('Deposit (uang jaminan)', rupiah(r.depositTotal)),
+              const DepositNote(),
             ],
           ),
         ),

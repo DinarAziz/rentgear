@@ -100,10 +100,11 @@ class EquipmentDetailScreen extends StatelessWidget {
                   children: [
                     InfoRow('Sewa per hari', rupiah(e.pricePerDay), bold: true),
                     InfoRow(
-                      'Deposit per unit (dikembalikan)',
+                      'Deposit per unit (uang jaminan)',
                       rupiah(e.depositAmount),
                     ),
                     InfoRow('Stok total', '${e.stockTotal} unit'),
+                    const DepositNote(),
                   ],
                 ),
               ),

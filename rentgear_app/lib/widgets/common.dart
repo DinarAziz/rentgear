@@ -204,6 +204,33 @@ class StatusPill extends StatelessWidget {
   );
 }
 
+/// Penjelasan singkat deposit, dipasang di bawah baris "Deposit (uang jaminan)".
+class DepositNote extends StatelessWidget {
+  const DepositNote({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.only(top: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline, size: 16, color: Colors.black54),
+          SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              'Deposit bukan biaya sewa. Uang ini kembali penuh setelah alat '
+              'dipulangkan tepat waktu dan utuh. Kalau terlambat atau rusak, '
+              'dipotong denda dulu.',
+              style: TextStyle(fontSize: 13, color: Colors.black54),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class InfoRow extends StatelessWidget {
   const InfoRow(this.label, this.value, {super.key, this.bold = false});
 
