@@ -921,3 +921,7 @@ To render a slide for checking: Playwright Chromium at 1920x1080 on `index.html#
 slides because a hash change alone does not reload the deck.
 
 If the Redmi is locked, typing into Termux over adb does nothing; ask the user to unlock it. Do not try to unlock it.
+
+Later on 2026-10-05 the user reported that Google sign-in works ("sudah bisa masuk dengan google"); they did not say
+whether that was on the Redmi, in the browser, or both. The deck and `../docs/08-RENCANA-KERJA.md` now list Google
+sign-in as finished. The plans left in the deck are the payment gateway and iOS.

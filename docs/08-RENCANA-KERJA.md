@@ -10,7 +10,7 @@ diambil, supaya tiap tahap bisa dikerjakan terpisah.
 | 1 | Denda dan blacklist di aplikasi Flutter (tanpa server) | Selesai, lihat bagian 1 |
 | 2 | Katalog per penyedia: halaman toko, rating, komentar, follow, lokasi di peta | Selesai, lihat bagian 2 |
 | 3 | Server Laravel + MySQL, lalu Flutter bisa memilih data lokal atau server | Selesai, lihat bagian 3 |
-| 4 | Daftar akun, login dengan akun Google, dan jejak audit admin | Selesai; login Google menunggu uji dengan akun sungguhan, lihat bagian 4 |
+| 4 | Daftar akun, login dengan akun Google, dan jejak audit admin | Selesai, lihat bagian 4 |
 | 5 | Fitur AI dengan Gemini | Selesai: tiga saran AI dan perbandingan foto kondisi, lihat bagian 5 |
 | 6 | Aturan denda yang bisa diatur penyedia | Selesai, lihat bagian 6 |
 | 7 | Payment gateway dan versi iOS | Menyusul |
@@ -90,7 +90,7 @@ Belum dibuat: panel admin berbasis web dan pencocokan nominal bukti transfer.
 
 ## 4. Login Google dan jejak audit
 
-### Login Google (kode selesai, menunggu uji dengan akun sungguhan)
+### Login Google (selesai)
 
 - Tombol "Masuk dengan Google" di layar login. Tombol hanya tampil bila aplikasi memakai server dan dibangun dengan
   `--dart-define=GOOGLE_CLIENT_ID=...`.
@@ -102,8 +102,8 @@ Belum dibuat: panel admin berbasis web dan pencocokan nominal bukti transfer.
 
 Client ID sudah dibuat dan terpasang di server, situs, dan APK. Pada 5 Oktober 2026 ditemukan bahwa yang terpasang
 sebelumnya adalah client ID jenis Android, padahal aplikasi dan server harus memakai client ID jenis Web; itu sebabnya
-Google menolak di web dan di HP. Setelah diganti, tombol Google tampil di situs tanpa galat. Yang belum: masuk sampai
-selesai dengan akun Google sungguhan. Cara membuat client ID ada di `rentgear_api/README.md`, bagian "Login Google".
+Google menolak di web dan di HP. Setelah diganti, tombol Google tampil di situs tanpa galat, dan pemilik proyek melaporkan
+berhasil masuk dengan akun Google pada hari yang sama. Cara membuat client ID ada di `rentgear_api/README.md`, bagian "Login Google".
 Yang sudah diuji: sisi server dengan jawaban Google tiruan (5 tes).
 
 ### Daftar akun dengan email dan password (selesai, 5 Oktober 2026)

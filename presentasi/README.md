@@ -55,10 +55,9 @@ terbit.
 
 ## Catatan
 
-- Rumusan masalah, tujuan, dan kesimpulan ditulis untuk fitur yang sudah ada di aplikasi. Login Google (kodenya sudah
-  dibuat, masih diuji), payment gateway, dan iOS ditulis sebagai rencana kerja ("dikerjakan setelah tahap ini"), bukan
-  saran. Server Laravel yang sudah online, saran AI, peta di dalam aplikasi, daftar akun, denda, blacklist, dan halaman
-  toko sudah dibuat. Rencana lengkapnya ada di `../docs/08-RENCANA-KERJA.md`.
+- Rumusan masalah, tujuan, dan kesimpulan ditulis untuk fitur yang sudah ada di aplikasi. Payment gateway dan iOS ditulis
+  sebagai rencana kerja ("dikerjakan setelah tahap ini"), bukan saran. Server Laravel yang sudah online, saran AI, peta
+  di dalam aplikasi, daftar akun, login Google, denda, blacklist, dan halaman toko sudah dibuat. Rencana lengkapnya ada di `../docs/08-RENCANA-KERJA.md`.
 - Slide "Jenis algoritma yang dipakai" mengikuti pembagian jenis algoritma dari kuliah (sequential, selection, iteration,
   searching, sorting, machine learning). Hanya jenis yang benar-benar ada di kode yang dimasukkan. Machine learning di
   sini berarti aplikasi memakai model Gemini milik Google, bukan melatih model sendiri.
