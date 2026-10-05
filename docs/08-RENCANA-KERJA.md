@@ -10,7 +10,7 @@ diambil, supaya tiap tahap bisa dikerjakan terpisah.
 | 1 | Denda dan blacklist di aplikasi Flutter (tanpa server) | Selesai, lihat bagian 1 |
 | 2 | Katalog per penyedia: halaman toko, rating, komentar, follow, lokasi di peta | Selesai, lihat bagian 2 |
 | 3 | Server Laravel + MySQL, lalu Flutter bisa memilih data lokal atau server | Selesai, lihat bagian 3 |
-| 4 | Daftar dan login dengan akun Google, dan jejak audit admin | Kode selesai; login Google menunggu client ID, lihat bagian 4 |
+| 4 | Daftar akun, login dengan akun Google, dan jejak audit admin | Selesai; login Google menunggu uji dengan akun sungguhan, lihat bagian 4 |
 | 5 | Fitur AI dengan Gemini | Selesai: tiga saran AI dan perbandingan foto kondisi, lihat bagian 5 |
 | 6 | Aturan denda yang bisa diatur penyedia | Selesai, lihat bagian 6 |
 | 7 | Payment gateway dan versi iOS | Menyusul |
@@ -90,7 +90,7 @@ Belum dibuat: panel admin berbasis web dan pencocokan nominal bukti transfer.
 
 ## 4. Login Google dan jejak audit
 
-### Login Google (kode selesai, menunggu client ID)
+### Login Google (kode selesai, menunggu uji dengan akun sungguhan)
 
 - Tombol "Masuk dengan Google" di layar login. Tombol hanya tampil bila aplikasi memakai server dan dibangun dengan
   `--dart-define=GOOGLE_CLIENT_ID=...`.
@@ -100,13 +100,30 @@ Belum dibuat: panel admin berbasis web dan pencocokan nominal bukti transfer.
 - Akun admin tidak bisa masuk dengan Google, hanya dengan password.
 - Rute masuk dibatasi 20 percobaan per menit.
 
-Belum diuji dengan akun Google sungguhan, karena client ID belum dibuat. Cara membuatnya ada di
-`rentgear_api/README.md`, bagian "Login Google". Yang sudah diuji: sisi server dengan jawaban Google tiruan (5 tes).
+Client ID sudah dibuat dan terpasang di server, situs, dan APK. Pada 5 Oktober 2026 ditemukan bahwa yang terpasang
+sebelumnya adalah client ID jenis Android, padahal aplikasi dan server harus memakai client ID jenis Web; itu sebabnya
+Google menolak di web dan di HP. Setelah diganti, tombol Google tampil di situs tanpa galat. Yang belum: masuk sampai
+selesai dengan akun Google sungguhan. Cara membuat client ID ada di `rentgear_api/README.md`, bagian "Login Google".
+Yang sudah diuji: sisi server dengan jawaban Google tiruan (5 tes).
+
+### Daftar akun dengan email dan password (selesai, 5 Oktober 2026)
+
+- Layar "Daftar Akun" dibuka dari layar login lewat "Belum punya akun? Daftar". Tombol itu hanya ada bila aplikasi
+  memakai server, karena akun baru disimpan di server.
+- Pengguna memilih daftar sebagai penyewa atau penyedia. Isian: nama, email, nomor HP, kota, dan password (minimal 8
+  karakter). Penyedia juga mengisi nama toko, alamat toko, dan rekening tujuan transfer.
+- Penyewa langsung bisa menyewa. Toko penyedia baru berstatus menunggu verifikasi admin, jadi alatnya belum tampil
+  di katalog. Titik toko di peta diberi nilai awal (Alun-alun Malang) dan dipindahkan penyedia dari menu Profil.
+- Akun admin tidak bisa dibuat dari sini. Email yang sudah terdaftar ditolak. Pendaftaran tercatat di jejak audit.
+- Tidak memakai captcha. Rute daftar dan masuk dibatasi 20 permintaan per menit, dan penyedia baru tetap harus
+  diverifikasi admin. Email tidak diverifikasi karena server belum punya pengirim email.
+- Server: `POST /api/v1/auth/register`. Tes: 7 di server, 4 di aplikasi. Diuji di situs publik: daftar sebagai
+  penyedia dari formulir, dan daftar sebagai penyewa lewat API.
 
 ### Jejak audit (selesai)
 
-- Yang dicatat: masuk, masuk dan daftar dengan Google, gagal masuk, perubahan status penyedia, keputusan denda
-  kerusakan, masuk blacklist (oleh admin atau otomatis oleh sistem), dan pencabutan blacklist.
+- Yang dicatat: masuk, daftar akun, masuk dan daftar dengan Google, gagal masuk, perubahan status penyedia,
+  keputusan denda kerusakan, masuk blacklist (oleh admin atau otomatis oleh sistem), dan pencabutan blacklist.
 - Tiap baris berisi waktu, pelaku dan perannya, aksi, sasaran, dan rincian. Password tidak pernah dicatat. Server juga
   menyimpan alamat IP.
 - Admin membacanya dari tombol "Jejak audit" di Dashboard, dengan saringan aksi admin, masuk dan daftar, dan sistem.

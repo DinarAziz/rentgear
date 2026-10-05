@@ -824,3 +824,100 @@ Where things run:
 
 Ideas offered and not started: in-app notifications when a rental's status changes, routes and travel time on the
 map, Midtrans Sandbox (needs keys), iOS.
+
+## Session (2026-10-05, public server was down)
+
+The app on the Redmi showed "server mengalami gangguan". The Laravel server was still installed on the phone; Android
+had ended the Termux process at about 12:29 WIB, which took nginx, the Cloudflare tunnel and the API down with it.
+Cloudflare answered `error code: 1033` (no tunnel). The phone had not rebooted, so the boot script never ran again.
+
+Fix: opened Termux and ran `sh /sdcard/rg/hidup.sh`, which calls `server start` and starts
+`/root/rentgear/start.sh` if the API is not running. Result is in `/sdcard/rg/hidup.log`. No code or data changed.
+
+Checked afterwards: the site answers 200, Budi logs in over the public address, the catalog returns 8 items, a photo
+loads, and the app on the Redmi shows Budi's catalog with photos.
+
+Why Android ended Termux is not known. Termux already had "Tidak ada pembatasan" for battery and held its wake lock.
+The tunnel log ends with `sendmsg: operation not permitted`. If it happens again, run the script above.
+
+Two notes for later. Before typing into Termux with `adb shell input text`, confirm that Termux has the focus
+(`dumpsys window | grep mCurrentFocus`); one command in this session was typed while the user had Settings open.
+A request to a protected route without `Accept: application/json` answers 500 ("Route [login] not defined") instead
+of 401. The app always sends the header, so users do not see it.
+
+## Session (2026-10-05, Google sign-in: wrong client ID)
+
+The earlier diagnosis in this file ("the web client has no Authorized JavaScript origins") was wrong. The user's
+screenshots showed both clients set up correctly. The real cause: `GOOGLE_CLIENT_IDS` on the server and
+`GOOGLE_CLIENT_ID` in the builds held the ID of the Android client ("Rentgear") instead of the web client
+("Web client 1"). That one mistake gave both symptoms: on the web Google refused the origin, and on Android it
+answered `[28444]`, because `serverClientId` has to be a web client.
+
+How it was found: a real browser (Playwright Chromium and WebKit) on the public site got 403 from
+`accounts.google.com/gsi/button` and "The given origin is not allowed for the given client ID" although the origin
+was registered. The `curl .../gsi/status` check recommended earlier answers 403 for every origin, registered or not,
+so it proves nothing; do not use it. Use the browser check instead.
+
+Fix: the web client ID is now in `../rentgear_api/.env` and `../rentgear_api/.env.redmi`; the env, the API and a new
+web build (`main.dart.92e3a564dc.js`) were deployed to the Redmi with `install.sh`; a new debug APK was installed on
+the Redmi. No code changed. The two IDs share the same project number prefix, so compare the part after the dash.
+
+Checked: on the public site Google answers 200 for the button and it renders ("Login dengan Google"), with no origin
+error; Budi still logs in with a password. Not checked yet: a complete Google sign-in (choosing an account) on the
+web and on the Redmi, and the server's check of the token against the new ID. The user has to pick the account.
+
+## Session (2026-10-05, clearer deposit wording)
+
+The user asked what "Deposit (dikembalikan)" meant, then asked for clearer wording. The label is now
+"Deposit (uang jaminan)" ("Deposit per unit (uang jaminan)" on the equipment page), and a new `DepositNote` in
+`lib/widgets/common.dart` sits under it on the equipment detail page, the booking summary and the AI advice page:
+"Deposit bukan biaya sewa. Uang ini kembali penuh setelah alat dipulangkan tepat waktu dan utuh. Kalau terlambat
+atau rusak, dipotong denda dulu."
+
+The smoke test "the store edits its fine rules and the renter sees them" now keeps the detail page's scroll view as a
+widget, because the longer page scrolls "Harga" out of the list. 93 app tests pass, `flutter analyze` is clean.
+
+Deployed: web build `main.dart.9de5bc4510.js` on the public site, new debug APK on the Redmi. Seen on the Redmi: the
+note on Carrier 60L's detail page. Not looked at on a device: the booking summary and the AI advice page, and the
+web pages in a browser (the public bundle contains the new text).
+
+## Session (2026-10-05, registration, deck update)
+
+Registration with email and password, for renters and providers. Reader-facing description: section 4 of
+`../docs/08-RENCANA-KERJA.md`. The user asked whether to use a captcha; the advice given was no (auth routes are
+throttled to 20 per minute and new stores wait for the admin), and the user did not object.
+
+- Server: `POST /api/v1/auth/register` in `AuthController::register`, `Audit::REGISTER`, `Provider::PENDING`. A new
+  store gets a default map point (Alun-alun Malang) and accepts KTP only until the provider changes it.
+  `bootstrap/app.php` now shows each validation message once.
+- App: `lib/features/auth/register_screen.dart`, `RegisterRequest` in `lib/domain/models.dart`,
+  `RentGearRepository.register` (server only; local mode throws `UNSUPPORTED`), `AppState.register`. The login screen
+  shows "Belum punya akun? Daftar" only when the repository is remote.
+- Tests: 97 app and 119 server pass, `flutter analyze` is clean. The deck shows 216.
+- Hosting: `deploy/nginx-rentgear.conf` now sends `Cache-Control: no-cache` for unhashed files and a long cache for
+  `main.dart.<hash>.js`. Before this, Cloudflare kept `assets/fonts/MaterialIcons-Regular.otf` for 4 hours, so icons
+  that were new in a build showed as blanks on the web. The copy cached at 15:00 WIB on 5 October expires by itself;
+  until then the eye icon on Password and the icon on "Alamat toko" are blank on the public site.
+
+Checked on the public site (build `main.dart.2b9d4d59f9.js`): a provider registered through the web form and landed on
+the store page with "Menunggu verifikasi"; a renter registered through the API; the same email was refused; the new
+provider logged in. Both test accounts (`uji.penyedia@rentgear.test`, `uji.penyewa@rentgear.test`) and the test store
+were deleted afterwards; their rows in the audit trail remain. Not checked: the registration screen on the Redmi (the
+new APK is installed), and an admin verifying a newly registered store on a device.
+
+Deck (`../presentasi/`), now 22 slides:
+
+- New slide 14 "Jenis algoritma yang dipakai", in the format of the lecturer's slide the user photographed: six
+  cards (sequential, selection, iteration, searching, sorting, machine learning), each with a small diagram and where
+  RentGear uses it. The user said not every type has to be included. The detailed availability slide follows it.
+- "Batasan masalah" and "Kesimpulan" list AI advice, the in-app map, the online server and registration as done.
+  Still planned: Google sign-in (code written, being tested), payment gateway, iOS.
+- Testing slide: 216 tests, one more row for registration, two rows shortened, and the "Intinya" line lifted because
+  its second line was off the stage (it already was in the previous commit).
+- `assets/app/detail.webp` retaken with the new deposit wording, from the fresh web build served locally against
+  the public API.
+
+To render a slide for checking: Playwright Chromium at 1920x1080 on `index.html#<n>`, loading `about:blank` between
+slides because a hash change alone does not reload the deck.
+
+If the Redmi is locked, typing into Termux over adb does nothing; ask the user to unlock it. Do not try to unlock it.
