@@ -925,3 +925,22 @@ If the Redmi is locked, typing into Termux over adb does nothing; ask the user t
 Later on 2026-10-05 the user reported that Google sign-in works ("sudah bisa masuk dengan google"); they did not say
 whether that was on the Redmi, in the browser, or both. The deck and `../docs/08-RENCANA-KERJA.md` now list Google
 sign-in as finished. The plans left in the deck are the payment gateway and iOS.
+
+## Session (2026-10-05, more demo stores)
+
+The user asked for more providers. `rentgear_api/database/seeders/MoreStoresSeeder.php` adds six verified stores
+(`p-bromo`, `p-welirang`, `p-kawi`, `p-ijen`, `p-lawu`, `p-basecamp`), each with an owner account
+(`<slug>@rentgear.id`, password `password`), four items and two or three reviews. It only creates rows that are
+missing, so it can run on a database in use. `DatabaseSeeder` runs it after `DemoSeeder`; the tests stay on
+`DemoSeeder` alone through `$seeder` in `ApiTestCase` and `SeedTest`. 120 server tests pass; the deck shows 217.
+
+Run on the public server after a copy of the database was saved in `/root/rentgear/backup/`. Checked over the public
+API as Budi: 9 stores (8 verified), 32 items in the catalog, photo URLs present. Not looked at on a screen.
+
+Limits to tell readers: the store names, addresses, bank accounts and reviews are made up; the photos are the same
+files the first stores use, so the same picture appears in more than one store; local mode
+(`lib/data/seed.dart`) still has only the first three stores.
+
+Also answered: whether other people can sign in with their own Google accounts once the app is shared. That depends
+on the OAuth consent screen being "In production" (in "Testing" only listed test users can sign in), which could not
+be checked from here, and on the APK being the one signed with this Mac's debug key.

@@ -3,6 +3,7 @@
 namespace Tests;
 
 use App\Models\User;
+use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +16,9 @@ abstract class ApiTestCase extends TestCase
     use RefreshDatabase;
 
     protected bool $seed = true;
+
+    /** Tes memakai data demo dasar; toko tambahan (`MoreStoresSeeder`) diuji tersendiri. */
+    protected string $seeder = DemoSeeder::class;
 
     protected function as(string $name): static
     {

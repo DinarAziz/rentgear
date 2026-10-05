@@ -88,6 +88,14 @@ admin di server publik berbeda dari akun demo lain. Cara memasang dan memperbaru
 
 Belum dibuat: panel admin berbasis web dan pencocokan nominal bukti transfer.
 
+### Toko contoh tambahan (5 Oktober 2026)
+
+Server publik sekarang berisi 8 toko terverifikasi dan 32 alat di katalog. Enam toko baru (Probolinggo, Pasuruan,
+Kepanjen, Banyuwangi, Magetan, Surabaya) ditambahkan oleh `MoreStoresSeeder`, yang aman dijalankan di database yang
+sedang dipakai: `php artisan db:seed --class=MoreStoresSeeder --force`. Nama toko, alamat, rekening, dan ulasannya
+adalah contoh, dan fotonya memakai berkas yang sama dengan toko demo awal. Aplikasi mode data lokal tetap berisi tiga
+toko awal.
+
 ## 4. Login Google dan jejak audit
 
 ### Login Google (selesai)

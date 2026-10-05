@@ -8,6 +8,8 @@ use App\Models\Provider;
 use App\Models\Rental;
 use App\Models\Review;
 use App\Models\User;
+use Database\Seeders\DemoSeeder;
+use Database\Seeders\MoreStoresSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -17,6 +19,8 @@ class SeedTest extends TestCase
     use RefreshDatabase;
 
     protected bool $seed = true;
+
+    protected string $seeder = DemoSeeder::class;
 
     public function test_demo_data_matches_the_flutter_seed(): void
     {
@@ -37,6 +41,25 @@ class SeedTest extends TestCase
         $this->assertSame('pickedUp', $rental->status);
         $this->assertSame('held', $rental->guarantees->first()->status);
         $this->assertCount(4, $rental->logs);
+    }
+
+    public function test_more_stores_can_be_added_to_a_database_in_use_without_duplicates(): void
+    {
+        $this->seed(MoreStoresSeeder::class);
+        $this->seed(MoreStoresSeeder::class);
+
+        $this->assertSame(9, Provider::count());
+        $this->assertSame(8, Provider::where('status', Provider::VERIFIED)->count());
+        $this->assertSame(33, Equipment::count());
+        $this->assertSame(12, User::count());
+        $this->assertSame(19, Review::count());
+        $this->assertSame(6, Rental::count());
+
+        foreach (Equipment::with('photos', 'sizes')->where('id', 'like', 'e-%-%')->whereNotIn('provider_id', ['p-arjuna', 'p-semeru', 'p-puncak'])->get() as $e) {
+            $this->assertGreaterThanOrEqual(2, $e->photos->count(), $e->id);
+            $this->assertGreaterThan(0, $e->stockFor(null), $e->id);
+        }
+        $this->assertSame(['39', '40', '41', '42', '43'], Equipment::find('e-ijen-sepatu')->sizes->pluck('label')->all());
     }
 
     public function test_document_numbers_are_encrypted_at_rest(): void
