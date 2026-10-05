@@ -944,3 +944,9 @@ files the first stores use, so the same picture appears in more than one store; 
 Also answered: whether other people can sign in with their own Google accounts once the app is shared. That depends
 on the OAuth consent screen being "In production" (in "Testing" only listed test users can sign in), which could not
 be checked from here, and on the APK being the one signed with this Mac's debug key.
+
+Seen on the Redmi later the same day (APK built for the public address, server up): the registration screen in both
+roles with all icons, Budi's catalog listing the eight verified stores sorted by distance, the store page and item
+page of Ijen Trekker Rent, and the booking summary with "Deposit (uang jaminan)" and the note under the total. The
+booking was not sent. Still not checked on a device: an admin verifying a newly registered store, the AI advice page
+with the new deposit wording, a complete rental on the public server, and a reboot of the Redmi.
