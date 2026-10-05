@@ -231,21 +231,22 @@
     <div class="belah">
       <div class="papan" data-in>
         <h3 class="sub">Dikerjakan pada tahap ini</h3>
-        <ul class="daftar">
-          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Aplikasi Flutter untuk Android dan web, dengan tiga peran pengguna.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Daftar toko dengan rating, ulasan, follow, dan lokasi Google Maps.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Booking, jaminan dokumen, dan alur status sampai selesai.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Pembayaran lewat transfer bank dengan unggah foto bukti transfer.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Denda keterlambatan dan kerusakan, serta blacklist penyewa.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Server Laravel dan MySQL. Aplikasi bisa memakai data di perangkat atau di server.</p></li>
+        <ul class="daftar padat">
+          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Aplikasi Android dan web, tiga peran, dan daftar akun.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Daftar toko dengan rating, ulasan, follow, dan peta.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Booking, jaminan dokumen, dan alur status.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Bayar lewat transfer dengan foto bukti.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Denda terlambat dan rusak, serta blacklist.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Server Laravel yang sudah online.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon hijau"><path d="M8 20l7 7 15-16"/></svg><p>Saran AI: paket alat, denda, dan foto kondisi alat.</p></li>
         </ul>
       </div>
       <div class="papan putus" data-step="1">
         <h3 class="sub">Dikerjakan setelah tahap ini</h3>
         <ul class="daftar">
-          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Fitur AI: rekomendasi paket alat dan pemeriksaan kondisi alat.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Login dengan akun Google, dan peta yang tertanam di aplikasi.</p></li>
-          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Payment gateway dan versi iOS.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Login dengan akun Google. Kodenya sudah dibuat dan sedang diuji.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Payment gateway, supaya pembayaran tercatat otomatis.</p></li>
+          <li><svg viewBox="0 0 38 38" class="ikon"><circle cx="19" cy="19" r="12"/><path d="M19 11v8l6 4"/></svg><p>Versi iOS.</p></li>
         </ul>
       </div>
     </div>
@@ -317,6 +318,48 @@
   <section class="slide" id="alur" data-pos="Pos 6" data-label="Perancangan">
     <h2 class="head">Alur status transaksi</h2>
     <div class="alur" id="alur-diagram"></div>
+  </section>
+
+  <section class="slide" id="jenis" data-pos="Pos 6" data-label="Perancangan">
+    <h2 class="head">Jenis algoritma yang dipakai</h2>
+    <div class="jenis-kisi">
+      <article class="jenis" data-in style="--w: var(--ember)">
+        <header><b class="angka">1</b><h3>Sequential</h3></header>
+        <p class="arti">Langkah dijalankan berurutan dari awal sampai akhir.</p>
+        <svg viewBox="0 0 450 96" class="skema" aria-hidden="true"><rect x="2" y="24" width="186" height="48" rx="10"/><text x="95" y="55">Sewa × unit × hari</text><path class="panah" d="M190 48H212"/><path class="mata" d="M203 42l9 6-9 6"/><rect x="214" y="24" width="112" height="48" rx="10"/><text x="270" y="55">+ Deposit</text><path class="panah" d="M328 48H350"/><path class="mata" d="M341 42l9 6-9 6"/><rect class="isi" x="352" y="24" width="96" height="48" rx="10"/><text x="400" y="55">Total</text></svg>
+        <p class="guna"><b>Di RentGear</b>Menghitung total bayar: sewa kali unit kali hari, lalu ditambah deposit.</p>
+      </article>
+      <article class="jenis" data-in style="--w: var(--moss)">
+        <header><b class="angka">2</b><h3>Selection</h3></header>
+        <p class="arti">Memilih jalur berdasarkan suatu kondisi.</p>
+        <svg viewBox="0 0 450 96" class="skema" aria-hidden="true"><path class="belah-ketupat" d="M2 48L92 8l90 40-90 40z"/><text x="92" y="55">Sewa besar?</text><path class="panah" d="M182 48H214V24H246"/><path class="mata" d="M237 18l9 6-9 6"/><text class="kecil-t" x="200" y="20">Ya</text><path class="panah" d="M214 48V72H246"/><path class="mata" d="M237 66l9 6-9 6"/><text class="kecil-t" x="190" y="90">Tidak</text><rect class="isi" x="248" y="4" width="200" height="40" rx="10"/><text x="348" y="31">2 dokumen jaminan</text><rect x="248" y="52" width="200" height="40" rx="10"/><text x="348" y="79">1 dokumen jaminan</text></svg>
+        <p class="guna"><b>Di RentGear</b>Sewa bernilai besar wajib 2 dokumen jaminan, selain itu cukup 1.</p>
+      </article>
+      <article class="jenis" data-in style="--w: var(--summit)">
+        <header><b class="angka">3</b><h3>Iteration</h3></header>
+        <p class="arti">Mengulang proses sampai kondisi terpenuhi.</p>
+        <svg viewBox="0 0 450 96" class="skema" aria-hidden="true"><rect x="2" y="4" width="82" height="40" rx="10"/><text x="43" y="31">1 Okt</text><rect x="92" y="4" width="82" height="40" rx="10"/><text x="133" y="31">2 Okt</text><rect class="isi" x="182" y="4" width="82" height="40" rx="10"/><text x="223" y="31">3 Okt</text><rect x="272" y="4" width="82" height="40" rx="10"/><text x="313" y="31">4 Okt</text><rect x="362" y="4" width="82" height="40" rx="10"/><text x="403" y="31">5 Okt</text><path class="panah" d="M403 44v26a12 12 0 0 1-12 12H55a12 12 0 0 1-12-12V54"/><path class="mata" d="M37 62l6-9 6 9"/><text class="kecil-t" x="223" y="74">ulangi untuk tiap tanggal sewa</text></svg>
+        <p class="guna"><b>Di RentGear</b>Cek stok: tanggal sewa diperiksa satu per satu untuk mencari hari tersibuk.</p>
+      </article>
+      <article class="jenis" data-in style="--w: var(--moss)">
+        <header><b class="angka">4</b><h3>Searching</h3></header>
+        <p class="arti">Mencari data tertentu dalam kumpulan data.</p>
+        <svg viewBox="0 0 450 96" class="skema" aria-hidden="true"><rect class="isi" x="2" y="4" width="105" height="40" rx="10"/><text x="54.5" y="31">Tenda</text><rect x="115" y="4" width="105" height="40" rx="10"/><text x="167.5" y="31">Carrier</text><rect x="228" y="4" width="105" height="40" rx="10"/><text x="280.5" y="31">Kompor</text><rect x="341" y="4" width="105" height="40" rx="10"/><text x="393.5" y="31">Sepatu</text><circle class="lup" cx="24" cy="72" r="11"/><path class="lup" d="M32 80l10 10"/><text class="kiri" x="56" y="80">kata kunci: “tenda”</text></svg>
+        <p class="guna"><b>Di RentGear</b>Kotak cari di katalog mencocokkan kata kunci dengan nama dan merek alat.</p>
+      </article>
+      <article class="jenis" data-in style="--w: var(--summit)">
+        <header><b class="angka">5</b><h3>Sorting</h3></header>
+        <p class="arti">Mengurutkan data menurut urutan tertentu.</p>
+        <svg viewBox="0 0 450 96" class="skema" aria-hidden="true"><rect x="2" y="24" width="96" height="48" rx="10"/><text x="50" y="55">615 km</text><rect x="104" y="24" width="96" height="48" rx="10"/><text x="152" y="55">562 km</text><path class="panah" d="M210 48H240"/><path class="mata" d="M231 42l9 6-9 6"/><rect class="isi" x="250" y="24" width="96" height="48" rx="10"/><text x="298" y="55">562 km</text><rect x="352" y="24" width="96" height="48" rx="10"/><text x="400" y="55">615 km</text></svg>
+        <p class="guna"><b>Di RentGear</b>Toko diurutkan dari yang paling dekat dengan lokasi penyewa.</p>
+      </article>
+      <article class="jenis" data-in style="--w: var(--ember)">
+        <header><b class="angka">6</b><h3>Machine Learning</h3></header>
+        <p class="arti">Model belajar dari data, lalu memberi prediksi atau saran.</p>
+        <svg viewBox="0 0 450 96" class="skema" aria-hidden="true"><rect x="2" y="24" width="150" height="48" rx="10"/><text x="77" y="55">Data dan foto</text><path class="panah" d="M154 48H176"/><path class="mata" d="M167 42l9 6-9 6"/><rect class="isi" x="178" y="24" width="150" height="48" rx="10"/><text x="253" y="55">Model Gemini</text><path class="panah" d="M330 48H352"/><path class="mata" d="M343 42l9 6-9 6"/><rect x="354" y="24" width="94" height="48" rx="10"/><text x="401" y="55">Saran</text></svg>
+        <p class="guna"><b>Di RentGear</b>Saran paket alat, pendapat soal denda, dan pembanding foto kondisi.</p>
+      </article>
+    </div>
   </section>
 
   <section class="slide" id="algoritma" data-pos="Pos 6" data-label="Perancangan">
@@ -431,8 +474,8 @@
     <h2 class="head">Pengujian</h2>
     <div class="uji">
       <div data-in>
-        <p class="skor"><b class="angka" id="skor">205</b><span>dari 205</span></p>
-        <p class="teks">skenario tes otomatis lulus: 93 di aplikasi, 112 di server.</p>
+        <p class="skor"><b class="angka" id="skor">216</b><span>dari 216</span></p>
+        <p class="teks">skenario tes otomatis lulus: 97 di aplikasi, 119 di server.</p>
         <p class="kecil jelas">Tes otomatis adalah kode yang menjalankan aplikasi lalu memeriksa sendiri hasilnya. Dijalankan dengan <code>flutter test</code> dan <code>php artisan test</code>.</p>
       </div>
       <div class="narasi">
@@ -440,22 +483,23 @@
           <ul class="kelompok" data-in>
             <li><h3>Aplikasi: sewa, stok, jaminan, foto kondisi <b>26</b></h3><div class="titik-uji" data-n="26"></div><p>Contoh: booking dobel ditolak, booking tanpa jaminan ditolak, NIK yang salah ditolak.</p></li>
             <li><h3>Aplikasi: denda, blacklist, toko, peta, audit <b>35</b></h3><div class="titik-uji" data-n="35"></div><p>Contoh: telat 3 hari dihitung 1,5 kali tarif, rating toko adalah rata-rata ulasan.</p></li>
-            <li><h3>Aplikasi: layar dan format <b>19</b></h3><div class="titik-uji" data-n="19"></div><p>Contoh: halaman awal menampilkan toko, 45000 tampil sebagai Rp 45.000.</p></li>
-            <li><h3>Aplikasi: sambungan ke server <b>13</b></h3><div class="titik-uji" data-n="13"></div><p>Contoh: galat dari server tampil dengan pesan yang sama, server mati tidak membuat aplikasi macet.</p></li>
+            <li><h3>Aplikasi: layar dan format <b>22</b></h3><div class="titik-uji" data-n="22"></div><p>Contoh: halaman awal menampilkan toko, formulir daftar menahan email yang salah.</p></li>
+            <li><h3>Aplikasi: sambungan ke server <b>14</b></h3><div class="titik-uji" data-n="14"></div><p>Contoh: galat dari server tampil dengan pesan yang sama, server mati tidak membuat aplikasi macet.</p></li>
             <li><h3>Server: aturan inti <b>26</b></h3><div class="titik-uji" data-n="26"></div><p>Kasus yang sama dengan tes aplikasi, untuk membuktikan dua sisi menghitung angka yang sama.</p></li>
-            <li><h3>Server: API <b>86</b></h3><div class="titik-uji" data-n="86"></div><p>Contoh: unit terakhir hanya jatuh ke satu booking, toko lain ditolak, foto KTP tidak bisa dibuka orang lain.</p></li>
+            <li><h3>Server: API <b>93</b></h3><div class="titik-uji" data-n="93"></div><p>Contoh: unit terakhir hanya jatuh ke satu booking, email yang sudah terdaftar ditolak, foto KTP tidak bisa dibuka orang lain.</p></li>
           </ul>
         </div>
         <table class="tabel-uji" data-step="1">
           <caption class="sub">Uji langsung di HP Redmi 17, emulator, dan browser</caption>
           <tbody>
-            <tr><td>Sewa lengkap: booking, konfirmasi, bukti transfer, serah terima, pengembalian</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
+            <tr><td>Sewa lengkap dari booking sampai pengembalian</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
             <tr><td>Jaminan ditolak, booking ditolak, lalu stok bisa dipesan lagi</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
             <tr><td>Admin: dashboard, verifikasi penyedia, daftar transaksi</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
             <tr><td>Ukuran font sistem 1,3 kali, setelah 3 perbaikan tata letak</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
             <tr><td>Denda dan blacklist di HP: telat, rusak, keberatan penyewa, keputusan admin</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
-            <tr><td>HP dan web lewat server: sewa lengkap sampai denda diputuskan admin</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
+            <tr><td>HP dan web lewat server: sewa sampai denda diputuskan</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
             <tr><td>Versi web pada lebar 390, 820, dan 1440 piksel</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
+            <tr><td>Daftar akun penyewa dan penyedia di server publik</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
           </tbody>
         </table>
       </div>
@@ -478,10 +522,9 @@
       <div class="papan putus" data-step="1">
         <h3 class="sub">Rencana lanjutan</h3>
         <ul class="daftar rencana">
-          <li><span class="urut">Berikutnya</span><p>Fitur AI: rekomendasi paket alat dan pemeriksaan kondisi alat.</p></li>
-          <li><span class="urut">Berikutnya</span><p>Login dengan akun Google.</p></li>
-          <li><span class="urut">Menyusul</span><p>Peta yang tertanam di dalam aplikasi.</p></li>
-          <li><span class="urut">Menyusul</span><p>Payment gateway dan versi iOS.</p></li>
+          <li><span class="urut">Berikutnya</span><p>Login dengan akun Google. Kodenya sudah dibuat dan sedang diuji.</p></li>
+          <li><span class="urut">Menyusul</span><p>Payment gateway, supaya pembayaran tercatat otomatis.</p></li>
+          <li><span class="urut">Menyusul</span><p>Versi iOS.</p></li>
         </ul>
       </div>
     </div>

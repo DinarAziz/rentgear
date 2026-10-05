@@ -17,9 +17,9 @@ Clicker presentasi mengirim Page Down dan Page Up, jadi bisa langsung dipakai. A
 
 ## Isi
 
-21 slide dengan urutan sidang: judul, filosofi logo, latar belakang (data usaha sewa alat, kasus nyata di toko sewa,
+22 slide dengan urutan sidang: judul, filosofi logo, latar belakang (data usaha sewa alat, kasus nyata di toko sewa,
 ringkasan masalah), rumusan masalah, tujuan dan manfaat, inovasi, batasan masalah, metode, perancangan (alur bisnis, peran, alur
-status, algoritma ketersediaan, susunan aplikasi), implementasi (screenshot dan video), pengujian, kesimpulan dan
+status, jenis algoritma yang dipakai, algoritma ketersediaan, susunan aplikasi), implementasi (screenshot dan video), pengujian, kesimpulan dan
 rencana lanjutan, sumber data, lalu tanya jawab. Latar gunung ikut naik dari basecamp saat senja sampai puncak saat matahari
 terbit.
 
@@ -55,9 +55,13 @@ terbit.
 
 ## Catatan
 
-- Rumusan masalah, tujuan, dan kesimpulan ditulis untuk fitur yang sudah ada di aplikasi. Server Laravel, fitur AI,
-  halaman toko penyedia, login Google, payment gateway, dan iOS ditulis sebagai rencana kerja ("dikerjakan setelah tahap ini"), bukan
-  saran. Denda, blacklist, dan halaman toko sudah dibuat. Rencana lengkapnya ada di `../docs/08-RENCANA-KERJA.md`.
+- Rumusan masalah, tujuan, dan kesimpulan ditulis untuk fitur yang sudah ada di aplikasi. Login Google (kodenya sudah
+  dibuat, masih diuji), payment gateway, dan iOS ditulis sebagai rencana kerja ("dikerjakan setelah tahap ini"), bukan
+  saran. Server Laravel yang sudah online, saran AI, peta di dalam aplikasi, daftar akun, denda, blacklist, dan halaman
+  toko sudah dibuat. Rencana lengkapnya ada di `../docs/08-RENCANA-KERJA.md`.
+- Slide "Jenis algoritma yang dipakai" mengikuti pembagian jenis algoritma dari kuliah (sequential, selection, iteration,
+  searching, sorting, machine learning). Hanya jenis yang benar-benar ada di kode yang dimasukkan. Machine learning di
+  sini berarti aplikasi memakai model Gemini milik Google, bukan melatih model sendiri.
 - Semua sumber latar belakang membahas usaha sewa alat, tidak ada data jumlah pendaki atau kecelakaan. Tiap sumber
   ditulis dengan URL di slide tempat ia dipakai dan di slide "Sumber data". Tautannya bisa diklik.
 - Skor risiko Lentera Camp (Ramadhan dkk. 2025, Tabel 5), masalah PT ABC (Nurjanah dkk. 2025), dan artikel detikFinance
@@ -68,5 +72,5 @@ terbit.
   alamat halaman jurnalnya.
 - Belum ada sumber untuk klaim "penyewa tidak tahu tempat sewa". Klaim itu tidak ada di slide.
 - Makna logo dan "arah berikutnya" di slide alur bisnis (komisi per transaksi) adalah usulan, belum keputusan.
-- Angka pengujian (205 tes: 93 aplikasi dan 112 server, hasil uji di Redmi 17 dan browser) berasal dari `../rentgear_app/HANDOFF.md`. Kalau jumlah tes
+- Angka pengujian (216 tes: 97 aplikasi dan 119 server, hasil uji di Redmi 17 dan browser) berasal dari `../rentgear_app/HANDOFF.md`. Kalau jumlah tes
   berubah, perbarui slide Pengujian dan angka di `adegan.pengujian` pada `deck.js`.
