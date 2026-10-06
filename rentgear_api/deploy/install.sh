@@ -16,7 +16,7 @@ if ! command -v php >/dev/null || ! command -v composer >/dev/null; then
 fi
 php -v | head -1
 INI=$(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;')
-printf 'upload_max_filesize=10M\npost_max_size=12M\nmemory_limit=256M\n' > "$INI/99-rentgear.ini"
+printf 'upload_max_filesize=10M\npost_max_size=12M\nmemory_limit=256M\nexpose_php=0\n' > "$INI/99-rentgear.ini"
 
 echo "== kode"
 mkdir -p /root/rentgear/backup
@@ -30,6 +30,8 @@ composer install --no-dev --optimize-autoloader --no-interaction --no-progress
 touch database/database.sqlite
 
 echo "== database"
+# Salinan database sebelum migrasi, supaya bisa dikembalikan.
+[ -s database/database.sqlite ] && cp database/database.sqlite /root/rentgear/backup/db-$(date +%Y%m%d-%H%M%S).sqlite
 php artisan config:clear
 if [ "$1" = "seed" ]; then php artisan migrate:fresh --seed --force; else php artisan migrate --force; fi
 php artisan config:cache

@@ -20,6 +20,12 @@ abstract class RentGearRepository {
   /// Masuk atau daftar dengan ID token dari Google. Hanya ada di server.
   Future<AppUser> loginWithGoogle(String idToken);
 
+  /// Meminta kode ganti password ke [email]. Hanya ada di server.
+  Future<void> requestPasswordReset(String email);
+
+  /// Menukar [code] dari email dengan [password] baru, lalu langsung masuk.
+  Future<AppUser> resetPassword({required String email, required String code, required String password});
+
   /// Pengguna yang masih login dari sesi sebelumnya, atau `null`.
   Future<AppUser?> restoreSession();
   Future<void> logout();

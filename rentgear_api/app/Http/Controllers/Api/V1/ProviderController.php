@@ -37,8 +37,8 @@ class ProviderController extends Controller
             'capacityPerson' => 'nullable|integer', 'isActive' => 'nullable|boolean',
             'sizes' => 'nullable|array', 'sizes.*.label' => 'nullable|string|max:20', 'sizes.*.stock' => 'nullable|integer',
             'photoOrder' => 'nullable|array', 'photoOrder.*' => 'string',
-            'newPhotos' => 'nullable|array', 'newPhotos.*' => 'image|max:8192',
-        ]);
+            'newPhotos' => 'nullable|array', 'newPhotos.*' => self::PHOTO_RULE,
+        ], self::PHOTO_MESSAGES);
 
         // `photoOrder` berisi "keep:<id foto lama>" atau "new:<indeks di newPhotos>", sesuai urutan tampil.
         $photos = [];

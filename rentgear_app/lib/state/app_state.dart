@@ -79,6 +79,9 @@ class AppState extends ChangeNotifier {
   Future<void> register(RegisterRequest request) async =>
       _startSession(await repo.register(request));
 
+  Future<void> resetPassword({required String email, required String code, required String password}) async =>
+      _startSession(await repo.resetPassword(email: email, code: code, password: password));
+
   /// [idToken] berasal dari tombol "Masuk dengan Google".
   Future<void> loginWithGoogle(String idToken) async =>
       _startSession(await repo.loginWithGoogle(idToken));

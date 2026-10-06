@@ -50,7 +50,8 @@ return [
     |
     */
 
-    'expiration' => null,
+    // 30 hari. Token yang dicuri tidak berlaku selamanya; pengguna masuk lagi sebulan sekali.
+    'expiration' => (int) env('SANCTUM_TOKEN_MINUTES', 60 * 24 * 30),
 
     /*
     |--------------------------------------------------------------------------

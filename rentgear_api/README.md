@@ -127,9 +127,47 @@ rute lain tetap jalan. Sebabnya dicatat di `storage/logs/laravel.log`. Identitas
 Foto kondisi alat (`POST /api/v1/rentals/{id}/condition-photos`, isian `phase` = `handover` atau `return`, dan
 `photo`) disimpan di disk privat dan ikut dikirim ke Gemini saat admin meminta pendapat atas denda.
 
+## Lupa password
+
+Pengguna meminta kode 6 angka lewat `POST /api/v1/auth/forgot-password`, lalu menukarnya dengan password baru lewat
+`POST /api/v1/auth/reset-password`. Kode berlaku 15 menit, batal setelah 5 tebakan salah, dan untuk satu email hanya
+bisa diminta sekali per 60 detik. Aturannya ada di `app/Services/PasswordResetService.php`.
+
+Kode dikirim lewat email, jadi server perlu satu akun pengirim. Bawaannya `MAIL_MAILER=log`: email tidak dikirim,
+isinya ditulis ke `storage/logs/laravel.log` pada tingkat `debug`. Itu cukup untuk mencoba di Mac. Di server publik
+tingkat log adalah `warning`, jadi kode tidak tercatat di mana pun sampai pengirim sungguhan diisi. Untuk mengirim sungguhan lewat Gmail
+(gratis, sampai 500 email per hari):
+
+1. Di akun Google pengirim, nyalakan Verifikasi 2 Langkah, lalu buat App Password di
+   [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
+2. Isi di `.env` (dan `.env.redmi` untuk server publik), lalu jalankan ulang server:
+
+   ```
+   MAIL_MAILER=smtp
+   MAIL_HOST=smtp.gmail.com
+   MAIL_PORT=587
+   MAIL_USERNAME=alamat@gmail.com
+   MAIL_PASSWORD=app-password-16-huruf
+   MAIL_FROM_ADDRESS=alamat@gmail.com
+   MAIL_FROM_NAME=RentGear
+   ```
+
+3. Periksa pengirimnya tanpa membuka aplikasi:
+
+   ```bash
+   php artisan rentgear:mail-test alamat-anda@gmail.com
+   ```
+
+   Perintah ini mengirim satu email percobaan. Selama `MAIL_MAILER` masih `log`, perintah hanya memberi peringatan
+   bahwa email tidak dikirim. Bila SMTP menolak, pesan galatnya ditampilkan.
+
+App Password adalah rahasia, sama seperti kunci Gemini: hanya di `.env`. Bila pengiriman gagal, server menjawab
+`MAIL_UNAVAILABLE` dan mencatat galatnya di log. Akun demo memakai alamat `@rentgear.id` yang tidak punya kotak
+masuk, jadi kode untuk akun itu tidak akan sampai ke mana pun.
+
 ## Jejak audit
 
-Tabel `audit_logs` mencatat masuk, gagal masuk, dan semua aksi admin. Admin membacanya lewat `GET /api/v1/audit`.
+Tabel `audit_logs` mencatat masuk, gagal masuk, permintaan kode dan penggantian password, dan semua aksi admin. Admin membacanya lewat `GET /api/v1/audit`.
 Tidak ada rute untuk mengubah atau menghapus baris. Password tidak pernah dicatat.
 
 ## Susunan
@@ -160,6 +198,16 @@ dengan tes Dart. `tests/Feature` menguji tiap alur lewat HTTP.
 - Harga, deposit, dan denda dihitung server. Tanggal kembali untuk denda memakai jam server (Asia/Jakarta).
 - Kunci API (Gemini) hanya ada di `.env`, yang diabaikan git. Jangan menulisnya di kode, di `.env.example`, atau di
   perintah build aplikasi. Client ID Google bukan rahasia.
-- Rute masuk dibatasi 20 percobaan per menit per alamat IP.
-- Server ini untuk pengembangan dan demo di jaringan lokal (http). Sebelum dipasang di internet perlu https,
-  password akun demo diganti, dan `APP_DEBUG=false`.
+- Rute masuk, daftar, dan lupa password dibatasi 20 percobaan per menit per alamat IP. Setelah 5 kali salah password,
+  satu akun terkunci 15 menit dari alamat IP itu.
+- Token masuk berlaku 30 hari (`SANCTUM_TOKEN_MINUTES`). Token kedaluwarsa dibuang oleh scheduler tiap hari.
+- Unggahan hanya menerima JPG, PNG, dan WebP, diperiksa dari isi berkas, paling besar 8 MB.
+- Semua jawaban API membawa `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, dan `Referrer-Policy`.
+  Header yang sama untuk situs ada di `deploy/nginx-rentgear.conf`.
+- Toko yang belum terverifikasi hanya ada di daftar toko untuk pemiliknya dan admin. Alat yang disembunyikan hanya
+  terlihat oleh pemilik toko dan admin.
+- Kode ganti password disimpan sebagai hash, dan mengganti password mengakhiri semua sesi lama akun itu.
+- Yang masih terbuka di server publik: akun demo penyewa dan penyedia memakai password `password` yang tertulis di
+  layar masuk, jadi siapa pun bisa masuk sebagai mereka. Itu disengaja untuk demo; datanya karangan. Server juga
+  masih dijalankan dengan `php artisan serve`, yang dibuat untuk pengembangan. `APP_DEBUG` harus tetap `false`.
+- Tes keamanan ada di `tests/Feature/SecurityTest.php`, `AccessTest.php`, dan `PasswordResetTest.php`.

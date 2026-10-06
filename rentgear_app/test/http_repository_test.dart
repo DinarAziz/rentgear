@@ -155,6 +155,23 @@ void main() {
     expect(tokens.read(), 'baru1');
   });
 
+  test('lupa password meminta kode, lalu kode dan password baru membuka sesi', () async {
+    final api = repo((request) async => request.url.path.endsWith('/auth/forgot-password')
+        ? ok(null)
+        : ok({'token': 'reset1', 'user': userJson}));
+
+    await api.requestPasswordReset('budi@rentgear.id');
+    expect(seen.single.url.path, '/api/v1/auth/forgot-password');
+    expect(jsonDecode(seen.single.body), {'email': 'budi@rentgear.id'});
+    expect(tokens.read(), isNull);
+
+    final user = await api.resetPassword(email: 'budi@rentgear.id', code: '123456', password: 'rahasiabaru1');
+    expect(seen.last.url.path, '/api/v1/auth/reset-password');
+    expect(jsonDecode(seen.last.body), {'email': 'budi@rentgear.id', 'code': '123456', 'password': 'rahasiabaru1'});
+    expect(user.id, 'u-budi');
+    expect(tokens.read(), 'reset1');
+  });
+
   test('amplop galat menjadi AppException dengan kode yang sama', () async {
     final api = repo((_) async => fail('SLOT_UNAVAILABLE', 'Stok tidak cukup pada tanggal tersebut.', 409));
 

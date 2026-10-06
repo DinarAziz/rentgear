@@ -951,10 +951,96 @@ page of Ijen Trekker Rent, and the booking summary with "Deposit (uang jaminan)"
 booking was not sent. Still not checked on a device: an admin verifying a newly registered store, the AI advice page
 with the new deposit wording, a complete rental on the public server, and a reboot of the Redmi.
 
+## Forgot password, 6 October 2026
+
+The user asked what happens when someone forgets their password, and chose a code sent by email over a reset by the
+admin. Built on both sides, not deployed.
+
+- Server: `POST /api/v1/auth/forgot-password` sends a 6-digit code, `POST /api/v1/auth/reset-password` swaps it for a
+  new password and returns a session. Rules are in `app/Services/PasswordResetService.php`: 15 minutes, 5 guesses, one
+  request per email per 60 seconds, only the hash is stored, unknown emails and the admin get the same OK answer and
+  no email, old tokens are deleted on success. A migration adds `attempts` to `password_reset_tokens`.
+- App: "Lupa password?" on the login screen (server mode only) opens `lib/features/auth/forgot_password_screen.dart`.
+  Two new audit actions show under "Masuk dan daftar" in the admin audit screen.
+- Tests: 10 on the server (`PasswordResetTest`), 4 in the app. Totals are now 101 app tests and 130 server tests.
+- `php artisan rentgear:mail-test <address>` sends one test email, to check the `MAIL_*` settings once they exist.
+  `.env.redmi` has no `MAIL_*` lines yet; `.env` has the Laravel defaults. Neither was edited.
+
+Limits: no mail sender is configured, so with `MAIL_MAILER=log` the code only lands in `storage/logs/laravel.log`.
+The user said to note this and fill it in later; the steps for a Gmail App Password are in `../rentgear_api/README.md`
+under "Lupa password". The demo accounts use `@rentgear.id` addresses with no inbox. Nothing here has been seen on a
+screen, on the Redmi, or on the public server, and no real email has been sent. The deck's feature list was left as it
+was for that reason; only its test numbers changed.
+
+To deploy later: copy the code to the Redmi, run `php artisan migrate --force` there, add the `MAIL_*` lines to
+`.env.redmi`, and rebuild the web build and the APK.
+
+## Security pass, 6 October 2026
+
+The user asked for the app to have no security holes. The server code was read route by route; nothing here is a
+penetration test, and the public server still runs the old code.
+
+Found and fixed, each with a test in `tests/Feature/SecurityTest.php` (8 tests, server total 138):
+
+- Login tokens never expired. They now last 30 days (`SANCTUM_TOKEN_MINUTES`), and the scheduler prunes old ones.
+- Password guessing was limited only per IP. Five wrong passwords now lock that account for 15 minutes from that IP.
+- The route limit answered with a bare 429. It now uses the API envelope (`TOO_MANY_REQUESTS`).
+- Uploads accepted any image type. Now JPG, PNG and WebP only, judged by file content.
+- No security headers. The API adds nosniff, frame and referrer headers and drops `X-Powered-By`; the same headers
+  for the site are in `deploy/nginx-rentgear.conf`.
+- `GET providers` listed unverified stores, with address and bank account, to every signed-in user, and
+  `GET providers/{id}/equipment` listed hidden gear. Both are now limited to the owner and the admin.
+
+Checked and left as it was: every rental action checks the owner, renter or admin inside a locked transaction; proof
+and guarantee photos are private; document numbers are encrypted; prices and fines are computed on the server; the
+Google token check verifies audience, issuer, expiry and verified email.
+
+Still open, for the user to decide: the demo renter and provider accounts on the public server use the password
+shown on the login screen; the server runs on `php artisan serve`; `GET providers/{id}` and `GET equipment/{id}`
+still answer for an unverified store if someone knows its id; `APP_DEBUG=false` on the Redmi could not be confirmed
+because this session may not read `.env.redmi`. None of this is deployed: it needs the code copied to the Redmi, the
+nginx file reinstalled and nginx reloaded.
+
+## Deployed, 6 October 2026 (afternoon)
+
+The user said "pasang". Forgot password and the security pass are now on the public server and on the Redmi.
+
+- Web build `main.dart.579b48f35b.js`. The Google web client ID for the build was taken from the previous public
+  build, because this session may not read `.env.redmi`. The migration ran on the live database; `install.sh` now
+  copies the database to `/root/rentgear/backup/db-<time>.sqlite` first and sets `expose_php=0`.
+- First deploy showed that 401 answers had no security headers and still sent `X-Powered-By`: the middleware sat in
+  the `api` group, behind the login check. It is now global, and a test covers the 401 case. Deployed again.
+- Checked from outside: the site and the API (200 and 401) send the headers; `X-Powered-By` is gone; Budi can sign in,
+  sees 8 stores, all verified, 32 catalog items and his 3 rentals; `forgot-password` answers OK for an unknown
+  address and `reset-password` refuses a wrong code. Photos already cached by Cloudflare keep their old headers until
+  the cache expires.
+- Seen on the Redmi (new debug APK): "Lupa password?" on the login screen, and step 2 of the screen after asking a
+  code for an address that is not registered. Not tried: a real code, because no mail sender is set. Also not tried
+  on the public server: the 5-wrong-passwords lock (it would lock a demo account for 15 minutes) and an upload of a
+  refused file type. The app was on the login screen when opened, not on Budi's catalog as left on 5 October;
+  the reason is not known.
+- `../webapp/` and `../rentgear-web.zip` were not rebuilt.
+
+## Checks on the public server, 6 October 2026 (13:45 to 13:50)
+
+The user asked for a check after the deploy. Done from the Mac against the public address and on the Redmi.
+
+- Five wrong passwords for a throwaway address gave 401 five times, then 429 with the lock message.
+- A booking as Budi with an HTML file named `.jpg`, and one with an SVG, were both refused; Budi still has 3 rentals.
+- The full reset could not be finished: the phone's log level is `warning` and the log mailer writes at `debug`, so
+  the code is written nowhere. A code was requested for Budi and left to expire; his password is unchanged.
+- The log showed every business error (wrong password, lock) written as ERROR with a stack trace. `ApiException` is
+  now not reported, and upload refusals answer in Indonesian. One more test; deployed again (third install today).
+- Redmi: Budi signs in from the demo chip and the catalog shows the 8 stores. Thumbnails of the larger photos
+  (230 to 250 KB) stay blank for up to about 40 seconds on first load, then appear. There is no loading placeholder.
+  The order "followed stores first, then nearest" is intended.
+
 ## Resume here (state saved 2026-10-05)
 
 Everything through stage 6 of `../docs/08-RENCANA-KERJA.md` is built, plus registration with email and password and
-six more demo stores. 97 app tests and 120 server tests pass, `flutter analyze` is clean. All work is committed on
+six more demo stores, and since 2026-10-06 a forgot-password flow and a security pass, both deployed (see the
+sections above); no mail sender is set, so reset codes reach nobody yet.
+101 app tests and 139 server tests pass, `flutter analyze` is clean. All work is committed on
 `master`; the commits since `2608397` are local only, because the user has not asked for a push.
 
 Done on 2026-10-05, in order: the public server was brought back after Android ended Termux; Google sign-in was fixed
@@ -972,6 +1058,7 @@ Waiting on the user:
    `../rentgear_api/.env.redmi`, then redeploy the env to the phone (see the README).
 5. Whether the old `../rentgear-presentasi-final.pptx.pptx` also has to be updated. Only the web deck was.
 6. Whether Google sign-in was confirmed on the Redmi, in the browser, or both.
+7. A Gmail address and App Password for the mail sender. Until then "Lupa password?" is live but sends nothing.
 
 Offered and not answered: testing an admin verifying a newly registered store and a complete rental on the public
 server (the admin password would be read from `.env.redmi` without printing it); a reboot of the Redmi to see that
@@ -982,7 +1069,7 @@ the Gemini quota).
 
 Where things run:
 
-- Public: `https://rentgear.serverbaik.my.id` on the Redmi, web build `main.dart.2b9d4d59f9.js`, 9 stores (8
+- Public: `https://rentgear.serverbaik.my.id` on the Redmi, web build `main.dart.579b48f35b.js`, 9 stores (8
   verified), 33 items. The Redmi has the debug APK built for it with the web client ID, and was left on Budi's catalog.
 - If the address answers `error code: 1033`, Android ended Termux again: open Termux and run
   `sh /sdcard/rg/hidup.sh`. The cause is not known.

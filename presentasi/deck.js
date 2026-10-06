@@ -656,7 +656,7 @@ const adegan = {
 
   pengujian: {
     masuk(tl) {
-      tl.add(hitung($('#skor'), 0, 217, 1.6, 'power1.out'), 0.6)
+      tl.add(hitung($('#skor'), 0, 240, 1.6, 'power1.out'), 0.6)
         .from('.titik-uji i', { autoAlpha: 0, scale: 0.4, duration: d(0.35), ease: 'back.out(2)', stagger: 0.012 }, 0.6)
         .call(() => ledakkan($('#skor'), 110), null, 2.2)
         .fromTo('#skor', { scale: 1 }, { scale: 1.14, duration: d(0.22), ease: 'power2.out', yoyo: true, repeat: 1, transformOrigin: 'left bottom' }, 2.2);

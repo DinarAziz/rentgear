@@ -18,6 +18,10 @@ final class Audit
 
     public const LOGIN_FAILED = 'login_failed';
 
+    public const PASSWORD_RESET_REQUESTED = 'password_reset_requested';
+
+    public const PASSWORD_RESET = 'password_reset';
+
     public const PROVIDER_STATUS = 'provider_status';
 
     public const DAMAGE_FEE_DECIDED = 'damage_fee_decided';

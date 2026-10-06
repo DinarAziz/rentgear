@@ -75,8 +75,8 @@ class RentalController extends Controller
             'guarantees.*.type' => 'nullable|string',
             'guarantees.*.holderName' => 'nullable|string',
             'guarantees.*.documentNumber' => 'nullable|string',
-            'guarantees.*.photo' => 'nullable|image|max:8192',
-        ]);
+            'guarantees.*.photo' => 'nullable|'.self::PHOTO_RULE,
+        ], self::PHOTO_MESSAGES);
         $key = $request->header('Idempotency-Key')
             ?? throw new ApiException('VALIDATION', 'Header Idempotency-Key wajib diisi.');
 
@@ -117,7 +117,7 @@ class RentalController extends Controller
 
     public function payment(Request $request, string $id): JsonResponse
     {
-        $request->validate(['proof' => 'required|image|max:8192']);
+        $request->validate(['proof' => 'required|'.self::PHOTO_RULE], self::PHOTO_MESSAGES);
 
         return $this->present($this->flow->submitPayment($id, $request->user(), $request->file('proof')));
     }
@@ -126,8 +126,8 @@ class RentalController extends Controller
     {
         $data = $request->validate([
             'phase' => ['required', Rule::in([ConditionPhoto::HANDOVER, ConditionPhoto::RETURN])],
-            'photo' => 'required|image|max:8192',
-        ]);
+            'photo' => 'required|'.self::PHOTO_RULE,
+        ], self::PHOTO_MESSAGES);
 
         return $this->present($this->flow->addConditionPhoto($id, $request->user(), $data['phase'], $request->file('photo')));
     }

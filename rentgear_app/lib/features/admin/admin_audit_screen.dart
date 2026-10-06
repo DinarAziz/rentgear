@@ -31,6 +31,8 @@ enum _Filter {
     AuditAction.register,
     AuditAction.registerGoogle,
     AuditAction.loginFailed,
+    AuditAction.passwordResetRequested,
+    AuditAction.passwordReset,
   };
 
   bool matches(AuditEntry e) => switch (this) {
@@ -119,6 +121,10 @@ class _AuditTile extends StatelessWidget {
     final e = entry;
     final (icon, color) = switch (e.action) {
       AuditAction.loginFailed => (Icons.lock_outline, Colors.red.shade700),
+      AuditAction.passwordResetRequested || AuditAction.passwordReset => (
+        Icons.key_outlined,
+        Colors.orange.shade800,
+      ),
       AuditAction.blacklistAdded => (Icons.block, Colors.red.shade700),
       AuditAction.blacklistRemoved => (
         Icons.lock_open_outlined,

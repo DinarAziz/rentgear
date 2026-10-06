@@ -530,6 +530,8 @@ abstract final class AuditAction {
   static const register = 'register';
   static const registerGoogle = 'register_google';
   static const loginFailed = 'login_failed';
+  static const passwordResetRequested = 'password_reset_requested';
+  static const passwordReset = 'password_reset';
   static const providerStatus = 'provider_status';
   static const damageFeeDecided = 'damage_fee_decided';
   static const blacklistAdded = 'blacklist_added';
@@ -543,6 +545,8 @@ abstract final class AuditAction {
     register => 'Daftar akun',
     registerGoogle => 'Daftar dengan Google',
     loginFailed => 'Gagal masuk',
+    passwordResetRequested => 'Kode ganti password diminta',
+    passwordReset => 'Password diganti lewat kode email',
     providerStatus => 'Status penyedia diubah',
     damageFeeDecided => 'Denda kerusakan diputuskan',
     blacklistAdded => 'Masuk blacklist',

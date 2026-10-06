@@ -167,6 +167,13 @@ class HttpRentGearRepository implements RentGearRepository {
   @override
   Future<AppUser> loginWithGoogle(String idToken) => _startSession('auth/google', {'idToken': idToken});
 
+  @override
+  Future<void> requestPasswordReset(String email) => _send('POST', 'auth/forgot-password', {'email': email});
+
+  @override
+  Future<AppUser> resetPassword({required String email, required String code, required String password}) =>
+      _startSession('auth/reset-password', {'email': email, 'code': code, 'password': password});
+
   Future<AppUser> _startSession(String path, Map<String, dynamic> body) async {
     await _tokens.write(null);
     final data = await _send('POST', path, body) as Map<String, dynamic>;

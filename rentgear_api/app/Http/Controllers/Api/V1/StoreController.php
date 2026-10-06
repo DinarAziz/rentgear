@@ -15,9 +15,16 @@ use Illuminate\Support\Facades\DB;
 
 class StoreController extends Controller
 {
-    public function index(): JsonResponse
+    /** Admin melihat semua toko. Yang lain hanya toko terverifikasi, ditambah tokonya sendiri. */
+    public function index(Request $request): JsonResponse
     {
-        return ApiResponse::ok(Provider::withStats()->orderBy('created_at')->orderBy('id')->get()->map(Present::provider(...)));
+        $user = $request->user();
+        $stores = Provider::withStats()
+            ->unless($user->isAdmin(), fn ($q) => $q->where(fn ($w) => $w
+                ->where('status', Provider::VERIFIED)->orWhere('id', $user->provider_id)))
+            ->orderBy('created_at')->orderBy('id')->get();
+
+        return ApiResponse::ok($stores->map(Present::provider(...)));
     }
 
     public function show(string $id): JsonResponse
@@ -25,11 +32,15 @@ class StoreController extends Controller
         return ApiResponse::ok(Present::providerById($id));
     }
 
-    /** Semua alat toko, termasuk yang disembunyikan (dipakai layar "Alat Saya"). */
-    public function equipment(string $id): JsonResponse
+    /** Alat satu toko. Pemilik toko dan admin juga melihat alat yang disembunyikan (layar "Alat Saya"). */
+    public function equipment(Request $request, string $id): JsonResponse
     {
         Provider::findOrFail($id);
-        $items = Equipment::with('sizes', 'photos')->where('provider_id', $id)->orderBy('created_at')->orderBy('id')->get();
+        $user = $request->user();
+        $seesHidden = $user->isAdmin() || $user->provider_id === $id;
+        $items = Equipment::with('sizes', 'photos')->where('provider_id', $id)
+            ->unless($seesHidden, fn ($q) => $q->where('is_active', true))
+            ->orderBy('created_at')->orderBy('id')->get();
 
         return ApiResponse::ok($items->map(Present::equipment(...)));
     }

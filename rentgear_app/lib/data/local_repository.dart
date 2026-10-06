@@ -382,6 +382,16 @@ class LocalRentGearRepository implements RentGearRepository {
   Future<AppUser> loginWithGoogle(String idToken) => throw const AppException(
       'UNSUPPORTED', 'Login Google hanya tersedia saat aplikasi terhubung ke server.');
 
+  static const _noPasswordReset = AppException(
+      'UNSUPPORTED', 'Ganti password hanya tersedia saat aplikasi terhubung ke server.');
+
+  @override
+  Future<void> requestPasswordReset(String email) => throw _noPasswordReset;
+
+  @override
+  Future<AppUser> resetPassword({required String email, required String code, required String password}) =>
+      throw _noPasswordReset;
+
   @override
   Future<AppUser?> restoreSession() => _delay(() {
         final id = _sessionUserId;

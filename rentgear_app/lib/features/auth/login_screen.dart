@@ -11,6 +11,7 @@ import '../../data/local_repository.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
 import '../../widgets/google_button.dart';
+import 'forgot_password_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -199,8 +200,8 @@ class _LoginScreenState extends State<LoginScreen> {
           style: TextStyle(fontSize: 12, color: Colors.black54),
         ),
       ],
-      // Akun baru disimpan di server, jadi tidak ada di mode data lokal.
-      if (context.read<AppState>().repo.isRemote)
+      // Akun baru dan kode ganti password ada di server, jadi tidak ada di mode data lokal.
+      if (context.read<AppState>().repo.isRemote) ...[
         TextButton(
           onPressed: _loading
               ? null
@@ -209,6 +210,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
           child: const Text('Belum punya akun? Daftar'),
         ),
+        TextButton(
+          onPressed: _loading
+              ? null
+              : () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ForgotPasswordScreen(email: _email.text.trim()),
+                  ),
+                ),
+          child: const Text('Lupa password?'),
+        ),
+      ],
       const SizedBox(height: 32),
       const Text(
         'Akun demo (password: password)',

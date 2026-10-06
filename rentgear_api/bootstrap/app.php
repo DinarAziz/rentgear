@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\SecurityHeaders;
 use App\Support\ApiException;
 use App\Support\ApiResponse;
 use Illuminate\Auth\AuthenticationException;
@@ -7,6 +8,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -22,17 +24,26 @@ return Application::configure(basePath: dirname(__DIR__))
         // Di hosting, server ada di belakang nginx dan Cloudflare. Tanpa ini alamat foto menjadi http dan
         // alamat IP di jejak audit menjadi 127.0.0.1.
         $middleware->trustProxies(at: '*');
+        // Global, bukan hanya grup api: jawaban 401 dari pemeriksa login pun harus membawa header ini.
+        $middleware->append(SecurityHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
 
+        // Galat bisnis (salah password, stok habis) bukan gangguan server, jadi tidak ditulis ke log.
+        $exceptions->dontReport(ApiException::class);
+
         // Semua galat API memakai amplop yang sama dengan kode `AppException` di Flutter.
         $exceptions->render(fn (ApiException $e) => ApiResponse::error($e->errorCode, $e->getMessage(), $e->status()));
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             return $request->is('api/*')
                 ? ApiResponse::error('UNAUTHENTICATED', 'Sesi berakhir. Silakan masuk lagi.', 401) : null;
+        });
+        $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
+            return $request->is('api/*')
+                ? ApiResponse::error('TOO_MANY_REQUESTS', 'Terlalu banyak permintaan. Coba lagi sebentar lagi.', 429) : null;
         });
         $exceptions->render(function (ValidationException $e, Request $request) {
             return $request->is('api/*')

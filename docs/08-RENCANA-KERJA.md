@@ -128,6 +128,23 @@ Yang sudah diuji: sisi server dengan jawaban Google tiruan (5 tes).
 - Server: `POST /api/v1/auth/register`. Tes: 7 di server, 4 di aplikasi. Diuji di situs publik: daftar sebagai
   penyedia dari formulir, dan daftar sebagai penyewa lewat API.
 
+### Lupa password dengan kode email (dibuat 6 Oktober 2026, email belum terkirim sungguhan)
+
+- Layar login punya tombol "Lupa password?". Tombol itu hanya ada bila aplikasi memakai server.
+- Langkah 1: pengguna mengisi email, lalu server mengirim kode 6 angka ke email itu. Langkah 2: pengguna mengisi
+  kode dan password baru (minimal 8 karakter), lalu langsung masuk.
+- Kode berlaku 15 menit dan hanya bisa dipakai sekali. Setelah 5 tebakan salah kode itu batal. Kode baru untuk email
+  yang sama bisa diminta lagi setelah 60 detik, dan kode lama tidak berlaku lagi. Server hanya menyimpan hash kode.
+- Email yang tidak terdaftar mendapat jawaban yang sama dengan email yang terdaftar, supaya orang tidak bisa
+  memeriksa siapa yang punya akun. Akun admin tidak dikirimi kode; password admin diganti di server.
+- Setelah password diganti, semua sesi lama akun itu berakhir. Permintaan kode dan penggantian password tercatat di
+  jejak audit. Akun yang dibuat lewat Google bisa memakai cara ini untuk membuat password.
+- Server: `POST /api/v1/auth/forgot-password` dan `POST /api/v1/auth/reset-password`. Tes: 10 di server, 4 di aplikasi.
+- Yang belum: server belum punya pengirim email. Selama `MAIL_MAILER=log`, isi email hanya masuk ke
+  `storage/logs/laravel.log` dan tidak sampai ke pengguna. Cara mengisi pengirim Gmail ada di
+  `rentgear_api/README.md`, bagian "Lupa password". Fitur ini juga belum dipasang di server publik dan belum dicoba
+  di HP.
+
 ### Jejak audit (selesai)
 
 - Yang dicatat: masuk, daftar akun, masuk dan daftar dengan Google, gagal masuk, perubahan status penyedia,
