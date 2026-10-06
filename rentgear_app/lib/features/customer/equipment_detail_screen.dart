@@ -15,9 +15,12 @@ import 'booking_screen.dart';
 import 'provider_store_screen.dart';
 
 class EquipmentDetailScreen extends StatelessWidget {
-  const EquipmentDetailScreen({super.key, required this.equipmentId});
+  const EquipmentDetailScreen({super.key, required this.equipmentId, this.prefill});
 
   final String equipmentId;
+
+  /// Diteruskan ke form booking bila layar ini dibuka dari saran AI.
+  final BookingPrefill? prefill;
 
   Future<(Equipment, ProviderProfile, BlacklistEntry?)> _load(
     AppState state,
@@ -56,7 +59,7 @@ class EquipmentDetailScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute<void>(
                           builder: (_) =>
-                              BookingScreen(equipment: e, provider: p),
+                              BookingScreen(equipment: e, provider: p, prefill: prefill),
                         ),
                       ),
                 child: const Text('Sewa Sekarang'),

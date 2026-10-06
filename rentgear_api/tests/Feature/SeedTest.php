@@ -9,9 +9,12 @@ use App\Models\Rental;
 use App\Models\Review;
 use App\Models\User;
 use Database\Seeders\DemoSeeder;
+use Database\Seeders\MoreGearSeeder;
 use Database\Seeders\MoreStoresSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class SeedTest extends TestCase
@@ -60,6 +63,36 @@ class SeedTest extends TestCase
             $this->assertGreaterThan(0, $e->stockFor(null), $e->id);
         }
         $this->assertSame(['39', '40', '41', '42', '43'], Equipment::find('e-ijen-sepatu')->sizes->pluck('label')->all());
+    }
+
+    public function test_more_gear_is_added_to_existing_stores_without_duplicates(): void
+    {
+        $this->seed(MoreStoresSeeder::class);
+        $this->seed(MoreGearSeeder::class);
+        $this->seed(MoreGearSeeder::class);
+
+        $this->assertSame(58, Equipment::count());
+        $this->assertSame(7, DB::table('categories')->count());
+        $this->assertSame(21, Equipment::where('category_id', MoreGearSeeder::CATEGORY)->count());
+        $this->assertSame(9, Provider::count());
+        $this->assertSame(6, Rental::count());
+
+        $files = collect(File::files(base_path('../rentgear_app/assets/equipment')))->map->getFilename();
+        $credited = collect(json_decode(File::get(base_path('../rentgear_app/assets/equipment/credits.json')), true))->pluck('file');
+        foreach (DB::table('equipment_photos')->pluck('path') as $path) {
+            $this->assertContains(basename($path), $files, $path);
+            $this->assertContains(basename($path), $credited, $path);
+        }
+
+        // Penyewa melihat kategori dan alat baru di katalog, lengkap dengan foto dan stok.
+        Sanctum::actingAs(User::findOrFail('u-budi'));
+        $this->assertContains('Perlengkapan', $this->getJson('/api/v1/categories')->json('data.*.name'));
+        $catalog = collect($this->getJson('/api/v1/equipment?categoryId=perlengkapan')->json('data'));
+        $this->assertCount(21, $catalog);
+        foreach ($catalog as $item) {
+            $this->assertNotEmpty($item['photos'], $item['id']);
+            $this->assertGreaterThan(0, $item['stock'], $item['id']);
+        }
     }
 
     public function test_document_numbers_are_encrypted_at_rest(): void

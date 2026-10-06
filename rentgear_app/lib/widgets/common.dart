@@ -1,6 +1,6 @@
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -121,6 +121,7 @@ const categoryIcons = <String, IconData>{
   'masak': Icons.outdoor_grill_outlined,
   'penerangan': Icons.flashlight_on_outlined,
   'sepatu': Icons.hiking,
+  'perlengkapan': Icons.inventory_2_outlined,
 };
 
 class EquipmentThumb extends StatelessWidget {
@@ -436,24 +437,45 @@ Future<Uint8List?> pickPhoto(
     ),
   );
   if (source == null) return null;
+  if (!context.mounted) return null;
+  final messenger = ScaffoldMessenger.of(context);
   try {
-    final file = await ImagePicker().pickImage(
-      source: source,
-      maxWidth: 1600,
-      imageQuality: 80,
-    );
-    return file == null ? null : await file.readAsBytes();
-  } catch (e) {
-    if (context.mounted) {
-      _showError(
-        ScaffoldMessenger.of(context),
-        source == ImageSource.camera
-            ? 'Kamera tidak bisa dibuka: $e'
-            : 'Galeri tidak bisa dibuka: $e',
-      );
+    return await _pickFrom(source);
+  } on PlatformException catch (e) {
+    // HP tanpa aplikasi kamera yang melayani aplikasi lain (kamera bawaan
+    // dihapus atau diganti): beri tahu, lalu buka galeri sebagai gantinya.
+    if (source == ImageSource.camera && e.code == 'no_available_camera') {
+      _showError(messenger, noCameraMessage);
+      try {
+        return await _pickFrom(ImageSource.gallery);
+      } catch (_) {
+        return null;
+      }
     }
+    _showError(messenger, _pickErrorMessage(source, e.message ?? e.code));
+    return null;
+  } catch (e) {
+    _showError(messenger, _pickErrorMessage(source, '$e'));
     return null;
   }
+}
+
+const noCameraMessage =
+    'HP ini tidak punya aplikasi kamera yang bisa dipakai aplikasi lain. '
+    'Pilih foto dari galeri.';
+
+String _pickErrorMessage(ImageSource source, String detail) =>
+    source == ImageSource.camera
+    ? 'Kamera tidak bisa dibuka: $detail'
+    : 'Galeri tidak bisa dibuka: $detail';
+
+Future<Uint8List?> _pickFrom(ImageSource source) async {
+  final file = await ImagePicker().pickImage(
+    source: source,
+    maxWidth: 1600,
+    imageQuality: 80,
+  );
+  return file == null ? null : await file.readAsBytes();
 }
 
 /// Tutup keyboard sebelum membuka dialog/halaman lain, agar fokus kolom

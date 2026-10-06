@@ -12,11 +12,22 @@ import '../../widgets/guarantee_widgets.dart';
 import '../../widgets/photo_widgets.dart';
 import '../rental/rental_detail_screen.dart';
 
+/// Isian awal form booking dari saran AI: jumlah unit dan lama sewa.
+class BookingPrefill {
+  const BookingPrefill({required this.qty, required this.days});
+
+  final int qty;
+  final int days;
+}
+
 class BookingScreen extends StatefulWidget {
-  const BookingScreen({super.key, required this.equipment, required this.provider});
+  const BookingScreen({super.key, required this.equipment, required this.provider, this.prefill});
 
   final Equipment equipment;
   final ProviderProfile provider;
+
+  /// `null` bila form dibuka dari katalog biasa.
+  final BookingPrefill? prefill;
 
   @override
   State<BookingScreen> createState() => _BookingScreenState();
@@ -58,15 +69,26 @@ class _BookingScreenState extends State<BookingScreen> {
     return e.stockTotal;
   }
 
+  /// Tanggal yang diisi otomatis dari saran AI; belum dihitung sebagai isian pengguna.
+  DateTimeRange? _prefilledRange;
+
   bool get _dirty =>
       !_submitted &&
-      (_range != null ||
+      (_range != _prefilledRange ||
           _size != null ||
           _drafts.any((d) => d.type != null || d.documentNumber.isNotEmpty || d.photo != null));
 
   @override
   void initState() {
     super.initState();
+    final prefill = widget.prefill;
+    if (prefill != null) {
+      // Saran AI tidak memuat tanggal berangkat, jadi sewa dimulai besok selama jumlah hari yang diminta.
+      final start = dateOnly(DateTime.now()).add(const Duration(days: 1));
+      _qty = prefill.qty < 1 ? 1 : prefill.qty;
+      _range = _prefilledRange = DateTimeRange(start: start, end: start.add(Duration(days: prefill.days - 1)));
+      WidgetsBinding.instance.addPostFrameCallback((_) => _checkAvailability());
+    }
     _syncDraftCount();
   }
 
@@ -214,6 +236,15 @@ class _BookingScreenState extends State<BookingScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (widget.prefill case final prefill?)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Text(
+                          'Diisi dari saran AI: ${prefill.qty} unit selama ${prefill.days} hari, mulai besok. '
+                          'Ubah tanggal atau jumlah bila perlu.',
+                          style: const TextStyle(fontSize: 13, color: Colors.black54),
+                        ),
+                      ),
                     OutlinedButton.icon(
                       onPressed: _pickRange,
                       icon: const Icon(Icons.date_range),

@@ -90,11 +90,19 @@ Belum dibuat: panel admin berbasis web dan pencocokan nominal bukti transfer.
 
 ### Toko contoh tambahan (5 Oktober 2026)
 
-Server publik sekarang berisi 8 toko terverifikasi dan 32 alat di katalog. Enam toko baru (Probolinggo, Pasuruan,
+Server publik sekarang berisi 8 toko terverifikasi dan 57 alat di katalog (32 sampai 5 Oktober, ditambah 25 pada
+6 Oktober, lihat paragraf berikut). Enam toko baru (Probolinggo, Pasuruan,
 Kepanjen, Banyuwangi, Magetan, Surabaya) ditambahkan oleh `MoreStoresSeeder`, yang aman dijalankan di database yang
 sedang dipakai: `php artisan db:seed --class=MoreStoresSeeder --force`. Nama toko, alamat, rekening, dan ulasannya
 adalah contoh, dan fotonya memakai berkas yang sama dengan toko demo awal. Aplikasi mode data lokal tetap berisi tiga
 toko awal.
+
+Pada 6 Oktober 2026 katalog ditambah 25 alat dari tujuh jenis baru: matras, trekking pole, hammock, kursi lipat,
+flysheet, lentera, dan ponco. Enam jenis pertama masuk kategori baru "Perlengkapan"; lentera masuk "Penerangan".
+Alat itu ditambahkan ke delapan toko terverifikasi oleh `MoreGearSeeder`, yang juga aman dijalankan di database yang
+sedang dipakai: `php artisan db:seed --class=MoreGearSeeder --force`. Tiga belas fotonya diambil dari Wikimedia
+Commons; pembuat dan lisensinya tercatat di `rentgear_app/assets/equipment/credits.json` dan tampil di layar kredit
+foto. Nama alat, merek, dan harga adalah contoh.
 
 ## 4. Login Google dan jejak audit
 

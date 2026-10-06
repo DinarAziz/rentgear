@@ -1035,12 +1035,51 @@ The user asked for a check after the deploy. Done from the Mac against the publi
   (230 to 250 KB) stay blank for up to about 40 seconds on first load, then appear. There is no loading placeholder.
   The order "followed stores first, then nearest" is intended.
 
-## Resume here (state saved 2026-10-05)
+## More gear in the catalog, 6 October 2026 (14:15)
+
+The user asked for a bigger catalog. `MoreGearSeeder` adds 25 items of seven new kinds (sleeping mat, trekking
+poles, hammock, folding chair, flysheet, lantern, rain poncho) to the eight verified stores, and a seventh category,
+"Perlengkapan" (21 of the 25; the four lanterns are under "Penerangan"). Like `MoreStoresSeeder` it is safe to run
+again and on live data. Run on the public server after a copy of the database: 58 items in total, 57 in the catalog.
+
+- 13 new photos from Wikimedia Commons, resized to 960 px and listed in `assets/equipment/credits.json` (37 entries).
+  `pole_1.jpg` was a 5:1 strip and sits on a 4:3 canvas in its own background colour. `pole_2.jpg` shows the poles
+  small, against a tree; it is the weakest of the set. The poncho has one photo. Brands, names and prices are made up,
+  and the same photo is used by more than one store, as before.
+- The app got an icon for the new category; web build `main.dart.e0c320bc86.js` and a new debug APK are deployed.
+- Seen on the Redmi: the "Perlengkapan" chip and its list with photos, and "7 alat" on the store cards. A store card
+  still shows only the first four thumbnails. Not tried: booking one of the new items. Local mode
+  (`lib/data/seed.dart`) does not have the new items or the category.
+- Tests: one more in `SeedTest` (counts, every photo file exists and is credited). Server total 140.
+
+## Camera error and AI prefill, 6 October 2026 (14:35)
+
+Camera: the user reported a PlatformException when taking a photo. Reproduced on the Redmi: the log says
+`unable to resolve Intent { act=android.media.action.IMAGE_CAPTURE }`, which image_picker reports as
+`no_available_camera`. The phone has no app that answers that request: the stock camera `com.android.camera` is
+uninstalled for the user, and Fossify Camera only answers `STILL_IMAGE_CAMERA`. `pickPhoto` in
+`lib/widgets/common.dart` now shows a plain message and opens the gallery instead; other picker errors show their
+message without the exception wrapper. Seen on the Redmi after the fix: choosing the camera opens the photo picker.
+The camera itself still cannot be used on this phone. Two ways out, neither done: restore the stock camera
+(`adb shell cmd package install-existing com.android.camera`, the user's call), or build a camera screen inside the
+app with the `camera` plugin.
+
+AI prefill: the user asked that an item from the AI suggestion opens the rental form already filled in. An AI pick
+now carries `BookingPrefill(qty, days)` through the detail screen to `BookingScreen`: quantity from the pick, dates
+from tomorrow for the number of days asked (the AI form has no start date), stock checked at once and the quantity
+lowered to what is left, with a line saying where the values came from. Size is still chosen by hand. Tested with
+widget tests on local data; not tried on a device or against the real AI, to save the Gemini quota.
+
+Tests: 4 more in the app (105). Web build `main.dart.3b7ffa1b19.js` and a new debug APK are deployed.
+
+## Resume here (state saved 2026-10-06)
 
 Everything through stage 6 of `../docs/08-RENCANA-KERJA.md` is built, plus registration with email and password and
-six more demo stores, and since 2026-10-06 a forgot-password flow and a security pass, both deployed (see the
-sections above); no mail sender is set, so reset codes reach nobody yet.
-101 app tests and 139 server tests pass, `flutter analyze` is clean. All work is committed on
+six more demo stores. On 2026-10-06 the user paused with "save, nanti lanjutkan" after: a forgot-password flow, a
+security pass, 25 more catalog items, a fix for the camera error, and AI suggestions that fill in the rental form.
+All of it is deployed to the public server and the Redmi; the sections above have the detail. No mail sender is
+set, so reset codes reach nobody yet.
+105 app tests and 140 server tests pass, `flutter analyze` is clean. All work is committed on
 `master`; the commits since `2608397` are local only, because the user has not asked for a push.
 
 Done on 2026-10-05, in order: the public server was brought back after Android ended Termux; Google sign-in was fixed
@@ -1059,6 +1098,11 @@ Waiting on the user:
 5. Whether the old `../rentgear-presentasi-final.pptx.pptx` also has to be updated. Only the web deck was.
 6. Whether Google sign-in was confirmed on the Redmi, in the browser, or both.
 7. A Gmail address and App Password for the mail sender. Until then "Lupa password?" is live but sends nothing.
+8. The camera on the Redmi: restore the stock camera app, or have a camera screen built into the app. Until one of
+   them, "Ambil dengan kamera" opens the gallery on that phone.
+
+Last question answered: how to sign in as Lawu Summit Gear in the browser (`lawu@rentgear.id`, the demo password;
+the six added stores follow `<slug>@rentgear.id`).
 
 Offered and not answered: testing an admin verifying a newly registered store and a complete rental on the public
 server (the admin password would be read from `.env.redmi` without printing it); a reboot of the Redmi to see that
@@ -1069,8 +1113,8 @@ the Gemini quota).
 
 Where things run:
 
-- Public: `https://rentgear.serverbaik.my.id` on the Redmi, web build `main.dart.579b48f35b.js`, 9 stores (8
-  verified), 33 items. The Redmi has the debug APK built for it with the web client ID, and was left on Budi's catalog.
+- Public: `https://rentgear.serverbaik.my.id` on the Redmi, web build `main.dart.3b7ffa1b19.js`, 9 stores (8
+  verified), 58 items. The Redmi has the debug APK built for it with the web client ID, and was left on Budi's catalog.
 - If the address answers `error code: 1033`, Android ended Termux again: open Termux and run
   `sh /sdcard/rg/hidup.sh`. The cause is not known.
 - The phone locks itself; then nothing typed over adb arrives. Ask the user to unlock it.

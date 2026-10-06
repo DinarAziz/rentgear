@@ -71,5 +71,5 @@ terbit.
   alamat halaman jurnalnya.
 - Belum ada sumber untuk klaim "penyewa tidak tahu tempat sewa". Klaim itu tidak ada di slide.
 - Makna logo dan "arah berikutnya" di slide alur bisnis (komisi per transaksi) adalah usulan, belum keputusan.
-- Angka pengujian (240 tes: 101 aplikasi dan 139 server, hasil uji di Redmi 17 dan browser) berasal dari `../rentgear_app/HANDOFF.md`. Kalau jumlah tes
+- Angka pengujian (245 tes: 105 aplikasi dan 140 server, hasil uji di Redmi 17 dan browser) berasal dari `../rentgear_app/HANDOFF.md`. Kalau jumlah tes
   berubah, perbarui slide Pengujian dan angka di `adegan.pengujian` pada `deck.js`.

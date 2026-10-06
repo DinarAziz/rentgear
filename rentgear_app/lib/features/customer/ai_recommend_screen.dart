@@ -6,6 +6,7 @@ import '../../core/responsive.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
 import '../../widgets/common.dart';
+import 'booking_screen.dart';
 import 'equipment_detail_screen.dart';
 
 /// Penyewa menulis rencana perjalanan, AI menyarankan paket alat dari
@@ -181,8 +182,10 @@ class _AiRecommendScreenState extends State<AiRecommendScreen> {
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute<void>(
-              builder: (_) =>
-                  EquipmentDetailScreen(equipmentId: pick.equipmentId),
+              builder: (_) => EquipmentDetailScreen(
+                equipmentId: pick.equipmentId,
+                prefill: BookingPrefill(qty: pick.qty, days: r.days),
+              ),
             ),
           ),
         ),
@@ -203,8 +206,10 @@ class _AiRecommendScreenState extends State<AiRecommendScreen> {
       ),
       const SizedBox(height: 4),
       const Text(
-        'Ketuk alat untuk melihat detail dan memesan. Tiap alat dipesan '
-        'terpisah, dan stok dicek lagi pada tanggal yang Anda pilih.',
+        'Ketuk alat untuk melihat detail dan memesan. Form sewa sudah terisi '
+        'jumlah unit dan lama sewa dari saran ini, mulai besok; ubah tanggalnya '
+        'bila perlu. Tiap alat dipesan terpisah, dan stok dicek lagi pada '
+        'tanggal yang Anda pilih.',
         style: TextStyle(fontSize: 13, color: Colors.black54),
       ),
     ],
