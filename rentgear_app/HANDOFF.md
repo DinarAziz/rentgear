@@ -1072,6 +1072,34 @@ widget tests on local data; not tried on a device or against the real AI, to sav
 
 Tests: 4 more in the app (105). Web build `main.dart.3b7ffa1b19.js` and a new debug APK are deployed.
 
+## 401 without the JSON header, 6 October 2026 (evening)
+
+A request to a protected route without `Accept: application/json` answered 500 ("Route [login] not defined"), noted
+on 5 October. `bootstrap/app.php` now calls `redirectGuestsTo(fn () => null)`, so the answer is the usual 401
+envelope. One more test in `SecurityTest` (it failed with 500 before the change); server total 141, and the deck
+shows 246. Not deployed: the Redmi was not connected over adb, so the public server still answers 500 for that
+case. The app always sends the header, so users are not affected.
+
+## Deck: plain wording and more motion, 6 October 2026 (night)
+
+The user asked to bring the "ppt" up to date in easy language, above all the double-booking part, and then for more
+motion graphics. "ppt" means the web deck in `../presentasi/`; the old `.pptx` was not touched.
+
+- "Mencegah booking dobel" is rebuilt with names and a row of free tents per date (7 states): Andi and Sinta have
+  bookings, Raka is accepted, Dewi is refused, then Yoga and Bima ask for the last tent in the same second and the
+  server serves one of them. The term "puncak pemakaian" is gone from the deck; the wording is "mengecek alat kosong
+  di tiap tanggal".
+- New motion: the six diagrams on the algorithm-types slide loop, dots travel along the arrows of the business flow,
+  and the layers of the app structure light up in turn.
+- Content now says: account lock after 5 wrong passwords, fine rules per store, 9 demo stores and 58 items on the
+  public server. Forgot password is listed as planned work because no mail sender is set.
+- Checked in Chrome through Playwright at 1920x1080: every changed slide rendered, the whole deck stepped forward and
+  backward with no console error. Not seen on a projector, and the motion was judged from still frames only.
+- The user could not find the motion at first: macOS "Reduce motion" was on, and the deck switches almost all
+  animation off in that case. They turned the setting off on 7 October. The laptop used at the sidang needs it off too.
+- 7 October: the title slide has a QR code to `https://rentgear.serverbaik.my.id` (inline SVG, made with the Python
+  package `segno` in a throwaway venv). It was decoded from a screenshot of the slide; not scanned with a phone camera.
+
 ## Resume here (state saved 2026-10-06)
 
 Everything through stage 6 of `../docs/08-RENCANA-KERJA.md` is built, plus registration with email and password and
@@ -1079,7 +1107,9 @@ six more demo stores. On 2026-10-06 the user paused with "save, nanti lanjutkan"
 security pass, 25 more catalog items, a fix for the camera error, and AI suggestions that fill in the rental form.
 All of it is deployed to the public server and the Redmi; the sections above have the detail. No mail sender is
 set, so reset codes reach nobody yet.
-105 app tests and 140 server tests pass, `flutter analyze` is clean. All work is committed on
+105 app tests and 141 server tests pass (the app tests were last run on 6 October, before the deck work, which did
+not touch the app), `flutter analyze` is clean. Saved again on 7 October after the 401 fix and the deck update; the
+401 fix still has to be installed on the Redmi. All work is committed on
 `master`; the commits since `2608397` are local only, because the user has not asked for a push.
 
 Done on 2026-10-05, in order: the public server was brought back after Android ended Termux; Google sign-in was fixed

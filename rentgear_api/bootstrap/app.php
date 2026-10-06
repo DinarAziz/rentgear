@@ -26,6 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         // Global, bukan hanya grup api: jawaban 401 dari pemeriksa login pun harus membawa header ini.
         $middleware->append(SecurityHeaders::class);
+        // Tidak ada halaman login di server ini. Tanpa ini, permintaan tanpa `Accept: application/json`
+        // dijawab 500 ("Route [login] not defined") alih-alih 401.
+        $middleware->redirectGuestsTo(fn () => null);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

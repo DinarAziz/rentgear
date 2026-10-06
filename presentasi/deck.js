@@ -604,40 +604,143 @@ const adegan = {
     atur(langkah, seketika, sebelum) {
       const maju = !seketika && !tenang && langkah > sebelum;
       const sapu = $('.sapu');
-      const hantu = $('.hantu');
+      const sorot = $('.sorot-hari');
+      const gembok = $('.gembok');
+      const [dewi, yoga, bima] = ['dewi', 'yoga', 'bima'].map((nama) => $(`.hantu.${nama}`));
+      const cap = $$('.hantu small');
       const sel = $$('.slot-kisi .pakai');
-      const baru = $$('.slot-kisi .tk.baru');
-      // Setelah permintaan baru diterima (langkah 4), tiap hari bertambah satu unit terpakai.
-      const terpakai = langkah >= 4 ? [2, 2, 1, 2, 2] : [1, 1, 0, 1, 1];
-      const puncak = Math.max(...terpakai);
+      const raka = $$('.slot-kisi .tk.baru');
+      const tendaYoga = $('.slot-kisi .tk.yoga');
+      // Tenda kosong per tanggal: awalnya, setelah Raka diterima (langkah 4), lalu setelah Yoga (langkah 6).
+      const kosong = langkah >= 6 ? [0, 0, 0, 0, 0] : langkah >= 4 ? [0, 0, 1, 0, 0] : [1, 1, 2, 1, 1];
+      const tulis = (el, n) => {
+        el.textContent = n;
+        el.classList.toggle('habis', n === 0);
+      };
 
-      gsap.killTweensOf([sapu, hantu, ...sel, ...baru]);
-      sel.forEach((el, n) => {
-        el.textContent = terpakai[n];
-        el.classList.toggle('puncak', langkah >= 3 && terpakai[n] === puncak);
-      });
+      this.tl?.kill();
+      gsap.killTweensOf([sapu, sorot, gembok, dewi, yoga, bima, tendaYoga, ...cap, ...sel, ...raka, '.tk.a, .tk.b']);
+      sel.forEach((el, n) => tulis(el, kosong[n]));
       gsap.set(sapu, { autoAlpha: 0, x: 0 });
+      gsap.set(sorot, { autoAlpha: 0, x: 150 });
       gsap.set(sel, { autoAlpha: langkah >= 3 ? 1 : 0, scale: 1 });
-      gsap.set(baru, { autoAlpha: langkah >= 4 ? 1 : 0, y: 0 });
-      gsap.set(hantu, { autoAlpha: langkah >= 5 ? 1 : 0, x: 0 });
+      gsap.set(raka, { autoAlpha: langkah >= 4 ? 1 : 0, y: 0 });
+      gsap.set(tendaYoga, { autoAlpha: langkah >= 6 ? 1 : 0, scale: 1 });
+      gsap.set(dewi, { autoAlpha: langkah === 5 ? 1 : 0, x: 0, y: 0 });
+      gsap.set(yoga, { autoAlpha: 0, x: 0, y: 0 });
+      gsap.set(bima, { autoAlpha: langkah >= 6 ? 1 : 0, x: 0 });
+      gsap.set(gembok, { autoAlpha: langkah >= 6 ? 1 : 0, scale: 1 });
+      gsap.set(cap, { autoAlpha: 1, scale: 1 });
+      gsap.set('.tk.a, .tk.b', { scale: 1 });
+      gsap.set('.keliru', { x: 0 });
       if (!maju) return;
 
+      const tl = (this.tl = gsap.timeline());
+      const getar = (el) => tl.fromTo(el, { x: -10 }, { x: 10, duration: 0.07, ease: 'none', yoyo: true, repeat: 7 }).set(el, { x: 0 });
+      const stempel = (el) => tl.fromTo(el, { autoAlpha: 0, scale: 2.4 }, { autoAlpha: 1, scale: 1, duration: 0.35, ease: 'back.out(2)' });
       if (langkah === 2) {
-        gsap.fromTo('.tk.a, .tk.b', { scale: 1 }, { scale: 1.14, duration: 0.2, yoyo: true, repeat: 3, stagger: 0.05, ease: 'power2.out' });
+        // Dua pesanan yang ada dihitung, lalu hitungan itu digetarkan sebagai tanda keliru.
+        tl.fromTo('.tk.a, .tk.b', { scale: 1 }, { scale: 1.14, duration: 0.2, yoyo: true, repeat: 3, stagger: 0.05, ease: 'power2.out' }, 0.2);
+        getar('.keliru');
       } else if (langkah === 3) {
-        // Garis sapu berjalan melewati lima kolom hari (150px per kolom).
+        // Garis sapu berjalan melewati lima kolom tanggal (150px per kolom); angka muncul saat terlewati.
         gsap.set(sel, { autoAlpha: 0 });
-        gsap.timeline()
-          .set(sapu, { autoAlpha: 1 })
+        tl.set(sapu, { autoAlpha: 1 })
           .to(sapu, { x: 750, duration: 2.6, ease: 'none' })
-          .to(sel, { autoAlpha: 1, duration: 0.25, stagger: 0.52 }, 0.26)
+          .fromTo(sel, { autoAlpha: 0, scale: 1.8 }, { autoAlpha: 1, scale: 1, duration: 0.35, ease: 'back.out(2)', stagger: 0.52 }, 0.26)
           .to(sapu, { autoAlpha: 0, duration: 0.3 });
       } else if (langkah === 4) {
-        gsap.from(baru, { autoAlpha: 0, y: -70, duration: 0.55, ease: 'back.out(1.6)', stagger: 0.12 });
-        gsap.from(sel, { scale: 1.6, duration: 0.45, ease: 'power3.out', stagger: 0.12 });
+        // Permintaan Raka turun dari baris permintaan ke baris tenda 2, lalu angka tenda kosong berkurang.
+        sel.forEach((el, n) => tulis(el, [1, 1, 2, 1, 1][n]));
+        tl.from(raka, { autoAlpha: 0, y: -174, duration: 0.6, ease: 'bounce.out', stagger: 0.1 });
+        sel.forEach((el, n) => {
+          tl.call(() => tulis(el, kosong[n]), null, 0.45 + n * 0.1)
+            .fromTo(el, { scale: 1.7 }, { scale: 1, duration: 0.45, ease: 'power3.out' }, 0.45 + n * 0.1);
+        });
       } else if (langkah === 5) {
-        gsap.fromTo(hantu, { x: -10 }, { x: 10, duration: 0.07, ease: 'none', yoyo: true, repeat: 7, onComplete: () => gsap.set(hantu, { x: 0 }) });
+        // Dewi mencoba turun ke kolom 2 Okt, terpental, lalu dicap ditolak.
+        gsap.set(cap[0], { autoAlpha: 0 });
+        tl.fromTo(dewi, { autoAlpha: 0, y: -50 }, { autoAlpha: 1, y: 0, duration: 0.4, ease: 'power3.out' })
+          .to(dewi, { y: 46, duration: 0.26, ease: 'power2.in' })
+          .to(sorot, { autoAlpha: 1, duration: 0.14, yoyo: true, repeat: 5 }, '<0.16')
+          .fromTo(sel[1], { scale: 1.8 }, { scale: 1, duration: 0.5, ease: 'power3.out' }, '<')
+          .to(dewi, { y: 0, duration: 0.55, ease: 'bounce.out' }, '<0.1');
+        getar(dewi);
+        stempel(cap[0]);
+      } else if (langkah === 6) {
+        // Dua permintaan datang bersamaan. Gembok muncul, Yoga masuk ke tenda 1, Bima ditolak.
+        tulis(sel[2], 1);
+        gsap.set(cap[1], { autoAlpha: 0 });
+        gsap.set([gembok, tendaYoga], { autoAlpha: 0 });
+        tl.fromTo(yoga, { autoAlpha: 0, x: -110 }, { autoAlpha: 1, x: 0, duration: 0.45, ease: 'power3.out' })
+          .fromTo(bima, { autoAlpha: 0, x: 110 }, { autoAlpha: 1, x: 0, duration: 0.45, ease: 'power3.out' }, '<')
+          .to(yoga, { x: 34, duration: 0.2, ease: 'power2.in', yoyo: true, repeat: 3 })
+          .to(bima, { x: -34, duration: 0.2, ease: 'power2.in', yoyo: true, repeat: 3 }, '<')
+          .fromTo(gembok, { autoAlpha: 0, scale: 2.6 }, { autoAlpha: 1, scale: 1, duration: 0.4, ease: 'back.out(2)' })
+          .to(yoga, { x: 150, y: 82, autoAlpha: 0, duration: 0.45, ease: 'power2.in' }, '+=0.25')
+          .fromTo(tendaYoga, { autoAlpha: 0, scale: 1.5 }, { autoAlpha: 1, scale: 1, duration: 0.4, ease: 'back.out(2)' }, '-=0.12')
+          .call(() => tulis(sel[2], 0))
+          .fromTo(sel[2], { scale: 1.8 }, { scale: 1, duration: 0.45, ease: 'power3.out' });
+        getar(bima);
+        stempel(cap[1]);
       }
+    },
+  },
+
+  // Enam diagram kecil bergerak terus: tiap gerak memperagakan jenis algoritmanya.
+  jenis: {
+    masuk() {
+      this.keluar();
+      if (tenang) return;
+      const kartu = $$('#jenis .skema');
+      const kotak = (n, pilih = 'rect') => $$(pilih, kartu[n]);
+      const ulang = (jeda = 0.6) => gsap.timeline({ repeat: -1, repeatDelay: jeda, delay: 1.6 });
+      const nyala = (tl, el, kapan) => tl.to(el, { stroke: '#fff3e0', strokeWidth: 4.5, duration: 0.3, ease: 'power2.out', yoyo: true, repeat: 1 }, kapan);
+      const urut = (els, jarak, jeda) => {
+        const tl = ulang(jeda);
+        els.forEach((el, n) => nyala(tl, el, n * jarak));
+        return tl;
+      };
+
+      // 1 Sequential dan 6 Machine Learning: kotak menyala bergiliran dari kiri ke kanan.
+      const berurutan = urut(kotak(0), 0.55);
+      const belajar = urut(kotak(5), 0.55, 0.9);
+      // 2 Selection: belah ketupat bertanya, lalu salah satu cabang menyala bergantian.
+      const [ya, tidak] = kotak(1);
+      const pilih = ulang(0.4);
+      [ya, tidak].forEach((cabang, n) => {
+        nyala(pilih, kotak(1, '.belah-ketupat')[0], n * 1.7);
+        nyala(pilih, cabang, n * 1.7 + 0.6);
+      });
+      // 3 Iteration: sorot berpindah dari tanggal ke tanggal, lalu mengulang.
+      const ulangi = ulang(0.3);
+      kotak(2).forEach((el, n) => ulangi.to(el, { fill: 'rgba(240, 138, 60, 0.5)', duration: 0.22, yoyo: true, repeat: 1 }, n * 0.42));
+      // 4 Searching: kaca pembesar memeriksa kotak satu per satu dan berhenti di yang cocok.
+      const kaca = $('.kaca', kartu[3]);
+      const cari = ulang(1.2);
+      [0, 113, 226].forEach((x, n) => {
+        cari.to(kaca, { x: x + 28, y: -48, duration: n ? 0.4 : 0.5, ease: 'power2.inOut' }, n * 0.8);
+        if (n < 2) cari.to(kotak(3)[n], { opacity: 0.35, duration: 0.25 }, n * 0.8 + 0.5);
+      });
+      nyala(cari, kotak(3)[2], 2.2);
+      cari.to(kaca, { x: 0, y: 0, duration: 0.5, ease: 'power2.inOut' }, 3.2).to(kotak(3), { opacity: 1, duration: 0.3 }, 3.2);
+      // 5 Sorting: dua kotak di kiri bertukar tempat, hasilnya menyala di kanan.
+      const teks = $$('text', kartu[4]);
+      const tukar = ulang(1.1);
+      tukar.to([kotak(4)[0], teks[0]], { x: 102, duration: 0.7, ease: 'power2.inOut' }, 0)
+        .to([kotak(4)[0], teks[0]], { y: -16, duration: 0.35, ease: 'sine.out', yoyo: true, repeat: 1 }, 0)
+        .to([kotak(4)[1], teks[1]], { x: -102, duration: 0.7, ease: 'power2.inOut' }, 0)
+        .to([kotak(4)[1], teks[1]], { y: 16, duration: 0.35, ease: 'sine.out', yoyo: true, repeat: 1 }, 0);
+      nyala(tukar, kotak(4)[2], 0.8);
+      nyala(tukar, kotak(4)[3], 1.1);
+      tukar.to([kotak(4)[0], teks[0], kotak(4)[1], teks[1]], { x: 0, duration: 0.5, ease: 'power2.inOut' }, 2.6);
+
+      this.putar = [berurutan, belajar, pilih, ulangi, cari, tukar];
+    },
+    keluar() {
+      this.putar?.forEach((tl) => tl.kill());
+      this.putar = null;
+      gsap.set('#jenis .skema *', { clearProps: 'all' });
     },
   },
 
@@ -656,7 +759,7 @@ const adegan = {
 
   pengujian: {
     masuk(tl) {
-      tl.add(hitung($('#skor'), 0, 245, 1.6, 'power1.out'), 0.6)
+      tl.add(hitung($('#skor'), 0, 246, 1.6, 'power1.out'), 0.6)
         .from('.titik-uji i', { autoAlpha: 0, scale: 0.4, duration: d(0.35), ease: 'back.out(2)', stagger: 0.012 }, 0.6)
         .call(() => ledakkan($('#skor'), 110), null, 2.2)
         .fromTo('#skor', { scale: 1 }, { scale: 1.14, duration: d(0.22), ease: 'power2.out', yoyo: true, repeat: 1, transformOrigin: 'left bottom' }, 2.2);
@@ -678,9 +781,16 @@ const adegan = {
       });
       if (tenang) return;
       this.ayun = gsap.fromTo('.strata', { rotationY: -9, rotationX: 5 }, { rotationY: 9, rotationX: -2, duration: 3.6, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.7, immediateRender: false });
+      // Perintah turun dari layar ke tempat data (oranye), lalu jawabannya naik lagi (hijau).
+      const pijar = (warna) => ({ borderColor: warna, boxShadow: `0 0 38px ${warna}`, duration: 0.28, ease: 'power2.out', yoyo: true, repeat: 1 });
+      this.arus = gsap.timeline({ repeat: -1, repeatDelay: 0.9, delay: 2.4 });
+      lapis.forEach((el, n) => this.arus.to(el, pijar('#f08a3c'), n * 0.3));
+      [...lapis].reverse().forEach((el, n) => this.arus.to(el, pijar('#8fc3a2'), 1.9 + n * 0.3));
     },
     keluar() {
       this.ayun?.kill();
+      this.arus?.kill();
+      gsap.set('.strata li', { clearProps: 'borderColor,boxShadow' });
       gsap.set('.strata', { rotationY: 0, rotationX: 0 });
     },
   },

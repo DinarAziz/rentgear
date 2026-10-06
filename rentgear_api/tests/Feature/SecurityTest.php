@@ -83,6 +83,12 @@ class SecurityTest extends ApiTestCase
             ->assertHeader('X-Content-Type-Options', 'nosniff');
     }
 
+    public function test_a_request_without_login_gets_401_even_without_the_json_accept_header(): void
+    {
+        // `get`, bukan `getJson`: peramban dan curl polos tidak mengirim `Accept: application/json`.
+        $this->assertApiError($this->get('/api/v1/rentals'), 'UNAUTHENTICATED', 401);
+    }
+
     public function test_uploads_that_are_not_jpg_png_or_webp_are_refused(): void
     {
         // Berkas sungguhan, bukan tiruan: jenisnya dibaca dari isi, sehingga nama ".jpg" tidak menolong.

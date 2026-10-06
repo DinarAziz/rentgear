@@ -36,6 +36,12 @@ terbit.
 - Gerak 3D lain: huruf judul berdiri dari posisi rebah, kartu ilustrasi latar belakang berganti dengan berputar, kartu
   kasus dan kartu peran terbuka seperti pintu (`pintu` di `deck.js`), papan di slide batasan dan kesimpulan juga, lapisan
   di slide susunan aplikasi jatuh lalu berayun, dan layar video datang dari kedalaman.
+- Slide "Mencegah booking dobel" punya tujuh keadaan (langkah 0 sampai 6) dengan nama orang, bukan huruf: Andi dan
+  Sinta sudah menyewa, Raka diterima, Dewi ditolak, lalu Yoga dan Bima berebut tenda terakhir. Geraknya diatur di
+  `adegan.algoritma` pada `deck.js`; angka di baris "Kosong" ditulis dari larik `kosong` di sana.
+- Enam diagram di slide "Jenis algoritma yang dipakai" bergerak terus (`adegan.jenis`). Di slide alur bisnis ada butir
+  yang berjalan di panah (`.koin` di `deck.css`), dan di slide susunan aplikasi lapisannya menyala bergiliran turun
+  lalu naik (`this.arus` di `adegan.susunan`).
 - Konfeti muncul di slide pengujian, kesimpulan, dan tanya jawab (`ledakkan` di `deck.js`). Tiap langkah baru diberi
   percikan kecil (`percik`).
 - Latar punya kunang-kunang, burung, dan bintang jatuh. Semua gerak ini mati sendiri kalau sistem memakai setelan
@@ -71,5 +77,12 @@ terbit.
   alamat halaman jurnalnya.
 - Belum ada sumber untuk klaim "penyewa tidak tahu tempat sewa". Klaim itu tidak ada di slide.
 - Makna logo dan "arah berikutnya" di slide alur bisnis (komisi per transaksi) adalah usulan, belum keputusan.
-- Angka pengujian (245 tes: 105 aplikasi dan 140 server, hasil uji di Redmi 17 dan browser) berasal dari `../rentgear_app/HANDOFF.md`. Kalau jumlah tes
+- Slide judul memuat kode QR ke `https://rentgear.serverbaik.my.id`. Kodenya SVG yang tertanam di `index.html`, jadi
+  tetap tampil tanpa internet. Kalau alamatnya berubah, kodenya harus dibuat ulang. Gerak deck mati kalau sistem
+  memakai "Reduce motion"; matikan setelan itu di laptop yang dipakai presentasi.
+- Slide batasan menyebut 9 toko contoh dan 58 alat di server publik (keadaan 6 Oktober 2026). Lupa password ditulis
+  sebagai rencana, karena pengirim email belum dipasang dan kodenya belum sampai ke siapa pun.
+- Di slide "Mencegah booking dobel", langkah terakhir (dua orang memesan pada detik yang sama) hanya berlaku di mode
+  server: server mengunci baris alat selama booking diproses.
+- Angka pengujian (246 tes: 105 aplikasi dan 141 server, hasil uji di Redmi 17 dan browser) berasal dari `../rentgear_app/HANDOFF.md`. Kalau jumlah tes
   berubah, perbarui slide Pengujian dan angka di `adegan.pengujian` pada `deck.js`.
