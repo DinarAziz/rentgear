@@ -1119,9 +1119,23 @@ as payment. The user said to build the check and to commit and deploy later.
   applies only to `awaitingPayment` and restarts after a rejection.
 - Tests: 108 app and 142 server pass, `flutter analyze` is clean. The deck shows 250, its status-flow slide has the
   new step, and the per-group test counts on the testing slide were recounted from the test files (they had drifted).
-- Not committed, not deployed, and not seen on a device or in a browser; the screens are covered by two widget
-  tests only. An older APK or web build against the new server would show an unknown status, so deploy the server,
-  the web build and the APK together.
+- The screens are covered by two widget tests. An older APK or web build against the new server would not know the
+  new status, so deploy the server, the web build and the APK together.
+
+Committed (`3a417f6`) and deployed on 7 October, about 10:10: web build `main.dart.664fae340b.js`, API code through
+`install.sh` (nothing to migrate). The Google web client ID was read from the previous public bundle again. The 401
+fix went out with it: a protected route without the JSON header now answers 401 on the public server.
+`startapi.sh` was typed after the install but never reached Termux; the API was not restarted and serves the new
+code anyway, because `php artisan serve` loads the code on each request.
+
+Checked over the public API with the demo accounts (INV-20261007-0003, Kompor, Budi and Arjuna Outdoor): upload
+gives `paymentReview`, a handover before the review is refused, the renter cannot accept their own proof, the
+store's rejection returns `awaitingPayment` with the reason in the log. The booking was then cancelled, so it stays
+in Budi's history as "Dibatalkan". The accept path was not run on the public server (it is in the tests).
+
+A new debug APK for the public address is on the Redmi. It opens on Budi's catalog with the session kept. The new
+screens ("Terima pembayaran", "Tolak bukti", the renter's rejection notice) have not been looked at on the phone or
+in a browser.
 
 ## Resume here (state saved 2026-10-06)
 
@@ -1130,9 +1144,8 @@ six more demo stores. On 2026-10-06 the user paused with "save, nanti lanjutkan"
 security pass, 25 more catalog items, a fix for the camera error, and AI suggestions that fill in the rental form.
 All of it is deployed to the public server and the Redmi; the sections above have the detail. No mail sender is
 set, so reset codes reach nobody yet.
-105 app tests and 141 server tests pass (the app tests were last run on 6 October, before the deck work, which did
-not touch the app), `flutter analyze` is clean. Saved again on 7 October after the 401 fix and the deck update; the
-401 fix still has to be installed on the Redmi. All work is committed on
+108 app tests and 142 server tests pass, `flutter analyze` is clean. Saved again on 7 October after the 401 fix,
+the deck update and the transfer-proof check; all three are deployed (see the sections above this one). All work is committed on
 `master`; the commits since `2608397` are local only, because the user has not asked for a push.
 
 Done on 2026-10-05, in order: the public server was brought back after Android ended Termux; Google sign-in was fixed
@@ -1166,7 +1179,7 @@ the Gemini quota).
 
 Where things run:
 
-- Public: `https://rentgear.serverbaik.my.id` on the Redmi, web build `main.dart.3b7ffa1b19.js`, 9 stores (8
+- Public: `https://rentgear.serverbaik.my.id` on the Redmi, web build `main.dart.664fae340b.js` since 7 October, 9 stores (8
   verified), 58 items. The Redmi has the debug APK built for it with the web client ID, and was left on Budi's catalog.
 - If the address answers `error code: 1033`, Android ended Termux again: open Termux and run
   `sh /sdcard/rg/hidup.sh`. The cause is not known.
