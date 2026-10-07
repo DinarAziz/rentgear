@@ -17,10 +17,13 @@ Clicker presentasi mengirim Page Down dan Page Up, jadi bisa langsung dipakai. A
 
 ## Isi
 
-22 slide dengan urutan sidang: judul, filosofi logo, latar belakang (data usaha sewa alat, kasus nyata di toko sewa,
-ringkasan masalah), rumusan masalah, tujuan dan manfaat, inovasi, batasan masalah, metode, perancangan (alur bisnis, peran, alur
-status, jenis algoritma yang dipakai, algoritma ketersediaan, susunan aplikasi), implementasi (screenshot dan video), pengujian, kesimpulan dan
-rencana lanjutan, sumber data, lalu tanya jawab. Latar gunung ikut naik dari basecamp saat senja sampai puncak saat matahari
+31 slide dengan urutan sidang: judul, filosofi logo, latar belakang (data usaha sewa alat, kasus dari berita, kasus
+dari jurnal, ringkasan masalah), rumusan masalah, tujuan dan manfaat, inovasi, batasan masalah, metode, perancangan
+(alur bisnis, peran, alur kerja aplikasi, alur status, flowchart booking, jenis algoritma yang dipakai, algoritma
+ketersediaan, susunan aplikasi, tech stack, ERD, struktur database), keamanan (pengamanan data, enkripsi password,
+login dengan Google), implementasi (screenshot dan video), pengujian, kesimpulan dan rencana lanjutan, sumber data,
+lalu tanya jawab. Nama bagian (misalnya "Latar belakang") tertulis di atas judul tiap slide; teksnya diambil dari
+`data-label`. Latar gunung ikut naik dari basecamp saat senja sampai puncak saat matahari
 terbit.
 
 ## Gerak
@@ -56,7 +59,8 @@ terbit.
   `data-in` muncul bersama slide. `data-hide-at="3"` menyembunyikan elemen mulai langkah 3, dipakai untuk blok
   penjelasan yang bergantian di slide algoritma dan pengujian.
 - Baris "Intinya: ..." di slide data, kasus, algoritma, dan pengujian adalah kalimat pegangan untuk presenter.
-- Diagram tahap dan alur status digambar dari data di `deck.js` (`bangunTahap`, `bangunAlur`).
+- Diagram tahap, alur status, alur kerja, ERD, dan urutan login Google digambar dari data di `deck.js` (`bangunTahap`,
+  `bangunAlur`, `bangunKerja`, `bangunErd`, `bangunGoogle`). Flowchart booking ditulis sebagai SVG di `index.html`.
 - Screenshot ada di `assets/app/`. Semuanya diambil dari build web di `../webapp/` pada lebar 390 piksel.
 
 ## Catatan
@@ -75,6 +79,16 @@ terbit.
   Solo dibaca dari jurnalnya. Buka lagi tautannya sebelum sidang.
 - DOI artikel Opak Adventure (10.48144/suryainformatika.v7i1.379) tidak terdaftar di doi.org, jadi slide memakai
   alamat halaman jurnalnya.
+- Slide "Kasus nyata dari pemberitaan" mengutip tiga situs berita: lenteraKalimantan.com (31 Desember 2022), Lintasan.id
+  (9 Agustus 2025), dan detikFinance (28 April 2018). Kutipan LEO Outdoor dan Van Adventure adalah ucapan pemiliknya,
+  disalin dari halaman aslinya pada 7 Oktober 2026. Kalimat tentang alat rusak di Avaya Outdoor adalah narasi wartawan,
+  jadi tidak ditulis sebagai kutipan. Tiap rumusan masalah menyebut kasus asalnya.
+- Slide keamanan, tech stack, ERD, dan struktur database ditulis dari kode di `../rentgear_api/` (migrasi,
+  `AuthController`, `GoogleTokenVerifier`, `SecurityHeaders`, `FileController`). Kalau kodenya berubah, slide ini ikut
+  diperbarui. Contoh hash di slide "Enkripsi password" adalah hash bcrypt asli untuk kata `rahasia123` dengan cost 12,
+  nilai bawaan Laravel; nilai `BCRYPT_ROUNDS` di server tidak diperiksa. Database server publik adalah SQLite, MySQL
+  dipakai di laptop. ERD hanya memuat 9 dari 16 tabel, dan migrasi tidak memasang foreign key di database: hubungannya
+  dijaga oleh kode.
 - Belum ada sumber untuk klaim "penyewa tidak tahu tempat sewa". Klaim itu tidak ada di slide.
 - Makna logo dan "arah berikutnya" di slide alur bisnis (komisi per transaksi) adalah usulan, belum keputusan.
 - Slide judul memuat kode QR ke `https://rentgear.serverbaik.my.id`. Kodenya SVG yang tertanam di `index.html`, jadi

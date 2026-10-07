@@ -101,6 +101,30 @@
     <p class="inti" data-step="3"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Intinya: alat mendaki mahal, jadi orang menyewa dan usaha sewanya hidup. Masalahnya ada di pengelolaan: catatan manual, stok yang tidak bisa dicek dari jauh, dan alat yang telat kembali.</p>
   </section>
 
+  <section class="slide" id="berita" data-pos="Pos 1" data-label="Latar belakang">
+    <h2 class="head">Kasus nyata dari pemberitaan</h2>
+    <ul class="kasus berita">
+      <li data-in>
+        <h3>Kehabisan tenda</h3><span>LEO Outdoor, Hulu Sungai Tengah, 2022</span>
+        <blockquote>"Stok barang masih terbatas, kadang juga pernah <mark>kehabisan tenda</mark> karena pesanan untuk memfasilitasi kegiatan yang <mark>berbarengan</mark>."</blockquote>
+        <p class="siapa">Muhammad Hidayatullah, pemilik</p>
+        <p class="sumber">lenteraKalimantan.com, 31 Desember 2022, <a href="https://lenterakalimantan.com/2022/12/diserbu-wisatawan-tahun-baru-usaha-rental-alat-camping-leo-outdoor-hst-alami-kenaikan-omset/" target="_blank" rel="noopener">lenterakalimantan.com/2022/12/diserbu-wisatawan-tahun-baru</a></p>
+      </li>
+      <li data-step="1">
+        <h3>Pesanan melonjak</h3><span>Van Adventure, Magetan, 2025</span>
+        <blockquote>"Biasanya hanya <mark>30 order per hari</mark>, sekarang meningkat menjadi <mark>30 hingga 50 order</mark> per hari."</blockquote>
+        <p class="siapa">Ika Yuliana, pemilik</p>
+        <p class="sumber">Lintasan.id, 9 Agustus 2025, <a href="https://www.lintasan.id/news/3631/maraknya-tren-pendaki-fomo-usaha-sewa-alat-camping-banjir-pesanan-jelang-hut-ri-ke80-" target="_blank" rel="noopener">lintasan.id/news/3631</a></p>
+      </li>
+      <li data-step="2">
+        <h3>Alat kembali rusak</h3><span>Avaya Outdoor dan Wastu Outdoor, 2018</span>
+        <p>Di Avaya Outdoor ada penyewa yang mengembalikan tenda dengan <mark>frame patah</mark> dan carrier dengan buckle hilang. Di Wastu Outdoor penyewa pernah telat mengembalikan dan <mark>"kontak nya nggak bisa dihubungi"</mark>.</p>
+        <p class="sumber">detikFinance, 28 April 2018, <a href="https://finance.detik.com/solusiukm/d-3995862/raup-omzet-jutaan-dari-bisnis-penyewaan-alat-mendaki-gunung" target="_blank" rel="noopener">finance.detik.com/solusiukm/d-3995862</a></p>
+      </li>
+    </ul>
+    <p class="inti" data-step="3"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Intinya: tiga pemilik rental mengalami stok habis saat pesanan berbarengan, pesanan yang naik hampir dua kali, dan alat yang kembali rusak atau telat. RentGear menjawabnya dengan stok per tanggal, pesanan yang tercatat di aplikasi, serta jaminan dan denda.</p>
+  </section>
+
   <section class="slide" id="kasus" data-pos="Pos 1" data-label="Latar belakang">
     <h2 class="head">Sudah datang ke toko, alatnya belum tentu ada</h2>
     <div class="perjalanan" data-in aria-hidden="true">
@@ -182,9 +206,9 @@
   <section class="slide" id="rumusan" data-pos="Pos 2" data-label="Rumusan masalah">
     <h2 class="head">Rumusan masalah</h2>
     <ol class="bernomor">
-      <li data-in><span class="angka">1</span><p>Bagaimana penyewa bisa mengetahui alat yang tersedia pada tanggal yang diminta tanpa bertanya ke tiap toko?</p></li>
-      <li data-step="1"><span class="angka">2</span><p>Bagaimana sistem mencegah satu alat dipesan dobel ketika stoknya terbatas?</p></li>
-      <li data-step="2"><span class="angka">3</span><p>Bagaimana penyedia mendapat jaminan dan catatan status yang jelas sejak booking sampai alat kembali?</p></li>
+      <li data-in><span class="angka">1</span><div><p>Bagaimana penyewa bisa mengetahui alat yang tersedia pada tanggal yang diminta tanpa bertanya ke tiap toko?</p><p class="asal">Kasus: di Opak Adventure, Dahlia Adventure, dan EX Adventure Solo penyewa harus datang dulu ke toko.</p></div></li>
+      <li data-step="1"><span class="angka">2</span><div><p>Bagaimana sistem mencegah satu alat dipesan dobel ketika stoknya terbatas?</p><p class="asal">Kasus: LEO Outdoor pernah kehabisan tenda karena pesanan yang berbarengan.</p></div></li>
+      <li data-step="2"><span class="angka">3</span><div><p>Bagaimana penyedia mendapat jaminan dan catatan status yang jelas sejak booking sampai alat kembali?</p><p class="asal">Kasus: alat kembali rusak di Avaya Outdoor, dan penyewa Wastu Outdoor tidak bisa dihubungi saat telat mengembalikan.</p></div></li>
     </ol>
   </section>
 
@@ -320,9 +344,45 @@
     </div>
   </section>
 
+  <section class="slide" id="kerja" data-pos="Pos 6" data-label="Perancangan">
+    <h2 class="head">Alur kerja aplikasi</h2>
+    <div class="kerja" id="kerja-diagram"></div>
+    <p class="inti" data-step="1"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Intinya: satu sewa melewati delapan langkah. Tiap langkah mengubah status transaksi, dan penyewa serta penyedia melihat status yang sama di HP masing-masing.</p>
+  </section>
+
   <section class="slide" id="alur" data-pos="Pos 6" data-label="Perancangan">
     <h2 class="head">Alur status transaksi</h2>
     <div class="alur" id="alur-diagram"></div>
+  </section>
+
+  <section class="slide" id="flowchart" data-pos="Pos 6" data-label="Perancangan">
+    <h2 class="head">Flowchart booking</h2>
+    <svg class="bagan" viewBox="0 0 1500 500" role="img" aria-label="Flowchart booking: input, cek blacklist, kunci baris alat, cek stok tiap tanggal, hitung total, cek jaminan, simpan booking">
+      <defs><marker id="mata-bagan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z"/></marker></defs>
+      <g class="garis">
+        <path d="M170 90H243"/><path d="M435 90H533"/><path d="M765 90H828"/><path d="M1050 90H1103"/>
+        <path d="M650 158V230"/><path d="M1230 162V230"/><path d="M1355 90H1440V420H1352"/>
+        <path d="M1110 420H1052"/><path d="M930 352V294"/><path d="M810 420H762"/><path d="M480 420H377"/>
+      </g>
+      <g class="n"><rect x="20" y="58" width="150" height="64" rx="32"/><text x="95" y="97">Mulai</text></g>
+      <g class="n"><path d="M235 132L255 48H445L425 132z"/><text x="340" y="84">Alat, tanggal,</text><text x="340" y="110">jumlah, jaminan</text></g>
+      <g class="n tanya"><path d="M535 90L650 22L765 90L650 158z"/><text x="650" y="84">Akun di</text><text x="650" y="110">blacklist?</text></g>
+      <g class="n"><rect x="830" y="48" width="220" height="84" rx="10"/><text x="940" y="84">Kunci baris alat</text><text x="940" y="110">di database</text></g>
+      <g class="n tanya"><path d="M1105 90L1230 18L1355 90L1230 162z"/><text x="1230" y="84">Kosong di tiap</text><text x="1230" y="110">tanggal?</text></g>
+      <g class="n"><rect x="1110" y="378" width="240" height="84" rx="10"/><text x="1230" y="414">Total = sewa × unit</text><text x="1230" y="440">× hari + deposit</text></g>
+      <g class="n tanya"><path d="M810 420L930 352L1050 420L930 488z"/><text x="930" y="414">Jaminan</text><text x="930" y="440">lengkap?</text></g>
+      <g class="n"><rect x="480" y="378" width="280" height="84" rx="10"/><text x="620" y="414">Simpan booking, status</text><text x="620" y="440">Menunggu konfirmasi</text></g>
+      <g class="n"><rect x="225" y="388" width="150" height="64" rx="32"/><text x="300" y="427">Selesai</text></g>
+      <g class="tolak"><rect x="560" y="232" width="780" height="60" rx="30"/><text x="950" y="269">Booking ditolak, alasannya tampil di layar</text></g>
+      <g class="cabang-t"><text x="797" y="76">Tidak</text><text x="672" y="202">Ya</text><text x="1268" y="204">Tidak</text><text x="1400" y="76">Ya</text><text x="966" y="330">Tidak</text><text x="786" y="406">Ya</text></g>
+    </svg>
+    <ul class="legenda" data-in>
+      <li><svg viewBox="0 0 60 30"><rect x="2" y="3" width="56" height="24" rx="12"/></svg>Mulai atau selesai</li>
+      <li><svg viewBox="0 0 60 30"><path d="M2 27L10 3H58L50 27z"/></svg>Masukan</li>
+      <li><svg viewBox="0 0 60 30"><rect x="2" y="3" width="56" height="24" rx="4"/></svg>Proses</li>
+      <li><svg viewBox="0 0 60 30"><path d="M2 15L30 2L58 15L30 28z"/></svg>Keputusan</li>
+    </ul>
+    <p class="inti" data-step="1"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Intinya: booking baru tersimpan setelah lolos tiga pemeriksaan. Baris alat dikunci dulu, jadi dua orang yang memesan unit terakhir pada detik yang sama diperiksa bergantian.</p>
   </section>
 
   <section class="slide" id="jenis" data-pos="Pos 6" data-label="Perancangan">
@@ -458,8 +518,157 @@
     </div>
   </section>
 
+  <section class="slide" id="stack" data-pos="Pos 6" data-label="Perancangan">
+    <h2 class="head">Tech stack</h2>
+    <div class="jenis-kisi">
+      <article class="jenis tumpuk" data-in style="--w: var(--ember)">
+        <header><b class="angka">1</b><h3>Aplikasi</h3></header>
+        <p class="alatnya">Flutter 3.44, Dart 3.12</p>
+        <p class="guna">Satu kode untuk Android dan web. Paket utama: provider, http, flutter_map, geolocator, image_picker, google_sign_in.</p>
+      </article>
+      <article class="jenis tumpuk" data-in style="--w: var(--moss)">
+        <header><b class="angka">2</b><h3>Server</h3></header>
+        <p class="alatnya">PHP 8.3, Laravel 13</p>
+        <p class="guna">REST API di alamat /api/v1. Laravel Sanctum mengurus token login.</p>
+      </article>
+      <article class="jenis tumpuk" data-in style="--w: var(--summit)">
+        <header><b class="angka">3</b><h3>Database</h3></header>
+        <p class="alatnya">MySQL dan SQLite</p>
+        <p class="guna">MySQL saat pengembangan di laptop. SQLite di server publik dan di tes otomatis.</p>
+      </article>
+      <article class="jenis tumpuk" data-in style="--w: var(--moss)">
+        <header><b class="angka">4</b><h3>Kecerdasan buatan</h3></header>
+        <p class="alatnya">Gemini API</p>
+        <p class="guna">Dipanggil dari server, jadi kunci API tidak pernah ada di dalam aplikasi.</p>
+      </article>
+      <article class="jenis tumpuk" data-in style="--w: var(--summit)">
+        <header><b class="angka">5</b><h3>Hosting</h3></header>
+        <p class="alatnya">nginx, Cloudflare Tunnel</p>
+        <p class="guna">Server berjalan di HP Redmi lewat Termux dan Ubuntu. Cloudflare memberi alamat HTTPS.</p>
+      </article>
+      <article class="jenis tumpuk" data-in style="--w: var(--ember)">
+        <header><b class="angka">6</b><h3>Pengujian</h3></header>
+        <p class="alatnya">flutter test, PHPUnit</p>
+        <p class="guna">250 tes otomatis: 108 untuk aplikasi dan 142 untuk server. Riwayat kode disimpan dengan Git.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="slide" id="erd" data-pos="Pos 6" data-label="Perancangan">
+    <h2 class="head">ERD: hubungan antar tabel</h2>
+    <svg class="erd" id="erd-diagram" viewBox="0 0 1480 690" role="img" aria-label="Diagram hubungan tabel: users, providers, categories, equipment, equipment_sizes, rentals, guarantees, rental_status_logs, reviews"></svg>
+    <p class="kecil erd-ket" data-in><b class="pk">PK</b> kunci utama, <b class="fk">FK</b> kolom penghubung ke tabel lain. Ujung bercabang berarti banyak: satu alat bisa punya banyak transaksi sewa.</p>
+  </section>
+
+  <section class="slide" id="tabel" data-pos="Pos 6" data-label="Perancangan">
+    <h2 class="head">Struktur database</h2>
+    <div class="tabel-kisi">
+      <table class="struktur" data-in><caption>users <span>akun penyewa, penyedia, admin</span></caption><tbody>
+        <tr><td>id</td><td>string</td><td>kunci utama</td></tr>
+        <tr><td>email</td><td>string</td><td>unik</td></tr>
+        <tr><td>password</td><td>string</td><td>hash bcrypt</td></tr>
+        <tr><td>role</td><td>string</td><td>customer, provider, admin</td></tr>
+        <tr><td>provider_id</td><td>string</td><td>toko milik penyedia</td></tr>
+        <tr><td>google_id</td><td>string</td><td>unik, boleh kosong</td></tr>
+      </tbody></table>
+      <table class="struktur" data-in><caption>equipment <span>alat yang disewakan</span></caption><tbody>
+        <tr><td>id</td><td>string</td><td>kunci utama</td></tr>
+        <tr><td>provider_id</td><td>string</td><td>ke providers</td></tr>
+        <tr><td>category_id</td><td>string</td><td>ke categories</td></tr>
+        <tr><td>price_per_day</td><td>decimal(12,2)</td><td>harga sewa per hari</td></tr>
+        <tr><td>deposit_amount</td><td>decimal(12,2)</td><td>deposit per unit</td></tr>
+        <tr><td>stock</td><td>integer</td><td>jumlah unit</td></tr>
+      </tbody></table>
+      <table class="struktur" data-step="1"><caption>rentals <span>transaksi sewa</span></caption><tbody>
+        <tr><td>id</td><td>string</td><td>kunci utama</td></tr>
+        <tr><td>invoice_code</td><td>string</td><td>unik</td></tr>
+        <tr><td>customer_id</td><td>string</td><td>ke users</td></tr>
+        <tr><td>equipment_id</td><td>string</td><td>ke equipment</td></tr>
+        <tr><td>start_date</td><td>date</td><td>sampai end_date</td></tr>
+        <tr><td>status</td><td>string</td><td>tahap transaksi saat ini</td></tr>
+      </tbody></table>
+      <table class="struktur" data-step="1"><caption>guarantees <span>dokumen jaminan</span></caption><tbody>
+        <tr><td>id</td><td>string</td><td>kunci utama</td></tr>
+        <tr><td>rental_id</td><td>string</td><td>ke rentals</td></tr>
+        <tr><td>type</td><td>string</td><td>KTP, SIM, KTM, dan lainnya</td></tr>
+        <tr><td>number_enc</td><td>text</td><td>nomor dokumen, terenkripsi</td></tr>
+        <tr><td>number_masked</td><td>string</td><td>nomor tersamar untuk layar</td></tr>
+        <tr><td>status</td><td>string</td><td>tahap jaminan saat ini</td></tr>
+      </tbody></table>
+    </div>
+    <p class="kecil tabel-lain" data-step="2">16 tabel aplikasi. Dua belas lainnya: providers, categories, equipment_sizes, equipment_photos, rental_status_logs, reviews, follows, blacklist_entries, condition_photos, audit_logs, idempotency_keys, counters.</p>
+  </section>
+
   <!-- Pos 7 -->
-  <section class="slide" id="implementasi" data-pos="Pos 7" data-label="Implementasi">
+  <section class="slide" id="keamanan" data-pos="Pos 7" data-label="Keamanan">
+    <h2 class="head">Pengamanan data</h2>
+    <ul class="aman">
+      <li data-in>
+        <svg viewBox="0 0 68 68" class="ikon"><rect x="12" y="30" width="44" height="30" rx="6"/><path d="M22 30v-9a12 12 0 0 1 24 0v9"/><path d="M34 41v8"/></svg>
+        <div><h3>Password</h3><p>Disimpan sebagai hash bcrypt. Teks aslinya tidak ada di database.</p></div>
+      </li>
+      <li data-in>
+        <svg viewBox="0 0 68 68" class="ikon"><rect x="8" y="16" width="52" height="38" rx="6"/><circle cx="25" cy="32" r="6"/><path d="M15 46c2-5 6-7 10-7s8 2 10 7M42 30h10M42 40h10"/></svg>
+        <div><h3>Nomor dokumen jaminan</h3><p>Dienkripsi AES-256-CBC sebelum disimpan. Layar hanya menampilkan nomor yang sudah disamarkan.</p></div>
+      </li>
+      <li data-step="1">
+        <svg viewBox="0 0 68 68" class="ikon"><rect x="10" y="14" width="48" height="40" rx="6"/><path d="M10 44l14-13 10 9 8-7 16 13"/><circle cx="44" cy="26" r="4"/></svg>
+        <div><h3>Foto KTP dan bukti transfer</h3><p>Disimpan di luar folder publik. Yang bisa membuka: penyewa dan penyedia transaksi itu, serta admin.</p></div>
+      </li>
+      <li data-step="1">
+        <svg viewBox="0 0 68 68" class="ikon"><circle cx="34" cy="34" r="24"/><path d="M34 20v14l10 6"/></svg>
+        <div><h3>Login</h3><p>Lima kali salah password, akun terkunci 15 menit. Token login berlaku 30 hari.</p></div>
+      </li>
+      <li data-step="2">
+        <svg viewBox="0 0 68 68" class="ikon"><path d="M34 46V16M22 28l12-12 12 12"/><path d="M12 44v10h44V44"/></svg>
+        <div><h3>Unggahan</h3><p>Hanya JPG, PNG, atau WebP, paling besar 8 MB. Berkas lain ditolak server.</p></div>
+      </li>
+      <li data-step="2">
+        <svg viewBox="0 0 68 68" class="ikon"><path d="M18 8h24l10 10v42H18z"/><path d="M42 8v10h10M26 30h18M26 40h18M26 50h10"/></svg>
+        <div><h3>Jejak audit</h3><p>Login, login gagal, dan keputusan admin tercatat bersama waktu dan alamat IP.</p></div>
+      </li>
+    </ul>
+    <p class="inti" data-step="3"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Intinya: data yang paling sensitif adalah password dan dokumen jaminan. Keduanya tidak disimpan dalam bentuk yang bisa langsung dibaca, dan sambungan ke server memakai HTTPS.</p>
+  </section>
+
+  <section class="slide" id="sandi" data-pos="Pos 7" data-label="Keamanan">
+    <h2 class="head">Enkripsi password</h2>
+    <div class="sandi">
+      <div class="mesin" data-in>
+        <p class="label">Yang diketik pengguna</p>
+        <p class="polos">rahasia123</p>
+        <p class="proses"><svg viewBox="0 0 30 40" class="ikon"><path d="M15 4v30M5 24l10 10 10-10"/></svg>bcrypt, dengan salt acak</p>
+        <p class="label">Yang disimpan di tabel users</p>
+        <p class="hash" id="hash-1"><i class="h-alg">$2y$</i><i class="h-cost">12$</i><i class="h-salt">mW4qO5z5/u2KkZBhfLAQze</i><i class="h-isi">GW7RCQ73dNJnFK020EKtUQThmPOGpJa</i></p>
+        <ul class="bagian-hash">
+          <li><i class="h-alg"></i>jenis algoritma</li>
+          <li><i class="h-cost"></i>tingkat kerja</li>
+          <li><i class="h-salt"></i>salt</li>
+          <li><i class="h-isi"></i>hasil hash</li>
+        </ul>
+        <div class="kedua" data-step="2">
+          <p class="label">Akun lain dengan password yang sama</p>
+          <p class="hash"><i class="h-alg">$2y$</i><i class="h-cost">12$</i><i class="h-salt">xxzHe4hssATtd1Pycw6ANe</i><i class="h-isi">27L4JYCzrb4x0UMkLV8Z2/QwZa2EzUe</i></p>
+        </div>
+      </div>
+      <ol class="daftar">
+        <li data-in><span class="angka">1</span><p>Password tidak disimpan apa adanya. Server menyimpan hasil hash bcrypt.</p></li>
+        <li data-step="1"><span class="angka">2</span><p>Hash berjalan satu arah. Password asli tidak bisa dihitung balik dari hash, jadi admin pun tidak bisa membacanya.</p></li>
+        <li data-step="2"><span class="angka">3</span><p>Tiap akun mendapat salt acak. Dua akun dengan password sama menyimpan hash yang berbeda.</p></li>
+        <li data-step="3"><span class="angka">4</span><p>Saat login, password yang diketik di-hash dengan salt akun itu, lalu hasilnya dibandingkan.</p></li>
+      </ol>
+    </div>
+    <p class="inti" data-step="4"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Intinya: untuk password, istilah yang tepat adalah hashing, karena hasilnya tidak bisa dibuka lagi. Enkripsi yang bisa dibuka dengan kunci server dipakai untuk nomor dokumen jaminan.</p>
+  </section>
+
+  <section class="slide" id="google" data-pos="Pos 7" data-label="Keamanan">
+    <h2 class="head">Login dengan Google</h2>
+    <svg class="urutan" id="google-diagram" viewBox="0 0 1500 560" role="img" aria-label="Urutan login Google: aplikasi mendapat ID token dari Google, server memeriksanya ke Google, lalu memberi token login RentGear"></svg>
+    <p class="inti" data-step="6"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Intinya: password Google tidak pernah sampai ke RentGear. Server hanya menerima token yang sudah diperiksa Google, dan akun admin tidak bisa masuk lewat jalur ini.</p>
+  </section>
+
+  <!-- Pos 8 -->
+  <section class="slide" id="implementasi" data-pos="Pos 8" data-label="Implementasi">
     <h2 class="head">Hasil implementasi</h2>
     <div class="galeri">
       <div class="hp-baris" data-hide-at="1">
@@ -476,15 +685,15 @@
     </div>
   </section>
 
-  <section class="slide" id="video" data-pos="Pos 7" data-label="Implementasi">
+  <section class="slide" id="video" data-pos="Pos 8" data-label="Implementasi">
     <h2 class="head">Aplikasi dalam 24 detik</h2>
     <div class="layar-video" data-in>
       <video id="promo" src="assets/promo.mp4" muted playsinline controls preload="metadata"></video>
     </div>
   </section>
 
-  <!-- Pos 8 -->
-  <section class="slide" id="pengujian" data-pos="Pos 8" data-label="Pengujian">
+  <!-- Pos 9 -->
+  <section class="slide" id="pengujian" data-pos="Pos 9" data-label="Pengujian">
     <h2 class="head">Pengujian</h2>
     <div class="uji">
       <div data-in>
@@ -545,9 +754,11 @@
 
   <section class="slide" id="sumber" data-pos="Puncak" data-label="Sumber data">
     <h2 class="head">Sumber data</h2>
-    <ol class="pustaka">
+    <ol class="pustaka delapan">
       <li data-in>Ramadhan, A. R., Fauzan, M. I., Hamid, Z. A., Ramdani, D. W., dan Djamil, B. U. (2025). Studi deskriptif mengenai manajemen risiko pada usaha penyewaan alat camping Lentera Camp di Bandung. <em>Ekopedia: Jurnal Ilmiah Ekonomi</em>, 1(4), 2413–2426. <a href="https://doi.org/10.63822/96j19572" target="_blank" rel="noopener">https://doi.org/10.63822/96j19572</a></li>
       <li data-in>Laucereno, S. F. (28 April 2018). Raup omzet jutaan dari bisnis penyewaan alat mendaki gunung. <em>detikFinance</em>. <a href="https://finance.detik.com/solusiukm/d-3995862/raup-omzet-jutaan-dari-bisnis-penyewaan-alat-mendaki-gunung" target="_blank" rel="noopener">https://finance.detik.com/solusiukm/d-3995862/raup-omzet-jutaan-dari-bisnis-penyewaan-alat-mendaki-gunung</a></li>
+      <li data-in>Riswan (31 Desember 2022). Diserbu wisatawan tahun baru, usaha rental alat camping LEO Outdoor HST alami kenaikan omset. <em>lenteraKalimantan.com</em>. <a href="https://lenterakalimantan.com/2022/12/diserbu-wisatawan-tahun-baru-usaha-rental-alat-camping-leo-outdoor-hst-alami-kenaikan-omset/" target="_blank" rel="noopener">https://lenterakalimantan.com/2022/12/diserbu-wisatawan-tahun-baru-usaha-rental-alat-camping-leo-outdoor-hst-alami-kenaikan-omset/</a></li>
+      <li data-in>Berliana, M. (9 Agustus 2025). Maraknya tren pendaki FOMO, usaha sewa alat camping banjir pesanan jelang HUT RI ke-80. <em>Lintasan.id</em>. <a href="https://www.lintasan.id/news/3631/maraknya-tren-pendaki-fomo-usaha-sewa-alat-camping-banjir-pesanan-jelang-hut-ri-ke80-" target="_blank" rel="noopener">https://www.lintasan.id/news/3631/maraknya-tren-pendaki-fomo-usaha-sewa-alat-camping-banjir-pesanan-jelang-hut-ri-ke80-</a></li>
       <li data-in>Nurjanah, D. S., Siska, Armiati, S., dan Mubassiran (2025). Perancangan Camply: sistem informasi penyewaan alat camping. <em>IMPROVE</em>, 17(1). <a href="https://ejurnal.ulbi.ac.id/index.php/improve/article/view/4217" target="_blank" rel="noopener">https://ejurnal.ulbi.ac.id/index.php/improve/article/view/4217</a></li>
       <li data-in>Musta Dwi N., N., Khambali, A., dan Wicaksono, T. A. (2019). Sistem informasi penyewaan alat outdoor pada Opak Adventure Kabupaten Pekalongan berbasis Android. <em>Surya Informatika</em>, 7(1), 44–51. <a href="https://jurnal.umpp.ac.id/index.php/surya_informatika/article/view/379" target="_blank" rel="noopener">https://jurnal.umpp.ac.id/index.php/surya_informatika/article/view/379</a></li>
       <li data-in>Artanto, F. A., dan Musta Dwi, N. (2023). Sistem informasi penyewaan alat camping pada Dahlia Adventure Kota Pekalongan berbasis Android. <em>SATESI</em>, 3(1), 1–5. <a href="https://doi.org/10.54259/satesi.v3i1.1472" target="_blank" rel="noopener">https://doi.org/10.54259/satesi.v3i1.1472</a></li>

@@ -408,6 +408,129 @@ function bangunAlur() {
   wadah.insertAdjacentHTML('beforeend', html.join(''));
 }
 
+/** Alur kerja tiga jalur. Letak kartu dan garis penghubungnya dihitung dari urutan langkah. */
+function bangunKerja() {
+  const wadah = $('#kerja-diagram');
+  const jalur = ['Penyewa', 'Sistem', 'Penyedia'];
+  const langkah = [
+    [0, 'Pilih alat dan tanggal sewa'],
+    [1, 'Cek alat kosong di tiap tanggal'],
+    [0, 'Isi jaminan, kirim booking'],
+    [2, 'Periksa jaminan, konfirmasi'],
+    [0, 'Transfer, unggah bukti'],
+    [2, 'Terima bukti, serahkan alat'],
+    [2, 'Terima alat kembali, isi denda'],
+    [1, 'Potong denda, selesai'],
+  ];
+  const LEBAR = 168;
+  const TINGGI = 180;
+  const titik = langkah.map(([baris], n) => [150 + LEBAR * (n + 0.5), TINGGI * baris + 84]);
+  buat('path', { class: 'jejak', d: lengkung(titik) }, buat('svg', {}, wadah));
+  const html = [
+    ...jalur.map((nama, n) => `<div class="lajur" style="top:${n * TINGGI}px"><b>${nama}</b></div>`),
+    ...langkah.map(([, teks], n) => `<div class="kotak" style="left:${titik[n][0] - 77}px;top:${titik[n][1] - 66}px"><b class="angka">${n + 1}</b>${teks}</div>`),
+    '<i class="jalan"></i>',
+  ];
+  wadah.insertAdjacentHTML('beforeend', html.join(''));
+}
+
+/** ERD: kotak tabel dan garis hubungannya. Ujung "banyak" diberi kaki gagak, ujung "satu" diberi palang. */
+function bangunErd() {
+  const svg = $('#erd-diagram');
+  const LEBAR = 250;
+  const KEPALA = 42;
+  const BARIS = 30;
+  // [x, y, kolom]. Awalan "PK " atau "FK " pada nama kolom menjadi penanda di kiri baris.
+  const tabel = {
+    users: [20, 10, ['PK id', 'name', 'email', 'password', 'role']],
+    providers: [20, 390, ['PK id', 'FK owner_id', 'business_name', 'status']],
+    categories: [410, 10, ['PK id', 'name']],
+    equipment: [410, 230, ['PK id', 'FK provider_id', 'FK category_id', 'name', 'price_per_day', 'stock']],
+    equipment_sizes: [410, 510, ['PK id', 'FK equipment_id', 'label', 'stock']],
+    rentals: [800, 140, ['PK id', 'FK customer_id', 'FK provider_id', 'FK equipment_id', 'start_date', 'end_date', 'status']],
+    guarantees: [1210, 10, ['PK id', 'FK rental_id', 'type', 'number_enc', 'status']],
+    rental_status_logs: [1210, 250, ['PK id', 'FK rental_id', 'from', 'to', 'at']],
+    reviews: [1210, 490, ['PK id', 'FK rental_id', 'rating', 'comment']],
+  };
+  // [jalur dari sisi "satu", titik awal, titik tiba, banyak?]. Hubungan satu ke satu tidak diberi kaki gagak.
+  const hubungan = [
+    ['M270 175H800', [270, 175], [800, 175], true],
+    ['M145 210V390', [145, 210], [145, 390], false],
+    ['M270 440H410', [270, 440], [410, 440], true],
+    ['M535 120V230', [535, 120], [535, 230], true],
+    ['M535 460V510', [535, 460], [535, 510], true],
+    ['M660 300H800', [660, 300], [800, 300], true],
+    ['M1050 200H1130V90H1210', [1050, 200], [1210, 90], true],
+    ['M1050 300H1210', [1050, 300], [1210, 300], true],
+    ['M1050 370H1130V570H1210', [1050, 370], [1210, 570], false],
+  ];
+  // Palang melintang terhadap garis (tegak bila garisnya mendatar), digeser `maju` sepanjang garis itu.
+  const palang = (x, y, datar, maju) => (datar ? `M${x + maju} ${y - 10}V${y + 10}` : `M${x - 10} ${y + maju}H${x + 10}`);
+  const kaki = (x, y, datar) => (datar ? `M${x - 18} ${y}L${x} ${y - 11}M${x - 18} ${y}L${x} ${y + 11}` : `M${x} ${y - 18}L${x - 11} ${y}M${x} ${y - 18}L${x + 11} ${y}`);
+  const garis = buat('g', { class: 'hub' }, svg);
+  hubungan.forEach(([jalur, [ax, ay], [x, y], banyak]) => {
+    // Arah garis di pangkal dan di ujung dibaca dari perintah pertama dan terakhir jalurnya.
+    const arah = jalur.match(/[HV]/g);
+    const awalDatar = arah[0] === 'H';
+    const akhirDatar = arah[arah.length - 1] === 'H';
+    const pangkal = palang(ax, ay, awalDatar, 12);
+    const ujung = banyak ? kaki(x, y, akhirDatar) : palang(x, y, akhirDatar, -12);
+    buat('path', { d: jalur }, garis);
+    buat('path', { class: 'tanda', d: pangkal + ujung }, garis);
+  });
+  Object.entries(tabel).forEach(([nama, [x, y, kolom]]) => {
+    const g = buat('g', { class: 'tbl' }, svg);
+    buat('rect', { class: 'badan', x, y, width: LEBAR, height: KEPALA + kolom.length * BARIS + 8, rx: 10 }, g);
+    buat('path', { class: 'kepala', d: `M${x} ${y + KEPALA}V${y + 10}a10 10 0 0 1 10-10H${x + LEBAR - 10}a10 10 0 0 1 10 10V${y + KEPALA}z` }, g);
+    buat('text', { class: 'nama', x: x + 16, y: y + 30 }, g).textContent = nama;
+    kolom.forEach((isi, n) => {
+      const [, kunci, teks] = isi.match(/^(?:(PK|FK) )?(.+)$/);
+      const dasar = y + KEPALA + BARIS * n + 24;
+      if (kunci) buat('text', { class: `kunci ${kunci.toLowerCase()}`, x: x + 16, y: dasar - 1 }, g).textContent = kunci;
+      buat('text', { x: x + 52, y: dasar }, g).textContent = teks;
+    });
+  });
+}
+
+/** Diagram urutan login Google. Pesan pertama tampil bersama slide, sisanya satu per langkah. */
+function bangunGoogle() {
+  const svg = $('#google-diagram');
+  const pihak = [['Pengguna', 150], ['Aplikasi RentGear', 560], ['Google', 960], ['Server RentGear', 1350]];
+  const pesan = [
+    [0, 1, 'Tekan "Masuk dengan Google"'],
+    [1, 2, 'Pengguna memilih akun di layar Google'],
+    [2, 1, 'ID token yang ditandatangani Google'],
+    [1, 3, 'Kirim ID token ke /auth/google'],
+    [3, 2, 'Minta Google memeriksa token'],
+    [3, 1, 'Token login RentGear'],
+  ];
+  const catatan = ['Server mengecek: token dibuat untuk aplikasi ini, belum kedaluwarsa,', 'dan emailnya terverifikasi. Akun baru menjadi penyewa.'];
+  const mata = buat('marker', { id: 'mata-urutan', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto-start-reverse' }, buat('defs', {}, svg));
+  buat('path', { d: 'M0 0L10 5L0 10z' }, mata);
+  pihak.forEach(([nama, x]) => {
+    buat('path', { class: 'hidup', d: `M${x} 62V550` }, svg);
+    const g = buat('g', { class: 'pihak' }, svg);
+    buat('rect', { x: x - 140, y: 2, width: 280, height: 58, rx: 12 }, g);
+    buat('text', { x, y: 42 }, g).textContent = nama;
+  });
+  // Langkah 0 tidak diberi data-step, jadi tampil bersama slide.
+  const grup = (langkah) => buat('g', langkah ? { class: 'pesan', 'data-step': langkah } : { class: 'pesan' }, svg);
+  pesan.forEach(([dari, ke, teks], n) => {
+    // Catatan pemeriksaan server menyisip sebelum pesan terakhir, jadi pesan itu turun satu baris lebih.
+    const terakhir = n === pesan.length - 1;
+    const y = 124 + n * 66 + (terakhir ? 76 : 0);
+    const [x1, x2] = [pihak[dari][1], pihak[ke][1]];
+    const g = grup(terakhir ? n + 1 : n);
+    buat('path', { d: `M${x1} ${y}H${x2}` }, g);
+    const label = buat('text', { x: (x1 + x2) / 2, y: y - 12 }, g);
+    buat('tspan', { class: 'nomor', dx: -6 }, label).textContent = n + 1;
+    buat('tspan', { dx: 12 }, label).textContent = teks;
+  });
+  const g = grup(pesan.length - 1);
+  buat('rect', { x: 600, y: 416, width: 760, height: 76, rx: 12 }, g);
+  catatan.forEach((baris, n) => (buat('text', { x: 980, y: 446 + n * 30 }, g).textContent = baris));
+}
+
 /* ---------- adegan: animasi khusus tiap slide ---------- */
 
 /** Tween angka dari `dari` ke `ke` yang ditulis ke `el`, dibulatkan dengan pemisah ribuan. */
@@ -518,6 +641,76 @@ const adegan = {
   bisnis: {
     masuk(tl) {
       tl.from('.pihak > div', { autoAlpha: 0, y: geser(70), rotationY: (n) => geser([-50, 0, 50][n]), transformPerspective: 1100, duration: d(0.9), ease: 'back.out(1.4)', stagger: 0.16 }, 0.4);
+    },
+  },
+
+  kerja: {
+    masuk(tl) {
+      const jalan = $('#kerja-diagram .jalan');
+      telusuri(tl, $('#kerja-diagram .jejak'), jalan, 3, 0.5);
+      // Penanda berhenti di atas kartu terakhir, jadi dihilangkan supaya teksnya terbaca.
+      tl.fromTo(jalan, { autoAlpha: 1 }, { autoAlpha: 0, duration: d(0.3), immediateRender: false }, 3.5)
+        .from('#kerja-diagram .lajur', { autoAlpha: 0, x: geser(-40), duration: d(0.6), ease: 'power3.out', stagger: 0.1 }, 0.2)
+        .from('#kerja-diagram .kotak', { autoAlpha: 0, scale: tenang ? 1 : 0.7, duration: d(0.5), ease: 'back.out(1.8)', stagger: 0.36 }, 0.5);
+    },
+  },
+
+  // Garis tergambar, lalu simbol di jalur "booking diterima" menyala bergiliran selama slide tampil.
+  flowchart: {
+    masuk(tl) {
+      this.keluar();
+      tl.from('.bagan .n, .bagan .tolak', { autoAlpha: 0, scale: tenang ? 1 : 0.8, transformOrigin: 'center', duration: d(0.5), ease: 'back.out(1.6)', stagger: 0.1 }, 0.4)
+        .from('.bagan .garis path', { autoAlpha: 0, drawSVG: 0, duration: d(0.5), ease: 'power2.out', stagger: 0.1 }, 1)
+        .from('.bagan .cabang-t text', { autoAlpha: 0, duration: d(0.4), stagger: 0.06 }, 2);
+      if (tenang) return;
+      this.putar = gsap.timeline({ repeat: -1, repeatDelay: 1.2, delay: 3.2 });
+      $$('.bagan .n').forEach((el, n) => this.putar.to(el.firstElementChild, { stroke: '#fff3e0', strokeWidth: 4.5, duration: 0.3, ease: 'power2.out', yoyo: true, repeat: 1 }, n * 0.5));
+    },
+    keluar() {
+      this.putar?.kill();
+      gsap.set('.bagan .n > :first-child', { clearProps: 'stroke,strokeWidth' });
+    },
+  },
+
+  erd: {
+    masuk(tl) {
+      tl.from('#erd-diagram .tbl', { autoAlpha: 0, y: geser(30), duration: d(0.6), ease: 'back.out(1.5)', stagger: 0.09 }, 0.4)
+        .from('#erd-diagram .hub path:not(.tanda)', { autoAlpha: 0, drawSVG: 0, duration: d(0.7), ease: 'power2.inOut', stagger: 0.12 }, 1.2)
+        .from('#erd-diagram .tanda', { autoAlpha: 0, duration: d(0.4), stagger: 0.12 }, 1.8);
+    },
+  },
+
+  // Hash tersusun huruf demi huruf dari karakter acak, seperti sedang dihitung.
+  sandi: {
+    masuk(tl) {
+      const bagian = $$('#hash-1 i');
+      this.asli ??= bagian.map((el) => el.textContent);
+      if (tenang) return;
+      const { asli } = this;
+      const HURUF = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
+      const maju = { n: 0 };
+      const tulis = () => {
+        let jatah = Math.floor(maju.n);
+        bagian.forEach((el, i) => {
+          const tetap = Math.min(asli[i].length, jatah);
+          jatah -= tetap;
+          const acakan = Array.from({ length: asli[i].length - tetap }, () => HURUF[Math.floor(Math.random() * HURUF.length)]);
+          el.textContent = asli[i].slice(0, tetap) + acakan.join('');
+        });
+      };
+      tl.to(maju, { n: asli.join('').length, duration: 1.8, ease: 'none', onUpdate: tulis }, 0.9);
+    },
+    keluar() {
+      if (!this.asli) return;
+      $$('#hash-1 i').forEach((el, i) => (el.textContent = this.asli[i]));
+    },
+  },
+
+  google: {
+    masuk(tl) {
+      tl.from('#google-diagram .pihak', { autoAlpha: 0, y: geser(-30), duration: d(0.6), ease: 'back.out(1.5)', stagger: 0.12 }, 0.4)
+        .from('#google-diagram .hidup', { autoAlpha: 0, duration: d(0.7), stagger: 0.12 }, 0.7)
+        .from('#google-diagram .pesan:not([data-step])', { autoAlpha: 0, duration: d(0.5) }, 1.4);
     },
   },
 
@@ -1089,6 +1282,9 @@ function mulai() {
   bangunKontur();
   bangunTahap();
   bangunAlur();
+  bangunKerja();
+  bangunErd();
+  bangunGoogle();
   bangunRel();
   bangunKelip();
   bangunBurung();
@@ -1108,6 +1304,9 @@ function mulai() {
       aksen.style.top = `${kepala.offsetTop + 10}px`;
       aksen.style.height = `${kepala.offsetHeight - 16}px`;
       s.append(aksen);
+      // Nama bagian sidang ditulis di atas judul, supaya terlihat tanpa melihat jalur di kiri.
+      const sama = kepala.textContent.trim().toLowerCase() === s.dataset.label.toLowerCase();
+      if (!sama) kepala.insertAdjacentHTML('beforebegin', `<p class="bagian" data-in>${s.dataset.label}</p>`);
       aksenSlide[n] = aksen;
     }
     s.classList.remove('aktif');

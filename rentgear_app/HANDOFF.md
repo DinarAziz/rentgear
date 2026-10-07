@@ -1190,3 +1190,29 @@ Where things run:
 
 Ideas offered and not started: in-app notifications when a rental's status changes, routes and travel time on the
 map, Midtrans Sandbox (needs keys), iOS, different photos for the six new stores.
+
+## Deck: latar belakang, news cases, design and security slides, 7 October 2026
+
+The user said the latar belakang was missing from the deck and that the problems need real cases from websites or
+articles, then listed topics to add: data protection, app workflow, flowchart and ERD, tech stack, password
+encryption, Google login, database structure.
+
+- The three latar belakang slides were in `../presentasi/index.html` and rendered in Chrome and WebKit. Nothing on the
+  slide itself said "Latar belakang" (only the rail on the left did), so every slide now shows its section name above
+  the title. The text comes from `data-label`. The user has not confirmed that this was what they meant.
+- New slide "Kasus nyata dari pemberitaan" with three news sources (lenteraKalimantan.com 2022, Lintasan.id 2025,
+  detikFinance 2018). Each rumusan masalah now names the case it comes from. "Sumber data" has 8 entries.
+- New slides: alur kerja aplikasi (three lanes), flowchart booking (follows `BookingService::create`), tech stack, ERD
+  (9 of 16 tables), struktur database, pengamanan data, enkripsi password, login dengan Google. The last three form a
+  new "Pos 7 Keamanan"; implementasi is Pos 8 and pengujian Pos 9. The deck has 31 slides.
+- Facts on these slides were read from `../rentgear_api/`. Two things to know when asked: the public server runs
+  SQLite (MySQL is on the laptop), and the migrations declare no foreign keys, so the ERD shows relations kept by the
+  code. The bcrypt cost on the slide (12) is Laravel's default; the server's `BCRYPT_ROUNDS` was not read.
+- Checked at 1920x1080 in headless Chrome driven in real time, and the new slides in WebKit: no page errors, nothing
+  outside the stage. `--virtual-time-budget` screenshots of this deck come out blank and prove nothing.
+- Committed, not pushed. The metode slide still says "Laravel dan MySQL untuk server".
+- Not rendered in the check: slides 1, 8, 9, 10, 12, 13, 27 (unchanged apart from the section label). Stepping
+  backward through the whole deck was not tested.
+
+The user paused here ("save nanti lanjut"). Open question for them: whether the section label was what "latar
+belakang hilang" meant.
