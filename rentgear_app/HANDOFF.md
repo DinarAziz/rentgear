@@ -1216,3 +1216,19 @@ encryption, Google login, database structure.
 
 The user paused here ("save nanti lanjut"). Open question for them: whether the section label was what "latar
 belakang hilang" meant.
+
+## Public server down and brought back, wireless adb, 7 October 2026 (afternoon)
+
+The user asked to update the app and the web build on the Redmi over wireless debugging, and to commit.
+
+- Wireless adb: the phone was on the same hotspot as the Mac. The port that mDNS announced
+  (`adb mdns services`) refused the connection; `adb connect <phone-ip>:5555` worked. The serial is then
+  `<phone-ip>:5555`, so pass it with `-s` or `ADB_SERIAL`. The address changes with the network.
+- The public address answered `error code: 1033`: Termux was not running. `sh /sdcard/rg/hidup.sh` typed into
+  Termux at 14:32 started nginx, the tunnel and the API again. When it went down is not known.
+- Nothing new was installed. Since `3a417f6` only `presentasi/` and this file changed. A fresh public web build
+  gave the same file, `main.dart.664fae340b.js`, as the one on the phone, so the site, the API and the APK from
+  10:10 are already the current code. The APK was not rebuilt.
+- After the restart: the site answers 200 and a protected API route answers 401 with JSON. No sign-in or rental
+  was tried.
+- The deck is not on the public server (`/presentasi/` answers 404). It was never asked for there.
