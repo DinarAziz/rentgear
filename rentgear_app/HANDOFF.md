@@ -1232,3 +1232,24 @@ The user asked to update the app and the web build on the Redmi over wireless de
 - After the restart: the site answers 200 and a protected API route answers 401 with JSON. No sign-in or rental
   was tried.
 - The deck is not on the public server (`/presentasi/` answers 404). It was never asked for there.
+
+## APK on GitHub and a second QR code in the deck, 7 October 2026 (afternoon)
+
+The user asked for a QR code in the deck that downloads the Android app from GitHub.
+
+- GitHub had no APK, and the local release APK dated from 30 September. A new one was built with
+  `flutter build apk --release --dart-define=API_URL=https://rentgear.serverbaik.my.id --dart-define=GOOGLE_CLIENT_ID=<web client ID from ../rentgear_api/.env>`
+  (65.5 MB, signed with the debug key as before).
+- It is published as release `android-v1.0.0` on `DinarAziz/rentgear`, asset `rentgear.apk`, not marked as latest.
+  Download link: `https://github.com/DinarAziz/rentgear/releases/download/android-v1.0.0/rentgear.apk` (answers 200).
+  The tag sits on the remote `master`, which is behind the local branch; the APK was built from local code.
+- The APK was searched for API keys and private keys before upload; none found. It was not installed on a phone,
+  and Google sign-in in this build was not tried.
+- Title slide: the QR card is now a pair (`.qr-baris` in `../presentasi/deck.css`), web on the left, APK on the
+  right. Both codes were decoded from a 1920x1080 headless Chrome screenshot and give the right addresses. Not
+  scanned with a real phone from a projector.
+- Later the same afternoon the user asked why the server runs SQLite and had the deck say it is only for the demo.
+  The stack slide now reads "MySQL adalah database utama. SQLite hanya untuk server demo di HP dan tes otomatis.",
+  and the metode slide adds "(SQLite hanya di server demo)". The notes record no reason for choosing SQLite on the
+  phone; the answer given was a likely one (one file, no extra service on a phone), not a recorded decision.
+- Committed, not pushed.

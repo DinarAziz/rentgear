@@ -91,8 +91,11 @@ terbit.
   dijaga oleh kode.
 - Belum ada sumber untuk klaim "penyewa tidak tahu tempat sewa". Klaim itu tidak ada di slide.
 - Makna logo dan "arah berikutnya" di slide alur bisnis (komisi per transaksi) adalah usulan, belum keputusan.
-- Slide judul memuat kode QR ke `https://rentgear.serverbaik.my.id`. Kodenya SVG yang tertanam di `index.html`, jadi
-  tetap tampil tanpa internet. Kalau alamatnya berubah, kodenya harus dibuat ulang. Gerak deck mati kalau sistem
+- Slide judul memuat dua kode QR: satu ke `https://rentgear.serverbaik.my.id`, satu lagi ke APK Android di GitHub
+  (`https://github.com/DinarAziz/rentgear/releases/download/android-v1.0.0/rentgear.apk`). Kodenya SVG yang tertanam
+  di `index.html`, jadi tetap tampil tanpa internet. Kalau alamatnya berubah, kodenya harus dibuat ulang. Tautan APK
+  menunjuk ke rilis `android-v1.0.0`: APK baru harus diunggah ke rilis itu dengan nama `rentgear.apk`
+  (`gh release upload android-v1.0.0 rentgear.apk --clobber`), kalau tidak kode QR tetap memberi APK lama. Gerak deck mati kalau sistem
   memakai "Reduce motion"; matikan setelan itu di laptop yang dipakai presentasi.
 - Slide batasan menyebut 9 toko contoh dan 58 alat di server publik (keadaan 6 Oktober 2026). Lupa password ditulis
   sebagai rencana, karena pengirim email belum dipasang dan kodenya belum sampai ke siapa pun.

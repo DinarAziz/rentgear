@@ -291,11 +291,12 @@ ol, ul { list-style: none; }
 .identitas { margin-top: 44px; display: grid; grid-template-columns: max-content 1fr; gap: 6px 28px; font-size: 26px; }
 .identitas dt { color: var(--mist); }
 .identitas dd { color: var(--sand); }
-/* Kode QR ke aplikasi yang sudah online, supaya penonton bisa mencoba dari HP sendiri. */
-.qr { position: absolute; right: 150px; top: 330px; width: 330px; padding: 22px 22px 20px; border-radius: 24px; background: var(--panel); border: 1.5px solid var(--line); text-align: center; }
+/* Dua kode QR: aplikasi yang sudah online dan APK Android di GitHub, supaya penonton bisa mencoba dari HP sendiri. */
+.qr-baris { position: absolute; right: 150px; top: 440px; display: flex; gap: 20px; }
+.qr { width: 290px; padding: 22px 22px 20px; border-radius: 24px; background: var(--panel); border: 1.5px solid var(--line); text-align: center; }
 .qr-kode { display: block; width: 100%; }
-.qr figcaption { margin-top: 16px; font-size: 23px; color: var(--mist); }
-.qr figcaption b { display: block; font-family: var(--display); font-weight: 800; font-size: 38px; line-height: 1.1; color: var(--ember); }
+.qr figcaption { margin-top: 14px; font-size: 20px; color: var(--mist); }
+.qr figcaption b { display: block; font-family: var(--display); font-weight: 800; font-size: 33px; line-height: 1.1; color: var(--ember); }
 .petunjuk { position: absolute; left: 290px; bottom: 64px; display: flex; align-items: center; gap: 14px; font-size: 22px; color: var(--mist); }
 .tombol {
   display: inline-grid;
