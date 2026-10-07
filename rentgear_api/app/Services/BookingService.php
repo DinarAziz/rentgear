@@ -87,7 +87,7 @@ final class BookingService
                 'holderName' => (string) ($g['holderName'] ?? ''),
                 'documentNumber' => (string) ($g['documentNumber'] ?? ''),
                 'hasPhoto' => ($g['photo'] ?? null) instanceof UploadedFile,
-            ], $guarantees), $total, $customer->name);
+            ], $guarantees), $total);
             if ($errors !== []) {
                 throw new ApiException('GUARANTEE_INVALID', implode("\n", $errors));
             }

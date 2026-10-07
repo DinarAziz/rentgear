@@ -27,11 +27,13 @@ final class RentalJobs
         $rentals = Rental::with('guarantees', 'logs')
             ->whereIn('status', ['pendingConfirmation', 'awaitingPayment', 'paid', 'pickedUp'])->get();
         foreach ($rentals as $rental) {
-            $hours = $rental->logs->last()->at->diffInHours($now);
+            // Catatan ganti tanggal tidak mengubah status, jadi tidak mengulang hitungan waktu.
+            $hours = $rental->logs->last(fn ($log) => $log->from !== $log->to)->at->diffInHours($now);
             [$to, $note] = match (true) {
                 $rental->status === 'pendingConfirmation' && $hours > 12 => [RentalStatus::Expired, 'Penyedia tidak merespons dalam 12 jam'],
                 $rental->status === 'awaitingPayment' && $hours > 24 => [RentalStatus::Cancelled, 'Tidak dibayar dalam 24 jam'],
-                $rental->status === 'paid' && $today > $rental->start_date->format('Y-m-d') => [RentalStatus::NoShow, 'Alat tidak diambil sampai tanggal mulai lewat'],
+                // Selama toko belum menjawab permintaan ganti tanggal, penyewa belum dianggap tidak datang.
+                $rental->status === 'paid' && $rental->reschedule_start === null && $today > $rental->start_date->format('Y-m-d') => [RentalStatus::NoShow, 'Alat tidak diambil sampai tanggal mulai lewat'],
                 $rental->status === 'pickedUp' && $today > $rental->end_date->format('Y-m-d') => [RentalStatus::Overdue, 'Melewati tanggal selesai'],
                 default => [null, null],
             };

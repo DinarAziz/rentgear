@@ -12,18 +12,20 @@ final class AvailabilityQuery
 {
     /**
      * `$size` null untuk alat tanpa ukuran. Untuk alat berukuran, null berarti
-     * jumlah ketersediaan semua ukuran.
+     * jumlah ketersediaan semua ukuran. `$exceptRentalId` mengabaikan satu sewa,
+     * dipakai saat sewa itu sendiri yang pindah tanggal.
      */
-    public function available(Equipment $equipment, string $start, string $end, ?string $size = null): int
+    public function available(Equipment $equipment, string $start, string $end, ?string $size = null, ?string $exceptRentalId = null): int
     {
         if ($equipment->hasSizes() && $size === null) {
-            return (int) $equipment->sizes->sum(fn ($s) => $this->available($equipment, $start, $end, $s->label));
+            return (int) $equipment->sizes->sum(fn ($s) => $this->available($equipment, $start, $end, $s->label, $exceptRentalId));
         }
 
         $ranges = Rental::query()
             ->where('equipment_id', $equipment->id)
             ->where('size', $size)
             ->whereIn('status', RentalStateMachine::LOCKING)
+            ->when($exceptRentalId !== null, fn ($q) => $q->where('id', '!=', $exceptRentalId))
             ->get(['start_date', 'end_date', 'qty'])
             ->map(fn (Rental $r) => [$r->start_date, $r->end_date, $r->qty])
             ->all();

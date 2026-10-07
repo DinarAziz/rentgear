@@ -31,7 +31,7 @@ final class GuaranteePolicy
      * @param  array<int, array{type: ?string, holderName: string, documentNumber: string, hasPhoto: bool}>  $drafts
      * @return array<int, string>
      */
-    public function validate(array $drafts, float $rentalValue, string $renterName): array
+    public function validate(array $drafts, float $rentalValue): array
     {
         $errors = [];
         $required = $this->requiredCount($rentalValue);
@@ -66,8 +66,9 @@ final class GuaranteePolicy
             } elseif ($digits !== null && ! preg_match('/^\d{'.$digits.'}$/', $number)) {
                 $errors[] = "$n: nomor {$type->label()} harus $digits digit angka.";
             }
-            if (self::normalize((string) ($draft['holderName'] ?? '')) !== self::normalize($renterName)) {
-                $errors[] = "$n: dokumen harus atas nama penyewa ($renterName).";
+            // Dokumen boleh milik orang lain (mis. teman satu rombongan), asal namanya diisi.
+            if (trim((string) ($draft['holderName'] ?? '')) === '') {
+                $errors[] = "$n: nama pemilik dokumen wajib diisi.";
             }
             if (empty($draft['hasPhoto'])) {
                 $errors[] = "$n: foto dokumen wajib diunggah.";
@@ -87,10 +88,5 @@ final class GuaranteePolicy
         }
 
         return str_repeat('•', $length - 4).mb_substr($clean, -4);
-    }
-
-    private static function normalize(string $value): string
-    {
-        return preg_replace('/\s+/u', ' ', mb_strtolower(trim($value)));
     }
 }

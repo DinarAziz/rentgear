@@ -26,6 +26,8 @@ final class Audit
 
     public const DAMAGE_FEE_DECIDED = 'damage_fee_decided';
 
+    public const MISMATCH_DECIDED = 'mismatch_decided';
+
     public const BLACKLIST_ADDED = 'blacklist_added';
 
     public const BLACKLIST_REMOVED = 'blacklist_removed';

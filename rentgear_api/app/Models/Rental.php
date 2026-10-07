@@ -19,6 +19,8 @@ class Rental extends Model
         return [
             'start_date' => 'date:Y-m-d',
             'end_date' => 'date:Y-m-d',
+            'reschedule_start' => 'date:Y-m-d',
+            'reschedule_end' => 'date:Y-m-d',
             'returned_at' => 'datetime',
             'price_per_day_snapshot' => 'float',
             'deposit_snapshot' => 'float',

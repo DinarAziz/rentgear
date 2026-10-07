@@ -27,10 +27,12 @@ class ProviderOrdersScreen extends StatelessWidget {
       builder: (context, data) {
         final (profile, rentals) = data;
         List<Rental> where(bool Function(Rental) test) => rentals.where(test).toList();
-        final active = where((r) => _needsAction.contains(r.status));
-        final waiting = where((r) => r.status == RentalStatus.awaitingPayment);
+        // Permintaan ganti tanggal menunggu jawaban toko, apa pun status sewanya.
+        bool needsAction(Rental r) => _needsAction.contains(r.status) || r.rescheduleStart != null;
+        final active = where(needsAction);
+        final waiting = where((r) => r.status == RentalStatus.awaitingPayment && !needsAction(r));
         final history = where(
-          (r) => !_needsAction.contains(r.status) && r.status != RentalStatus.awaitingPayment,
+          (r) => !needsAction(r) && r.status != RentalStatus.awaitingPayment,
         );
 
         return DefaultTabController(

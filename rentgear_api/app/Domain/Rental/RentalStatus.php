@@ -18,6 +18,7 @@ enum RentalStatus: string
     case Expired = 'expired';
     case NoShow = 'noShow';
     case Disputed = 'disputed';
+    case Refunded = 'refunded';
 
     public function label(): string
     {
@@ -35,6 +36,7 @@ enum RentalStatus: string
             self::Expired => 'Kedaluwarsa',
             self::NoShow => 'Tidak diambil',
             self::Disputed => 'Sengketa',
+            self::Refunded => 'Dana dikembalikan',
         };
     }
 }

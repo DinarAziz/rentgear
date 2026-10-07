@@ -1253,3 +1253,46 @@ The user asked for a QR code in the deck that downloads the Android app from Git
   and the metode slide adds "(SQLite hanya di server demo)". The notes record no reason for choosing SQLite on the
   phone; the answer given was a likely one (one file, no extra service on a phone), not a recorded decision.
 - Committed, not pushed.
+
+## Rental rules from the user's five answers, 7 October 2026 (evening)
+
+The user answered five questions about the rules and asked for the app to follow the answers.
+
+- No extension. This was already true. The booking screen now lists it under "4. Ketentuan sewa", and a date change
+  refuses a different number of days.
+- No refund after payment. Cancelling was already limited to the time before payment. The rule is now shown on the
+  booking screen and on the "Cara bayar" card. The user wrote "DP"; the app has no partial payment, so this was read as
+  the full transfer. The user has not confirmed that reading.
+- Date change. The renter asks before pickup (`POST rentals/{id}/reschedule`), the store accepts or refuses
+  (`reschedule-review`). The user chose "the store must agree". Stock is checked when the renter asks and again when
+  the store accepts, with the equipment row locked as in booking, and the rental's own dates are left out of the
+  count. The request sits in `reschedule_start` and `reschedule_end` and is cleared when the rental leaves the
+  statuses before pickup.
+- Several accounts are allowed. The rule that a guarantee document must be in the account holder's name is gone from
+  `GuaranteePolicy` on both sides. The holder's name only has to be filled in.
+- Gear that does not match. The renter reports it on the day of handover (`mismatch`), once per rental. The admin
+  decides (`mismatch-decision`): refund, exchange, or rejected. A refund moves the rental to the new status
+  `refunded` ("Dana dikembalikan"), marks the guarantees returned and frees the stock. The store sends the money
+  outside the app; the app records the decision and writes an audit entry (`mismatch_decided`).
+
+Choices made without asking, which the user may want to change:
+
+- A date change must keep the number of days, so it cannot work as an extension.
+- A paid rental is not marked "Tidak diambil" while a date change waits for the store's answer.
+- The store cannot receive the gear back while a mismatch report waits for the admin (`MISMATCH_PENDING`).
+- A mismatch report is text only, with no photo.
+
+Other things to know:
+
+- Notes that do not change the status (date change, report, exchange, refusal) are stored in the status log with
+  `from` equal to `to`. The timeline shows them as "Catatan". The scheduled jobs and `paymentRejection` skip them when
+  they look for the last status change.
+- A rental with a date change waiting now appears on the store's "Aksi" tab even when it is still unpaid.
+- New migration: `2026_10_08_000000_add_reschedule_and_mismatch_to_rentals.php`. The public server needs
+  `php artisan migrate` at the next deploy.
+- Tests: 152 on the server, 119 in the app, 271 in total. The deck numbers were updated (`index.html`, `deck.js`,
+  `README.md` in `../presentasi/`). The deck has no slide about these five rules.
+- Not deployed to the Redmi. Not tried on a phone or against the public server. The renter's date picker is not
+  covered by a widget test; the store's approval and the admin's refund are.
+
+The user paused here ("save nanti lanjut").

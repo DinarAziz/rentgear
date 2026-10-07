@@ -14,8 +14,9 @@ class RentalStateMachine {
     // Penyedia memeriksa bukti transfer: diterima, atau dikembalikan supaya penyewa mengunggah ulang.
     RentalStatus.paymentReview: {RentalStatus.paid, RentalStatus.awaitingPayment},
     RentalStatus.paid: {RentalStatus.pickedUp, RentalStatus.noShow},
-    RentalStatus.pickedUp: {RentalStatus.returned, RentalStatus.overdue},
-    RentalStatus.overdue: {RentalStatus.returned},
+    // Refund: admin menerima laporan barang tidak sesuai.
+    RentalStatus.pickedUp: {RentalStatus.returned, RentalStatus.overdue, RentalStatus.refunded},
+    RentalStatus.overdue: {RentalStatus.returned, RentalStatus.refunded},
     RentalStatus.returned: {RentalStatus.completed, RentalStatus.disputed},
     RentalStatus.disputed: {RentalStatus.completed},
   };
@@ -31,6 +32,7 @@ class RentalStateMachine {
     RentalStatus.returned: {UserRole.provider},
     RentalStatus.completed: {UserRole.provider, UserRole.admin},
     RentalStatus.disputed: {UserRole.customer, UserRole.provider},
+    RentalStatus.refunded: {UserRole.admin},
     RentalStatus.expired: {null},
     RentalStatus.noShow: {null},
     RentalStatus.overdue: {null},
@@ -68,7 +70,7 @@ class RentalStateMachine {
         if (g.any((x) => x.status != GuaranteeStatus.held)) {
           return 'Dokumen asli jaminan harus diterima sebelum alat diserahkan.';
         }
-      case RentalStatus.completed:
+      case RentalStatus.completed || RentalStatus.refunded:
         if (g.any((x) => x.status != GuaranteeStatus.returned)) {
           return 'Semua jaminan harus dikembalikan sebelum transaksi selesai.';
         }

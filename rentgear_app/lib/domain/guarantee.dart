@@ -111,7 +111,6 @@ class GuaranteePolicy {
   List<String> validate(
     List<GuaranteeDraft> drafts, {
     required double rentalValue,
-    required String renterName,
   }) {
     final errors = <String>[];
     final required = requiredCount(rentalValue);
@@ -144,8 +143,9 @@ class GuaranteePolicy {
           !RegExp('^\\d{${type.exactDigits}}\$').hasMatch(number)) {
         errors.add('$n: nomor ${type.label} harus ${type.exactDigits} digit angka.');
       }
-      if (_normalize(d.holderName) != _normalize(renterName)) {
-        errors.add('$n: dokumen harus atas nama penyewa ($renterName).');
+      // Dokumen boleh milik orang lain (mis. teman satu rombongan), asal namanya diisi.
+      if (d.holderName.trim().isEmpty) {
+        errors.add('$n: nama pemilik dokumen wajib diisi.');
       }
       if (d.photo == null) {
         errors.add('$n: foto dokumen wajib diunggah.');
@@ -166,7 +166,4 @@ class GuaranteePolicy {
         highValueThreshold: highValueThreshold ?? this.highValueThreshold,
         highValueRequired: highValueRequired ?? this.highValueRequired,
       );
-
-  static String _normalize(String s) =>
-      s.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
 }

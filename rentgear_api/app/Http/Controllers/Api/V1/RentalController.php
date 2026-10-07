@@ -115,6 +115,23 @@ class RentalController extends Controller
         return $this->present($this->flow->cancel($id, $request->user(), $reason));
     }
 
+    public function reschedule(Request $request, string $id): JsonResponse
+    {
+        $data = $request->validate(['startDate' => 'required|date_format:Y-m-d', 'endDate' => 'required|date_format:Y-m-d']);
+
+        return $this->present($this->flow->requestReschedule($id, $request->user(), $data['startDate'], $data['endDate']));
+    }
+
+    public function rescheduleReview(Request $request, string $id): JsonResponse
+    {
+        $data = $request->validate(
+            ['accept' => 'required|boolean', 'reason' => 'nullable|required_if:accept,false|string|max:255'],
+            ['reason.required_if' => 'Alasan penolakan wajib diisi.'],
+        );
+
+        return $this->present($this->flow->reviewReschedule($id, $request->user(), (bool) $data['accept'], $data['reason'] ?? null));
+    }
+
     public function payment(Request $request, string $id): JsonResponse
     {
         $request->validate(['proof' => 'required|'.self::PHOTO_RULE], self::PHOTO_MESSAGES);
@@ -145,6 +162,23 @@ class RentalController extends Controller
     public function handover(Request $request, string $id): JsonResponse
     {
         return $this->present($this->flow->handover($id, $request->user()));
+    }
+
+    public function mismatch(Request $request, string $id): JsonResponse
+    {
+        $reason = $this->reason($request);
+
+        return $this->present($this->flow->reportMismatch($id, $request->user(), $reason));
+    }
+
+    public function mismatchDecision(Request $request, string $id): JsonResponse
+    {
+        $data = $request->validate([
+            'decision' => ['required', Rule::in(RentalFlowService::MISMATCH_DECISIONS)],
+            'note' => 'nullable|string|max:255',
+        ]);
+
+        return $this->present($this->flow->decideMismatch($id, $request->user(), $data['decision'], $data['note'] ?? null));
     }
 
     public function receiveReturn(Request $request, string $id): JsonResponse

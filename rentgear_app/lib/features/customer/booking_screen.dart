@@ -155,7 +155,7 @@ class _BookingScreenState extends State<BookingScreen> {
       if (range == null) 'Pilih tanggal sewa.',
       if (e.hasSizes && _size == null) 'Pilih ukuran.',
       if (_available != null && _qty > _available!) 'Stok tidak cukup untuk jumlah ini.',
-      ...policy.validate(_drafts, rentalValue: _total, renterName: renterName),
+      ...policy.validate(_drafts, rentalValue: _total),
       if (!_agree) 'Centang persetujuan jaminan di bawah.',
     ];
     setState(() => _errors = errors);
@@ -322,7 +322,7 @@ class _BookingScreenState extends State<BookingScreen> {
               child: Text(
                 'Diterima: ${[for (final t in GuaranteeType.values) if (policy.acceptedTypes.contains(t)) t.label].join(', ')}. '
                 'Foto dokumen diperiksa penyedia; dokumen asli diserahkan saat mengambil alat '
-                'dan dikembalikan saat alat kembali.',
+                'dan dikembalikan saat alat kembali. Dokumen boleh atas nama orang lain, misalnya teman serombongan.',
                 style: const TextStyle(fontSize: 13, color: Colors.black54),
               ),
             ),
@@ -355,6 +355,22 @@ class _BookingScreenState extends State<BookingScreen> {
                       ),
               ),
             ),
+            const SectionTitle('4. Ketentuan sewa'),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (final rule in _rentalTerms)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Text('• $rule', style: const TextStyle(fontSize: 13)),
+                      ),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 8),
             CheckboxListTile(
               value: _agree,
@@ -362,7 +378,7 @@ class _BookingScreenState extends State<BookingScreen> {
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: EdgeInsets.zero,
               title: const Text(
-                'Saya setuju menyerahkan dokumen asli jaminan saat pengambilan alat. '
+                'Saya setuju dengan ketentuan sewa dan menyerahkan dokumen asli jaminan saat pengambilan alat. '
                 'Dokumen dikembalikan setelah alat kembali dalam kondisi baik.',
                 style: TextStyle(fontSize: 13),
               ),
@@ -396,6 +412,14 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 }
+
+/// Aturan yang berlaku untuk semua sewa. Server menjalankan aturan yang sama.
+const _rentalTerms = [
+  'Masa sewa tidak bisa diperpanjang, karena alat bisa sudah dipesan penyewa berikutnya.',
+  'Uang yang sudah dibayar tidak bisa dikembalikan bila Anda batal menyewa.',
+  'Tanggal bisa diganti sebelum alat diambil, selama stok tersedia dan toko setuju. Lama sewa tetap.',
+  'Bila barang tidak sesuai, laporkan pada hari alat diterima. Admin memutuskan refund atau tukar barang.',
+];
 
 class _SizePicker extends StatelessWidget {
   const _SizePicker({

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/format.dart';
 import '../../core/responsive.dart';
+import '../../domain/availability.dart';
 import '../../domain/fines.dart';
 import '../../domain/guarantee.dart';
 import '../../domain/models.dart';
@@ -109,6 +110,15 @@ class _Body extends StatelessWidget {
                 InfoRow('Penyewa', r.customerName),
                 InfoRow('Tanggal', rentangTanggal(r.startDate, r.endDate)),
                 InfoRow('Durasi', '${r.durationDays} hari'),
+                if (r.rescheduleStart != null && r.rescheduleEnd != null) ...[
+                  InfoRow('Diminta ganti', rentangTanggal(r.rescheduleStart!, r.rescheduleEnd!)),
+                  Text(
+                    user.role == UserRole.provider
+                        ? 'Penyewa meminta pindah tanggal. Setujui atau tolak lewat tombol di bawah.'
+                        : 'Tanggal baru berlaku setelah disetujui toko.',
+                    style: const TextStyle(fontSize: 13, color: Colors.black54),
+                  ),
+                ],
                 if (r.cancelReason != null) InfoRow('Alasan', r.cancelReason!),
               ],
             ),
@@ -130,6 +140,30 @@ class _Body extends StatelessWidget {
         ),
         if (r.status == RentalStatus.overdue || r.returnedAt != null)
           FineSection(rental: r),
+        if (r.mismatch != MismatchStatus.none) ...[
+          const SectionTitle('Laporan barang tidak sesuai'),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  InfoRow('Status', r.mismatch.label),
+                  InfoRow('Keluhan', r.mismatchReason ?? '-'),
+                  if (r.mismatchNote != null) InfoRow('Catatan admin', r.mismatchNote!),
+                  if (r.mismatch == MismatchStatus.refund) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      'Toko mentransfer kembali ${rupiah(r.grandTotal)} (sewa dan deposit) ke penyewa. '
+                      'Alat dan dokumen jaminan sudah dikembalikan.',
+                      style: const TextStyle(fontSize: 13, color: Colors.black54),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
         if (r.status == RentalStatus.awaitingPayment &&
             user.role == UserRole.customer &&
             provider.bankAccount != null) ...[
@@ -151,7 +185,8 @@ class _Body extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   const Text(
-                    'Lalu unggah foto bukti transfer lewat tombol di bawah. Penyedia memeriksanya sebelum alat bisa diambil.',
+                    'Lalu unggah foto bukti transfer lewat tombol di bawah. Penyedia memeriksanya sebelum alat bisa diambil. '
+                    'Uang yang sudah dibayar tidak bisa dikembalikan; tanggal masih bisa diganti dengan persetujuan toko.',
                     style: TextStyle(fontSize: 13, color: Colors.black54),
                   ),
                   if (r.paymentRejection != null) ...[
@@ -252,7 +287,7 @@ class _Body extends StatelessWidget {
                       color: statusColor(log.to),
                       celebrate: i == 0 && log.to == RentalStatus.completed,
                     ),
-                    title: Text(log.to.label),
+                    title: Text(log.isNote ? 'Catatan' : log.to.label),
                     subtitle: Text(
                       [
                         '${log.actorName} · ${tanggalJam(log.at)}',
@@ -338,7 +373,7 @@ class _GuaranteeHint extends StatelessWidget {
         provider
             ? 'Dokumen asli sedang Anda pegang. Simpan dengan aman dan jangan difotokopi.'
             : 'Dokumen asli dipegang penyedia sampai alat dikembalikan.',
-      RentalStatus.completed =>
+      RentalStatus.completed || RentalStatus.refunded =>
         'Semua dokumen jaminan sudah dikembalikan ke penyewa.',
       _ => null,
     };
@@ -400,6 +435,47 @@ class _ActionBar extends StatelessWidget {
               );
             },
             child: const Text('Batalkan'),
+          ),
+        );
+      }
+      if (r.canRequestReschedule) {
+        actions.add(
+          OutlinedButton.icon(
+            icon: const Icon(Icons.event_repeat_outlined),
+            label: const Text('Ganti tanggal'),
+            onPressed: () async {
+              final start = await _pickNewStart(context, r);
+              if (start == null || !context.mounted) return;
+              await act(
+                () => state.repo.requestReschedule(
+                  r.id,
+                  user,
+                  start,
+                  start.add(Duration(days: r.durationDays - 1)),
+                ),
+                'Permintaan ganti tanggal terkirim. Menunggu jawaban toko.',
+              );
+            },
+          ),
+        );
+      }
+      if (r.canReportMismatchAt(DateTime.now())) {
+        actions.add(
+          OutlinedButton.icon(
+            icon: const Icon(Icons.report_problem_outlined),
+            label: const Text('Laporkan barang tidak sesuai'),
+            onPressed: () async {
+              final reason = await askReason(
+                context,
+                title: 'Barang tidak sesuai',
+                hint: 'Jelaskan apa yang tidak sesuai. Admin memutuskan refund atau tukar barang.',
+              );
+              if (reason == null || !context.mounted) return;
+              await act(
+                () => state.repo.reportMismatch(r.id, user, reason),
+                'Laporan terkirim. Admin akan memutuskan.',
+              );
+            },
           ),
         );
       }
@@ -497,6 +573,51 @@ class _ActionBar extends StatelessWidget {
           },
         ),
       );
+    }
+
+    if (user.role == UserRole.admin && r.mismatch == MismatchStatus.pending) {
+      actions.add(
+        FilledButton.icon(
+          icon: const Icon(Icons.gavel_outlined),
+          label: const Text('Putuskan laporan barang'),
+          onPressed: () async {
+            final decision = await _askMismatchDecision(context, r);
+            if (decision == null || !context.mounted) return;
+            await act(
+              () => state.repo.decideMismatch(r.id, user, decision.$1, note: decision.$2),
+              'Keputusan tersimpan: ${decision.$1.label}.',
+            );
+          },
+        ),
+      );
+    }
+
+    if (user.role == UserRole.provider && r.rescheduleStart != null && r.rescheduleEnd != null) {
+      final range = rentangTanggal(r.rescheduleStart!, r.rescheduleEnd!);
+      actions
+        ..add(
+          FilledButton.icon(
+            icon: const Icon(Icons.event_available_outlined),
+            label: Text('Setujui pindah ke $range'),
+            onPressed: () => act(
+              () => state.repo.reviewReschedule(r.id, user, accept: true),
+              'Tanggal sewa diganti.',
+            ),
+          ),
+        )
+        ..add(
+          OutlinedButton(
+            onPressed: () async {
+              final reason = await askReason(context, title: 'Tolak ganti tanggal');
+              if (reason == null || !context.mounted) return;
+              await act(
+                () => state.repo.reviewReschedule(r.id, user, accept: false, reason: reason),
+                'Ganti tanggal ditolak. Tanggal lama tetap berlaku.',
+              );
+            },
+            child: const Text('Tolak ganti tanggal'),
+          ),
+        );
     }
 
     if (user.role == UserRole.provider) {
@@ -605,6 +726,13 @@ class _ActionBar extends StatelessWidget {
               },
             ),
           );
+        case RentalStatus.pickedUp || RentalStatus.overdue when r.mismatch == MismatchStatus.pending:
+          actions.add(
+            const FilledButton(
+              onPressed: null,
+              child: Text('Menunggu keputusan admin atas laporan penyewa'),
+            ),
+          );
         case RentalStatus.pickedUp || RentalStatus.overdue:
           actions.add(
             FilledButton.icon(
@@ -685,6 +813,78 @@ class _ActionBar extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Pilih tanggal mulai yang baru. Tanggal selesai mengikuti, karena lama sewa tetap.
+Future<DateTime?> _pickNewStart(BuildContext context, Rental r) {
+  final today = dateOnly(DateTime.now());
+  return showDatePicker(
+    context: context,
+    firstDate: today,
+    lastDate: today.add(const Duration(days: 90)),
+    initialDate: r.startDate.isBefore(today) ? today : r.startDate,
+    helpText: 'Tanggal mulai baru (tetap ${r.durationDays} hari)',
+    confirmText: 'Minta ganti',
+  );
+}
+
+/// Keputusan admin atas laporan barang tidak sesuai, dengan catatan opsional.
+Future<(MismatchStatus, String?)?> _askMismatchDecision(BuildContext context, Rental r) {
+  dismissKeyboard();
+  final note = TextEditingController();
+  var decision = MismatchStatus.refund;
+  return showDialog<(MismatchStatus, String?)>(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) => AlertDialog(
+        title: const Text('Putuskan laporan barang'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Keluhan ${r.customerName}: ${r.mismatchReason ?? '-'}'),
+              const SizedBox(height: 12),
+              SegmentedButton<MismatchStatus>(
+                showSelectedIcon: false,
+                segments: const [
+                  ButtonSegment(value: MismatchStatus.refund, label: Text('Refund')),
+                  ButtonSegment(value: MismatchStatus.exchange, label: Text('Tukar')),
+                  ButtonSegment(value: MismatchStatus.rejected, label: Text('Tolak')),
+                ],
+                selected: {decision},
+                onSelectionChanged: (picked) => setState(() => decision = picked.first),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                switch (decision) {
+                  MismatchStatus.refund =>
+                    'Sewa ditutup. Toko mengembalikan ${rupiah(r.grandTotal)} dan dokumen jaminan, penyewa mengembalikan alat.',
+                  MismatchStatus.exchange => 'Toko menukar alat dengan yang sesuai. Sewa tetap berjalan.',
+                  _ => 'Laporan tidak diterima. Sewa tetap berjalan.',
+                },
+                style: const TextStyle(fontSize: 13, color: Colors.black54),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: note,
+                maxLines: 2,
+                decoration: const InputDecoration(labelText: 'Catatan (opsional)'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          FilledButton(
+            style: FilledButton.styleFrom(minimumSize: const Size(0, 40)),
+            onPressed: () => Navigator.pop(context, (decision, note.text.trim().isEmpty ? null : note.text.trim())),
+            child: const Text('Simpan'),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 /// Pilih foto bukti transfer lalu tampilkan pratinjau. "Ganti" membuka

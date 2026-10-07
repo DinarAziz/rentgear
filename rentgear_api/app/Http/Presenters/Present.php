@@ -126,6 +126,10 @@ final class Present
             'returnedAt' => self::time($r->returned_at), 'returnCondition' => $r->return_condition,
             'lateFee' => $r->late_fee, 'damageFee' => $r->damage_fee, 'damageNote' => $r->damage_note,
             'damageReview' => $r->damage_review, 'reviewReason' => $r->review_reason, 'reviewNote' => $r->review_note,
+            'rescheduleStart' => $r->reschedule_start?->format('Y-m-d'),
+            'rescheduleEnd' => $r->reschedule_end?->format('Y-m-d'),
+            'mismatchStatus' => $r->mismatch_status ?? 'none', 'mismatchReason' => $r->mismatch_reason,
+            'mismatchNote' => $r->mismatch_note,
             'guarantees' => $r->guarantees->map(self::guarantee(...))->all(),
             // Fotonya diunduh lewat `files/condition/{id}`.
             'conditionPhotos' => $r->conditionPhotos->map(fn ($p) => [

@@ -66,6 +66,13 @@ abstract class RentGearRepository {
   Future<Rental> confirmBooking(String rentalId, AppUser actor);
   Future<Rental> rejectBooking(String rentalId, AppUser actor, String reason);
   Future<Rental> cancelBooking(String rentalId, AppUser actor, String reason);
+
+  /// Penyewa meminta pindah tanggal sebelum alat diambil. Lama sewa harus tetap,
+  /// dan tanggal baru berlaku setelah toko setuju.
+  Future<Rental> requestReschedule(String rentalId, AppUser actor, DateTime start, DateTime end);
+
+  /// Toko menjawab permintaan ganti tanggal. Bila ditolak, [reason] wajib.
+  Future<Rental> reviewReschedule(String rentalId, AppUser actor, {required bool accept, String? reason});
   Future<Rental> submitPayment(String rentalId, AppUser actor, Uint8List proof);
 
   /// Penyedia memeriksa bukti transfer. Bila ditolak, [reason] wajib dan penyewa bisa mengunggah bukti baru.
@@ -76,6 +83,13 @@ abstract class RentGearRepository {
 
   /// Provider menerima dokumen asli jaminan lalu menyerahkan alat.
   Future<Rental> handover(String rentalId, AppUser actor);
+
+  /// Penyewa melaporkan barang tidak sesuai ke admin, hanya pada hari alat diterima.
+  Future<Rental> reportMismatch(String rentalId, AppUser actor, String reason);
+
+  /// Admin memutuskan laporan barang tidak sesuai: refund menutup sewa, tukar
+  /// barang dan penolakan membiarkannya berjalan.
+  Future<Rental> decideMismatch(String rentalId, AppUser actor, MismatchStatus decision, {String? note});
 
   /// Penyedia menerima alat kembali. Denda keterlambatan dihitung otomatis;
   /// denda kerusakan diisi penyedia dan ditinjau admin bila nominalnya besar.

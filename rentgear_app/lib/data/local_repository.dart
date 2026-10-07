@@ -252,9 +252,10 @@ class LocalRentGearRepository implements RentGearRepository {
 
   /// ALG-2 per ukuran. [size] `null` untuk alat tanpa ukuran; untuk alat
   /// berukuran, `null` berarti jumlah ketersediaan semua ukuran.
-  int _available(Equipment e, DateTime start, DateTime end, [String? size]) {
+  /// [except] mengabaikan satu sewa, dipakai saat sewa itu sendiri yang pindah tanggal.
+  int _available(Equipment e, DateTime start, DateTime end, [String? size, String? except]) {
     if (e.hasSizes && size == null) {
-      return e.sizes.fold(0, (sum, s) => sum + _available(e, start, end, s.label));
+      return e.sizes.fold(0, (sum, s) => sum + _available(e, start, end, s.label, except));
     }
     return sweepAvailableQty(
         stockTotal: e.stockFor(size),
@@ -263,6 +264,7 @@ class LocalRentGearRepository implements RentGearRepository {
         ranges: [
           for (final r in _rentals)
             if (r.equipmentId == e.id &&
+                r.id != except &&
                 r.size == size &&
                 RentalStateMachine.lockingStatuses.contains(r.status))
               OccupancyRange(r.startDate, r.endDate, r.qty),
@@ -355,6 +357,37 @@ class LocalRentGearRepository implements RentGearRepository {
       note: note,
     ));
     r.status = to;
+    // Permintaan ganti tanggal gugur begitu alat diambil atau sewa berakhir.
+    if (!beforePickupStatuses.contains(to)) {
+      r
+        ..rescheduleStart = null
+        ..rescheduleEnd = null;
+    }
+  }
+
+  /// Catatan riwayat tanpa perubahan status, mis. ganti tanggal atau laporan penyewa.
+  void _note(Rental r, AppUser actor, String note) => r.logs.add(StatusLog(
+        from: r.status,
+        to: r.status,
+        actorName: actor.role == UserRole.provider ? r.providerName : actor.name,
+        at: DateTime.now(),
+        note: note,
+      ));
+
+  /// Tanggal baru harus belum lewat dan stoknya cukup, tanpa menghitung sewa ini sendiri.
+  void _requireFreeSlot(Rental r, DateTime start, DateTime end) {
+    if (start.isBefore(dateOnly(DateTime.now()))) {
+      throw const AppException('INVALID_DATE', 'Tanggal mulai sudah lewat.');
+    }
+    if (_available(_equipmentById(r.equipmentId), start, end, r.size, r.id) < r.qty) {
+      throw const AppException('SLOT_UNAVAILABLE', 'Stok tidak cukup pada tanggal tersebut.');
+    }
+  }
+
+  static String _range(DateTime start, DateTime end) {
+    String day(DateTime d) =>
+        '${'${d.day}'.padLeft(2, '0')}/${'${d.month}'.padLeft(2, '0')}/${d.year}';
+    return '${day(start)} s.d. ${day(end)}';
   }
 
   // ---------------------------------------------------------------- auth
@@ -419,13 +452,15 @@ class LocalRentGearRepository implements RentGearRepository {
         }
 
         for (final r in _rentals) {
-          final since = now.difference(r.logs.last.at);
+          // Catatan ganti tanggal tidak mengubah status, jadi tidak mengulang hitungan waktu.
+          final since = now.difference(r.lastChange.at);
           switch (r.status) {
             case RentalStatus.pendingConfirmation when since > const Duration(hours: 12):
               apply(r, RentalStatus.expired, 'Penyedia tidak merespons dalam 12 jam');
             case RentalStatus.awaitingPayment when since > const Duration(hours: 24):
               apply(r, RentalStatus.cancelled, 'Tidak dibayar dalam 24 jam');
-            case RentalStatus.paid when today.isAfter(r.startDate):
+            // Selama toko belum menjawab permintaan ganti tanggal, penyewa belum dianggap tidak datang.
+            case RentalStatus.paid when r.rescheduleStart == null && today.isAfter(r.startDate):
               apply(r, RentalStatus.noShow, 'Alat tidak diambil sampai tanggal mulai lewat');
               _autoBlacklist(r.customerId);
             case RentalStatus.pickedUp when today.isAfter(r.endDate):
@@ -534,7 +569,7 @@ class LocalRentGearRepository implements RentGearRepository {
         final days = inclusiveDays(start, end);
         final total = e.pricePerDay * req.qty * days + e.depositAmount * req.qty;
         final errors = p.policy.validate(req.guarantees,
-            rentalValue: total, renterName: customer.name);
+            rentalValue: total);
         if (errors.isNotEmpty) {
           throw AppException('GUARANTEE_INVALID', errors.join('\n'));
         }
@@ -693,6 +728,118 @@ class LocalRentGearRepository implements RentGearRepository {
       });
 
   @override
+  Future<Rental> requestReschedule(String rentalId, AppUser actor, DateTime start, DateTime end) =>
+      _mutate(() {
+        final r = _rentalById(rentalId);
+        _requireRenter(r, actor);
+        if (!beforePickupStatuses.contains(r.status)) {
+          throw const AppException('INVALID_STATE', 'Tanggal hanya bisa diganti sebelum alat diambil.');
+        }
+        if (r.rescheduleStart != null) {
+          throw const AppException(
+              'INVALID_STATE', 'Permintaan ganti tanggal sebelumnya masih menunggu jawaban toko.');
+        }
+        final from = dateOnly(start);
+        final to = dateOnly(end);
+        if (to.isBefore(from)) {
+          throw const AppException('INVALID_DATE', 'Tanggal selesai sebelum tanggal mulai.');
+        }
+        if (inclusiveDays(from, to) != r.durationDays) {
+          throw AppException(
+              'INVALID_DATE', 'Lama sewa harus tetap ${r.durationDays} hari. Sewa tidak bisa diperpanjang.');
+        }
+        if (from == r.startDate) {
+          throw const AppException('INVALID_DATE', 'Tanggal baru sama dengan tanggal sekarang.');
+        }
+        _requireFreeSlot(r, from, to);
+        r
+          ..rescheduleStart = from
+          ..rescheduleEnd = to;
+        _note(r, actor, 'Minta ganti tanggal menjadi ${_range(from, to)}');
+        return r;
+      });
+
+  @override
+  Future<Rental> reviewReschedule(String rentalId, AppUser actor, {required bool accept, String? reason}) =>
+      _mutate(() {
+        final r = _rentalById(rentalId);
+        _requireOwner(r, actor);
+        final start = r.rescheduleStart;
+        final end = r.rescheduleEnd;
+        if (start == null || end == null) {
+          throw const AppException('INVALID_STATE', 'Tidak ada permintaan ganti tanggal.');
+        }
+        final why = reason?.trim() ?? '';
+        if (!accept && why.isEmpty) {
+          throw const AppException('VALIDATION', 'Alasan penolakan wajib diisi.');
+        }
+        if (accept) {
+          // Stok diperiksa lagi, karena bisa berubah sejak permintaan dibuat.
+          _requireFreeSlot(r, start, end);
+          r
+            ..startDate = start
+            ..endDate = end;
+        }
+        r
+          ..rescheduleStart = null
+          ..rescheduleEnd = null;
+        _note(r, actor,
+            accept ? 'Tanggal sewa diganti menjadi ${_range(start, end)}' : 'Ganti tanggal ditolak: $why');
+        return r;
+      });
+
+  @override
+  Future<Rental> reportMismatch(String rentalId, AppUser actor, String reason) => _mutate(() {
+        final r = _rentalById(rentalId);
+        _requireRenter(r, actor);
+        if (r.status != RentalStatus.pickedUp || dateOnly(r.lastChange.at) != dateOnly(DateTime.now())) {
+          throw const AppException(
+              'INVALID_STATE', 'Barang tidak sesuai hanya bisa dilaporkan pada hari alat diterima.');
+        }
+        if (r.mismatch != MismatchStatus.none) {
+          throw const AppException('INVALID_STATE', 'Sewa ini sudah pernah dilaporkan.');
+        }
+        r
+          ..mismatch = MismatchStatus.pending
+          ..mismatchReason = reason.trim();
+        _note(r, actor, 'Melaporkan barang tidak sesuai: ${reason.trim()}');
+        return r;
+      });
+
+  @override
+  Future<Rental> decideMismatch(String rentalId, AppUser actor, MismatchStatus decision, {String? note}) =>
+      _mutate(() {
+        _requireAdmin(actor);
+        final r = _rentalById(rentalId);
+        if (r.mismatch != MismatchStatus.pending) {
+          throw const AppException('INVALID_STATE', 'Tidak ada laporan yang menunggu keputusan.');
+        }
+        if (decision == MismatchStatus.none || decision == MismatchStatus.pending) {
+          throw const AppException('VALIDATION', 'Pilih refund, tukar barang, atau tolak.');
+        }
+        final trimmed = note?.trim() ?? '';
+        final suffix = trimmed.isEmpty ? '' : '. Catatan: $trimmed';
+        final text = 'Keputusan admin atas laporan barang tidak sesuai: ${decision.label}$suffix';
+        if (decision == MismatchStatus.refund) {
+          // Refund menutup sewa: alat dan dokumen jaminan dikembalikan.
+          final now = DateTime.now();
+          for (final g in r.guarantees) {
+            g
+              ..status = GuaranteeStatus.returned
+              ..returnedAt = now;
+          }
+          _transition(r, RentalStatus.refunded, actor, note: text);
+        } else {
+          _note(r, actor, text);
+        }
+        r
+          ..mismatch = decision
+          ..mismatchNote = trimmed.isEmpty ? null : trimmed;
+        _record(actor, AuditAction.mismatchDecided, target: r.invoiceCode, detail: '${decision.label}$suffix');
+        return r;
+      });
+
+  @override
   Future<Rental> handover(String rentalId, AppUser actor) => _mutate(() {
         final r = _rentalById(rentalId);
         _requireOwner(r, actor);
@@ -721,6 +868,9 @@ class LocalRentGearRepository implements RentGearRepository {
       _mutate(() {
         final r = _rentalById(rentalId);
         _requireOwner(r, actor);
+        if (r.mismatch == MismatchStatus.pending) {
+          throw const AppException('MISMATCH_PENDING', 'Laporan barang tidak sesuai masih diproses admin.');
+        }
         final error = damageFeeError(condition, damageFee, r.depositTotal);
         if (error != null) throw AppException('VALIDATION', error);
 

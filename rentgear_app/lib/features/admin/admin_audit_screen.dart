@@ -134,7 +134,7 @@ class _AuditTile extends StatelessWidget {
         Icons.storefront_outlined,
         Colors.blue.shade700,
       ),
-      AuditAction.damageFeeDecided => (
+      AuditAction.damageFeeDecided || AuditAction.mismatchDecided => (
         Icons.gavel_outlined,
         Colors.orange.shade800,
       ),

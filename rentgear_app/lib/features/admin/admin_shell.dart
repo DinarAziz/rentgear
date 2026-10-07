@@ -118,6 +118,9 @@ class AdminDashboardScreen extends StatelessWidget {
           final fineReviews = rentals
               .where((r) => r.damageReview == DamageReview.pending)
               .toList();
+          final mismatchReports = rentals
+              .where((r) => r.mismatch == MismatchStatus.pending)
+              .toList();
 
           final stats = [
             ('Total transaksi', '${rentals.length}', Icons.receipt_long),
@@ -125,6 +128,7 @@ class AdminDashboardScreen extends StatelessWidget {
             ('Jaminan dipegang', '$held dokumen', Icons.badge),
             ('Penyedia menunggu', '$pending', Icons.hourglass_top),
             ('Denda ditinjau', '${fineReviews.length}', Icons.gavel_outlined),
+            ('Laporan barang', '${mismatchReports.length}', Icons.report_problem_outlined),
             ('Nilai sewa selesai', rupiah(revenue), Icons.payments_outlined),
           ];
           // Card height follows the system font scale so large text does not overflow.
@@ -202,7 +206,7 @@ class AdminDashboardScreen extends StatelessWidget {
                 ],
               ),
               const SectionTitle('Perlu tindakan'),
-              if (pending == 0 && fineReviews.isEmpty)
+              if (pending == 0 && fineReviews.isEmpty && mismatchReports.isEmpty)
                 const Text(
                   'Tidak ada yang menunggu keputusan admin.',
                   style: TextStyle(color: Colors.black54),
@@ -225,6 +229,15 @@ class AdminDashboardScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 rentalCards(fineReviews),
+              ],
+              if (mismatchReports.isNotEmpty) ...[
+                if (pending > 0 || fineReviews.isNotEmpty) const SizedBox(height: 10),
+                const Text(
+                  'Laporan barang tidak sesuai menunggu keputusan:',
+                  style: TextStyle(color: Colors.black54, fontSize: 13),
+                ),
+                const SizedBox(height: 8),
+                rentalCards(mismatchReports),
               ],
               SectionTitle(
                 'Transaksi terbaru',

@@ -60,7 +60,6 @@ void main() {
       final errors = policy.validate(
         [draft(GuaranteeType.ktp, '3573011204020001')],
         rentalValue: 200000,
-        renterName: 'budi  santoso',
       );
       expect(errors, isEmpty);
     });
@@ -69,32 +68,38 @@ void main() {
       final errors = policy.validate(
         [draft(GuaranteeType.ktp, '3573011204020001')],
         rentalValue: 1500000,
-        renterName: 'Budi Santoso',
       );
       expect(errors, contains(contains('minimal 2')));
     });
 
-    test('rejects unaccepted type, duplicate, bad NIK, other name, missing photo', () {
+    test('rejects unaccepted type, duplicate, bad NIK, blank name, missing photo', () {
       final noPhoto = GuaranteeDraft(
           type: GuaranteeType.ijazah, holderName: 'Budi Santoso', documentNumber: 'DN-01');
       final errors = policy.validate(
         [
           draft(GuaranteeType.sim, '123'),
           draft(GuaranteeType.ktp, '12345'),
-          draft(GuaranteeType.ktp, '3573011204020001', name: 'Orang Lain'),
+          draft(GuaranteeType.ktp, '3573011204020001', name: ' '),
           noPhoto,
         ],
         rentalValue: 100000,
-        renterName: 'Budi Santoso',
       );
       expect(errors.join('\n'), allOf(
         contains('Maksimal 3'),
         contains('SIM tidak diterima'),
         contains('16 digit'),
         contains('sudah dipakai'),
-        contains('atas nama penyewa'),
+        contains('nama pemilik dokumen wajib'),
         contains('foto dokumen wajib'),
       ));
+    });
+
+    test('the document may belong to someone other than the account holder', () {
+      final errors = policy.validate(
+        [draft(GuaranteeType.ktp, '3573011204020001', name: 'Orang Lain')],
+        rentalValue: 200000,
+      );
+      expect(errors, isEmpty);
     });
 
     test('masks all but last 4 digits', () {

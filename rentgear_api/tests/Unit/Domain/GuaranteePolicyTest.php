@@ -28,33 +28,38 @@ class GuaranteePolicyTest extends TestCase
 
     public function test_valid_single_ktp_passes(): void
     {
-        $errors = $this->policy->validate([$this->draft('ktp', '3573011204020001')], 200000, 'budi  santoso');
+        $errors = $this->policy->validate([$this->draft('ktp', '3573011204020001')], 200000);
         $this->assertSame([], $errors);
     }
 
     public function test_high_value_rental_needs_two_documents(): void
     {
-        $errors = $this->policy->validate([$this->draft('ktp', '3573011204020001')], 1500000, 'Budi Santoso');
+        $errors = $this->policy->validate([$this->draft('ktp', '3573011204020001')], 1500000);
         $this->assertStringContainsString('minimal 2', implode("\n", $errors));
     }
 
-    public function test_rejects_unaccepted_type_duplicate_bad_nik_other_name_missing_photo(): void
+    public function test_rejects_unaccepted_type_duplicate_bad_nik_blank_name_missing_photo(): void
     {
         $errors = implode("\n", $this->policy->validate([
             $this->draft('sim', '123'),
             $this->draft('ktp', '12345'),
-            $this->draft('ktp', '3573011204020001', 'Orang Lain'),
+            $this->draft('ktp', '3573011204020001', ' '),
             $this->draft('ijazah', 'DN-01', photo: false),
-        ], 100000, 'Budi Santoso'));
+        ], 100000));
 
-        foreach (['Maksimal 3', 'SIM tidak diterima', '16 digit', 'sudah dipakai', 'atas nama penyewa', 'foto dokumen wajib'] as $needle) {
+        foreach (['Maksimal 3', 'SIM tidak diterima', '16 digit', 'sudah dipakai', 'nama pemilik dokumen wajib', 'foto dokumen wajib'] as $needle) {
             $this->assertStringContainsString($needle, $errors);
         }
     }
 
+    public function test_the_document_may_belong_to_someone_other_than_the_account_holder(): void
+    {
+        $this->assertSame([], $this->policy->validate([$this->draft('ktp', '3573011204020001', 'Orang Lain')], 200000));
+    }
+
     public function test_unknown_or_missing_type_is_reported(): void
     {
-        $errors = implode("\n", $this->policy->validate([$this->draft('', '1'), $this->draft('kartu-pelajar', '1')], 1000, 'Budi Santoso'));
+        $errors = implode("\n", $this->policy->validate([$this->draft('', '1'), $this->draft('kartu-pelajar', '1')], 1000));
         $this->assertSame(2, substr_count($errors, 'pilih jenis dokumen'));
     }
 

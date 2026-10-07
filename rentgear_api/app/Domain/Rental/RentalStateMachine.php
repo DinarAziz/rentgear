@@ -14,8 +14,9 @@ final class RentalStateMachine
         // Penyedia memeriksa bukti transfer: diterima, atau dikembalikan supaya penyewa mengunggah ulang.
         'paymentReview' => ['paid', 'awaitingPayment'],
         'paid' => ['pickedUp', 'noShow'],
-        'pickedUp' => ['returned', 'overdue'],
-        'overdue' => ['returned'],
+        // Refund: admin menerima laporan barang tidak sesuai.
+        'pickedUp' => ['returned', 'overdue', 'refunded'],
+        'overdue' => ['returned', 'refunded'],
         'returned' => ['completed', 'disputed'],
         'disputed' => ['completed'],
     ];
@@ -31,6 +32,7 @@ final class RentalStateMachine
         'returned' => ['provider'],
         'completed' => ['provider', 'admin'],
         'disputed' => ['customer', 'provider'],
+        'refunded' => ['admin'],
         'expired' => [null],
         'noShow' => [null],
         'overdue' => [null],
@@ -65,7 +67,7 @@ final class RentalStateMachine
                 ? 'Semua jaminan harus diverifikasi sebelum konfirmasi.' : null,
             RentalStatus::PickedUp => ! $allAre('held')
                 ? 'Dokumen asli jaminan harus diterima sebelum alat diserahkan.' : null,
-            RentalStatus::Completed => ! $allAre('returned')
+            RentalStatus::Completed, RentalStatus::Refunded => ! $allAre('returned')
                 ? 'Semua jaminan harus dikembalikan sebelum transaksi selesai.' : null,
             default => null,
         };

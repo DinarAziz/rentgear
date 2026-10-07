@@ -9,6 +9,8 @@ import 'package:rentgear/app.dart';
 import 'package:rentgear/core/location.dart';
 import 'package:rentgear/core/maps.dart';
 import 'package:rentgear/data/local_repository.dart';
+import 'package:rentgear/domain/availability.dart';
+import 'package:rentgear/domain/guarantee.dart';
 import 'package:rentgear/domain/models.dart';
 import 'package:rentgear/state/app_state.dart';
 
@@ -425,5 +427,76 @@ void main() {
     await tester.scrollUntilVisible(find.text('Aturan denda toko'), 300, scrollable: detail);
     await tester.scrollUntilVisible(find.text('2 kali tarif harian'), 200, scrollable: detail);
     expect(find.text('2 kali tarif harian'), findsOneWidget);
+  });
+
+  testWidgets('the store approves a date change and the rental moves', (tester) async {
+    final repo = LocalRentGearRepository.open(latency: Duration.zero);
+    final today = dateOnly(DateTime.now());
+    await tester.runAsync(() async {
+      // r-2: Rina, tiga hari mulai hari ke-4.
+      final rina = await repo.login('rina@rentgear.id', 'password');
+      await repo.requestReschedule('r-2', rina, today.add(const Duration(days: 10)), today.add(const Duration(days: 12)));
+      await repo.logout();
+    });
+    await pumpApp(tester, repo: repo);
+    await tester.tap(find.text('Penyedia · Arjuna'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('INV-DEMO-0002'));
+    await tester.pumpAndSettle();
+    expect(find.text('Diminta ganti'), findsOneWidget);
+
+    await tester.tap(find.textContaining('Setujui pindah ke'));
+    await tester.pumpAndSettle();
+    expect(find.text('Diminta ganti'), findsNothing);
+    expect(find.text('Tolak ganti tanggal'), findsNothing);
+    final rental = await tester.runAsync(() => repo.rental('r-2'));
+    expect(rental!.startDate, today.add(const Duration(days: 10)));
+  });
+
+  testWidgets('admin refunds a rental whose gear did not match', (tester) async {
+    final repo = LocalRentGearRepository.open(latency: Duration.zero);
+    final today = dateOnly(DateTime.now());
+    final rental = await tester.runAsync(() async {
+      final budi = await repo.login('budi@rentgear.id', 'password');
+      final sari = await repo.login('sari@rentgear.id', 'password');
+      final r = await repo.createBooking(BookingRequest(
+        customerId: budi.id,
+        equipmentId: 'e-kompor',
+        qty: 1,
+        startDate: today,
+        endDate: today,
+        idempotencyKey: 'tidak-sesuai',
+        guarantees: [
+          GuaranteeDraft(type: GuaranteeType.ktp, holderName: 'Budi Santoso', documentNumber: '3573011204020001')
+            ..photo = onePixelPng,
+        ],
+      ));
+      await repo.reviewGuarantee(r.id, r.guarantees.single.id, sari, accept: true);
+      await repo.confirmBooking(r.id, sari);
+      await repo.submitPayment(r.id, budi, onePixelPng);
+      await repo.reviewPayment(r.id, sari, accept: true);
+      await repo.handover(r.id, sari);
+      await repo.reportMismatch(r.id, budi, 'Kompor tidak menyala');
+      await repo.logout();
+      return r;
+    });
+    await pumpApp(tester, repo: repo);
+    await tester.tap(find.text('Admin'));
+    await tester.pumpAndSettle();
+    final report = find.text('Laporan barang tidak sesuai menunggu keputusan:');
+    await tester.scrollUntilVisible(report, 300, scrollable: find.byType(Scrollable).first);
+    expect(report, findsOneWidget);
+
+    await tester.tap(find.text(rental!.invoiceCode).first);
+    await tester.pumpAndSettle();
+    expect(find.text('Kompor tidak menyala'), findsOneWidget);
+    await tester.tap(find.text('Putuskan laporan barang'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Simpan'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Putuskan laporan barang'), findsNothing);
+    final done = await tester.runAsync(() => repo.rental(rental.id));
+    expect(done!.status, RentalStatus.refunded);
   });
 }

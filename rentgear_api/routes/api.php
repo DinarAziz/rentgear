@@ -53,10 +53,14 @@ Route::prefix('v1')->group(function () {
         Route::post('rentals/{id}/confirm', [RentalController::class, 'confirm']);
         Route::post('rentals/{id}/reject', [RentalController::class, 'reject']);
         Route::post('rentals/{id}/cancel', [RentalController::class, 'cancel']);
+        Route::post('rentals/{id}/reschedule', [RentalController::class, 'reschedule']);
+        Route::post('rentals/{id}/reschedule-review', [RentalController::class, 'rescheduleReview']);
         Route::post('rentals/{id}/payment', [RentalController::class, 'payment']);
         Route::post('rentals/{id}/payment-review', [RentalController::class, 'paymentReview']);
         Route::post('rentals/{id}/condition-photos', [RentalController::class, 'conditionPhoto']);
         Route::post('rentals/{id}/handover', [RentalController::class, 'handover']);
+        Route::post('rentals/{id}/mismatch', [RentalController::class, 'mismatch']);
+        Route::post('rentals/{id}/mismatch-decision', [RentalController::class, 'mismatchDecision']);
         Route::post('rentals/{id}/return', [RentalController::class, 'receiveReturn']);
         Route::post('rentals/{id}/complete', [RentalController::class, 'complete']);
         Route::post('rentals/{id}/damage-objection', [RentalController::class, 'damageObjection']);

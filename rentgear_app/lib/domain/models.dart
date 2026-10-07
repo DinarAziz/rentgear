@@ -266,7 +266,8 @@ enum RentalStatus {
   cancelled('Dibatalkan'),
   expired('Kedaluwarsa'),
   noShow('Tidak diambil'),
-  disputed('Sengketa');
+  disputed('Sengketa'),
+  refunded('Dana dikembalikan');
 
   const RentalStatus(this.label);
   final String label;
@@ -286,7 +287,30 @@ class StatusLog {
   final String actorName;
   final DateTime at;
   final String? note;
+
+  /// Catatan tanpa perubahan status, mis. ganti tanggal atau laporan penyewa.
+  bool get isNote => from == to;
 }
+
+/// Laporan penyewa bahwa barang tidak sesuai, dan keputusan admin atasnya.
+enum MismatchStatus {
+  none('Tidak ada laporan'),
+  pending('Menunggu keputusan admin'),
+  refund('Dana dikembalikan'),
+  exchange('Barang ditukar'),
+  rejected('Laporan ditolak');
+
+  const MismatchStatus(this.label);
+  final String label;
+}
+
+/// Status sebelum alat diambil.
+const beforePickupStatuses = {
+  RentalStatus.pendingConfirmation,
+  RentalStatus.awaitingPayment,
+  RentalStatus.paymentReview,
+  RentalStatus.paid,
+};
 
 class Rental {
   Rental({
@@ -328,8 +352,12 @@ class Rental {
 
   /// Foto utama alat saat booking dibuat, untuk kartu transaksi.
   final ItemPhoto? photo;
-  final DateTime startDate;
-  final DateTime endDate;
+  DateTime startDate;
+  DateTime endDate;
+
+  /// Tanggal baru yang diminta penyewa dan belum dijawab toko.
+  DateTime? rescheduleStart;
+  DateTime? rescheduleEnd;
 
   /// Harga dikunci saat booking dibuat, tidak ikut perubahan harga provider.
   final double pricePerDaySnapshot;
@@ -354,6 +382,12 @@ class Rental {
 
   /// Catatan keputusan admin.
   String? reviewNote;
+
+  MismatchStatus mismatch = MismatchStatus.none;
+  String? mismatchReason;
+
+  /// Catatan keputusan admin atas laporan barang tidak sesuai.
+  String? mismatchNote;
 
   /// Ulasan penyewa untuk toko, diisi setelah transaksi selesai.
   Review? review;
@@ -391,11 +425,23 @@ class Rental {
   double lateFeeAt(DateTime at) =>
       finePolicy.lateFee(pricePerDay: pricePerDaySnapshot, qty: qty, days: lateDaysAt(at));
 
-  /// Keberatan hanya untuk denda kerusakan yang belum pernah ditinjau admin.
+  /// Perubahan status terakhir, tanpa menghitung catatan.
+  StatusLog get lastChange => logs.lastWhere((l) => !l.isNote);
+
   /// Catatan penolakan bukti transfer terakhir, selama penyewa belum mengunggah bukti baru.
   String? get paymentRejection =>
-      status == RentalStatus.awaitingPayment && logs.last.from == RentalStatus.paymentReview ? logs.last.note : null;
+      status == RentalStatus.awaitingPayment && lastChange.from == RentalStatus.paymentReview ? lastChange.note : null;
 
+  /// Tanggal masih bisa diminta ganti selama alat belum diambil dan tidak ada permintaan yang menunggu.
+  bool get canRequestReschedule => beforePickupStatuses.contains(status) && rescheduleStart == null;
+
+  /// Barang tidak sesuai hanya bisa dilaporkan pada hari alat diterima, sekali per sewa.
+  bool canReportMismatchAt(DateTime now) =>
+      status == RentalStatus.pickedUp &&
+      mismatch == MismatchStatus.none &&
+      dateOnly(lastChange.at) == dateOnly(now);
+
+  /// Keberatan hanya untuk denda kerusakan yang belum pernah ditinjau admin.
   bool get canObjectToDamageFee =>
       status == RentalStatus.returned && damageFee > 0 && damageReview == DamageReview.none;
 }
@@ -539,6 +585,7 @@ abstract final class AuditAction {
   static const passwordReset = 'password_reset';
   static const providerStatus = 'provider_status';
   static const damageFeeDecided = 'damage_fee_decided';
+  static const mismatchDecided = 'mismatch_decided';
   static const blacklistAdded = 'blacklist_added';
   static const blacklistRemoved = 'blacklist_removed';
   static const aiFineOpinion = 'ai_fine_opinion';
@@ -554,6 +601,7 @@ abstract final class AuditAction {
     passwordReset => 'Password diganti lewat kode email',
     providerStatus => 'Status penyedia diubah',
     damageFeeDecided => 'Denda kerusakan diputuskan',
+    mismatchDecided => 'Laporan barang tidak sesuai diputuskan',
     blacklistAdded => 'Masuk blacklist',
     blacklistRemoved => 'Blacklist dicabut',
     aiFineOpinion => 'Pendapat AI atas denda diminta',

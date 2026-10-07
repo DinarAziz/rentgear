@@ -400,6 +400,22 @@ class HttpRentGearRepository implements RentGearRepository {
       _action(rentalId, 'payment-review', {'accept': accept, 'reason': reason});
 
   @override
+  Future<Rental> requestReschedule(String rentalId, AppUser actor, DateTime start, DateTime end) =>
+      _action(rentalId, 'reschedule', {'startDate': _day(start), 'endDate': _day(end)});
+
+  @override
+  Future<Rental> reviewReschedule(String rentalId, AppUser actor, {required bool accept, String? reason}) =>
+      _action(rentalId, 'reschedule-review', {'accept': accept, 'reason': reason});
+
+  @override
+  Future<Rental> reportMismatch(String rentalId, AppUser actor, String reason) =>
+      _action(rentalId, 'mismatch', {'reason': reason});
+
+  @override
+  Future<Rental> decideMismatch(String rentalId, AppUser actor, MismatchStatus decision, {String? note}) =>
+      _action(rentalId, 'mismatch-decision', {'decision': decision.name, 'note': note});
+
+  @override
   Future<Rental> handover(String rentalId, AppUser actor) => _action(rentalId, 'handover');
 
   @override

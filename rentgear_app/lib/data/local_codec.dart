@@ -148,6 +148,11 @@ class LocalCodec {
         'damageReview': r.damageReview.name,
         'reviewReason': r.reviewReason,
         'reviewNote': r.reviewNote,
+        'rescheduleStart': _date(r.rescheduleStart),
+        'rescheduleEnd': _date(r.rescheduleEnd),
+        'mismatch': r.mismatch.name,
+        'mismatchReason': r.mismatchReason,
+        'mismatchNote': r.mismatchNote,
         'guarantees': [for (final g in r.guarantees) guarantee(g)],
         'logs': [
           for (final l in r.logs)
@@ -211,7 +216,12 @@ class LocalCodec {
         ..damageNote = j['damageNote'] as String?
         ..damageReview = _byName(DamageReview.values, j['damageReview']) ?? DamageReview.none
         ..reviewReason = j['reviewReason'] as String?
-        ..reviewNote = j['reviewNote'] as String?;
+        ..reviewNote = j['reviewNote'] as String?
+        ..rescheduleStart = _parse(j['rescheduleStart'])
+        ..rescheduleEnd = _parse(j['rescheduleEnd'])
+        ..mismatch = _byName(MismatchStatus.values, j['mismatch']) ?? MismatchStatus.none
+        ..mismatchReason = j['mismatchReason'] as String?
+        ..mismatchNote = j['mismatchNote'] as String?;
 
   static T? _byName<T extends Enum>(List<T> values, Object? name) =>
       name == null ? null : values.byName(name as String);

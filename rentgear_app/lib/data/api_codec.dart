@@ -14,6 +14,8 @@ abstract final class ApiCodec {
     return DateTime(parts[0], parts[1], parts[2]);
   }
 
+  static DateTime? _optionalDate(Object? value) => value == null ? null : _date(value);
+
   static double _double(Object? value) => (value as num?)?.toDouble() ?? 0;
 
   static T? _byName<T extends Enum>(List<T> values, Object? name) =>
@@ -210,6 +212,11 @@ abstract final class ApiCodec {
       ..damageReview = _byName(DamageReview.values, j['damageReview']) ?? DamageReview.none
       ..reviewReason = j['reviewReason'] as String?
       ..reviewNote = j['reviewNote'] as String?
+      ..rescheduleStart = _optionalDate(j['rescheduleStart'])
+      ..rescheduleEnd = _optionalDate(j['rescheduleEnd'])
+      ..mismatch = _byName(MismatchStatus.values, j['mismatchStatus']) ?? MismatchStatus.none
+      ..mismatchReason = j['mismatchReason'] as String?
+      ..mismatchNote = j['mismatchNote'] as String?
       ..review = review == null ? null : ApiCodec.review(review);
   }
 
