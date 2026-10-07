@@ -11,6 +11,7 @@ class ProviderOrdersScreen extends StatelessWidget {
 
   static const _needsAction = {
     RentalStatus.pendingConfirmation,
+    RentalStatus.paymentReview,
     RentalStatus.paid,
     RentalStatus.pickedUp,
     RentalStatus.overdue,

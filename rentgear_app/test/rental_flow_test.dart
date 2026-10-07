@@ -60,6 +60,12 @@ void main() {
     expect(r.status, RentalStatus.awaitingPayment);
 
     r = await repo.submitPayment(r.id, budi, photo);
+    expect(r.status, RentalStatus.paymentReview);
+    // Bukti belum diperiksa, jadi alat belum bisa diserahkan.
+    await expectLater(repo.handover(r.id, sari),
+        throwsA(isA<AppException>().having((e) => e.code, 'code', 'INVALID_STATE')));
+    r = await repo.reviewPayment(r.id, sari, accept: true);
+    expect(r.status, RentalStatus.paid);
     r = await repo.handover(r.id, sari);
     expect(r.status, RentalStatus.pickedUp);
     expect(r.guarantees.single.status, GuaranteeStatus.held);
@@ -71,11 +77,40 @@ void main() {
     expect(r.logs.map((l) => l.to), [
       RentalStatus.pendingConfirmation,
       RentalStatus.awaitingPayment,
+      RentalStatus.paymentReview,
       RentalStatus.paid,
       RentalStatus.pickedUp,
       RentalStatus.returned,
       RentalStatus.completed,
     ]);
+  });
+
+  test('a rejected transfer proof goes back to the renter, who can upload again', () async {
+    final rina = await repo.login('rina@rentgear.id', 'password');
+    final dewi = await repo.login('dewi@rentgear.id', 'password'); // pemilik toko lain
+    const id = 'r-2'; // seed: Tenda Dome milik Arjuna Outdoor, menunggu pembayaran
+
+    var r = await repo.submitPayment(id, rina, photo);
+    expect(r.status, RentalStatus.paymentReview);
+    expect(r.paymentRejection, isNull);
+
+    // Hanya toko pemilik pesanan yang memeriksa, dan penolakan wajib beralasan.
+    await expectLater(repo.reviewPayment(id, dewi, accept: true),
+        throwsA(isA<AppException>().having((e) => e.code, 'code', 'FORBIDDEN')));
+    await expectLater(repo.reviewPayment(id, sari, accept: false, reason: '  '),
+        throwsA(isA<AppException>().having((e) => e.code, 'code', 'VALIDATION')));
+
+    r = await repo.reviewPayment(id, sari, accept: false, reason: 'Nominal kurang');
+    expect(r.status, RentalStatus.awaitingPayment);
+    expect(r.paymentRejection, 'Bukti transfer ditolak: Nominal kurang');
+    // Tidak ada bukti yang menunggu, jadi tidak ada yang bisa diterima.
+    await expectLater(repo.reviewPayment(id, sari, accept: true),
+        throwsA(isA<AppException>().having((e) => e.code, 'code', 'INVALID_TRANSITION')));
+
+    r = await repo.submitPayment(id, rina, photo);
+    expect(r.paymentRejection, isNull);
+    r = await repo.reviewPayment(id, sari, accept: true);
+    expect(r.status, RentalStatus.paid);
   });
 
   test('booking without guarantee is refused', () async {

@@ -122,6 +122,16 @@ class RentalController extends Controller
         return $this->present($this->flow->submitPayment($id, $request->user(), $request->file('proof')));
     }
 
+    public function paymentReview(Request $request, string $id): JsonResponse
+    {
+        $data = $request->validate(
+            ['accept' => 'required|boolean', 'reason' => 'nullable|required_if:accept,false|string|max:255'],
+            ['reason.required_if' => 'Alasan penolakan wajib diisi.'],
+        );
+
+        return $this->present($this->flow->reviewPayment($id, $request->user(), (bool) $data['accept'], $data['reason'] ?? null));
+    }
+
     public function conditionPhoto(Request $request, string $id): JsonResponse
     {
         $data = $request->validate([

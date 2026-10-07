@@ -256,6 +256,7 @@ class Equipment {
 enum RentalStatus {
   pendingConfirmation('Menunggu konfirmasi'),
   awaitingPayment('Menunggu pembayaran'),
+  paymentReview('Pembayaran diperiksa'),
   paid('Siap diambil'),
   pickedUp('Sedang disewa'),
   overdue('Terlambat'),
@@ -391,6 +392,10 @@ class Rental {
       finePolicy.lateFee(pricePerDay: pricePerDaySnapshot, qty: qty, days: lateDaysAt(at));
 
   /// Keberatan hanya untuk denda kerusakan yang belum pernah ditinjau admin.
+  /// Catatan penolakan bukti transfer terakhir, selama penyewa belum mengunggah bukti baru.
+  String? get paymentRejection =>
+      status == RentalStatus.awaitingPayment && logs.last.from == RentalStatus.paymentReview ? logs.last.note : null;
+
   bool get canObjectToDamageFee =>
       status == RentalStatus.returned && damageFee > 0 && damageReview == DamageReview.none;
 }

@@ -21,8 +21,12 @@ class RentalFlowTest extends ApiTestCase
         $this->postJson("/api/v1/rentals/$id/confirm")->assertJsonPath('data.status', 'awaitingPayment');
 
         $this->as('budi')->post("/api/v1/rentals/$id/payment", ['proof' => $this->photo()], ['Accept' => 'application/json'])
-            ->assertOk()->assertJsonPath('data.status', 'paid')->assertJsonPath('data.hasPaymentProof', true);
+            ->assertOk()->assertJsonPath('data.status', 'paymentReview')->assertJsonPath('data.hasPaymentProof', true);
         Storage::disk('local')->assertExists("payments/$id.jpg");
+
+        // Bukti belum diperiksa, jadi alat belum bisa diserahkan.
+        $this->assertApiError($this->as('sari')->postJson("/api/v1/rentals/$id/handover"), 'INVALID_STATE', 409);
+        $this->postJson("/api/v1/rentals/$id/payment-review", ['accept' => true])->assertJsonPath('data.status', 'paid');
 
         $this->as('sari')->postJson("/api/v1/rentals/$id/handover")
             ->assertJsonPath('data.status', 'pickedUp')->assertJsonPath('data.guarantees.0.status', 'held');
@@ -33,11 +37,34 @@ class RentalFlowTest extends ApiTestCase
         $this->assertSame('completed', $done['status']);
         $this->assertSame('returned', $done['guarantees'][0]['status']);
         $this->assertSame(
-            ['pendingConfirmation', 'awaitingPayment', 'paid', 'pickedUp', 'returned', 'completed'],
+            ['pendingConfirmation', 'awaitingPayment', 'paymentReview', 'paid', 'pickedUp', 'returned', 'completed'],
             array_column($done['logs'], 'to'),
         );
         $this->assertSame('Arjuna Outdoor', $done['logs'][1]['actorName']);
         $this->assertSame('Budi Santoso', $done['logs'][2]['actorName']);
+    }
+
+    public function test_a_rejected_payment_proof_goes_back_to_the_renter_who_can_upload_again(): void
+    {
+        $pay = fn () => $this->as('rina')->post('/api/v1/rentals/r-2/payment', ['proof' => $this->photo()], ['Accept' => 'application/json']);
+        $pay()->assertJsonPath('data.status', 'paymentReview');
+
+        // Hanya toko pemilik pesanan yang memeriksa, dan penolakan wajib beralasan.
+        $this->assertApiError($this->postJson('/api/v1/rentals/r-2/payment-review', ['accept' => true]), 'FORBIDDEN', 403);
+        $this->assertApiError($this->as('dewi')->postJson('/api/v1/rentals/r-2/payment-review', ['accept' => true]), 'FORBIDDEN', 403);
+        $this->assertApiError($this->as('sari')->postJson('/api/v1/rentals/r-2/payment-review', ['accept' => false]), 'VALIDATION', 422);
+
+        $rejected = $this->postJson('/api/v1/rentals/r-2/payment-review', ['accept' => false, 'reason' => 'Nominal kurang'])
+            ->assertJsonPath('data.status', 'awaitingPayment')->json('data');
+        $this->assertSame('Bukti transfer ditolak: Nominal kurang', end($rejected['logs'])['note']);
+        // Tidak ada bukti yang menunggu, jadi tidak ada yang bisa diterima.
+        $this->assertApiError($this->postJson('/api/v1/rentals/r-2/payment-review', ['accept' => true]), 'INVALID_TRANSITION', 409);
+        // Stok tetap terkunci selama menunggu bukti baru.
+        $this->getJson("/api/v1/equipment/e-dome4/availability?start={$this->day(4)}&end={$this->day(4)}")
+            ->assertJsonPath('data.available', 0);
+
+        $pay()->assertJsonPath('data.status', 'paymentReview');
+        $this->as('sari')->postJson('/api/v1/rentals/r-2/payment-review', ['accept' => true])->assertJsonPath('data.status', 'paid');
     }
 
     public function test_rejected_guarantee_blocks_confirmation_and_the_booking_can_be_rejected(): void

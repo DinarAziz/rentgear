@@ -122,10 +122,21 @@ final class RentalFlowService
     {
         return $this->on($rentalId, function (Rental $r) use ($actor, $proof) {
             $this->requireRenter($r, $actor);
-            // Sama dengan aplikasi lokal: bukti langsung dianggap sah. Pencocokan
-            // nominal menunggu payment gateway.
-            $this->transition($r, RentalStatus::Paid, $actor, 'Bukti transfer diunggah');
+            $this->transition($r, RentalStatus::PaymentReview, $actor, 'Bukti transfer diunggah');
             $r->update(['payment_proof_path' => $proof->storeAs('payments', "{$r->id}.".$proof->extension(), 'local')]);
+        });
+    }
+
+    /** Penyedia memeriksa bukti transfer. Bila ditolak, penyewa kembali ke "Menunggu pembayaran" dan bisa mengunggah ulang. */
+    public function reviewPayment(string $rentalId, User $actor, bool $accept, ?string $reason): Rental
+    {
+        return $this->on($rentalId, function (Rental $r) use ($actor, $accept, $reason) {
+            $this->requireOwner($r, $actor);
+            if ($accept) {
+                $this->transition($r, RentalStatus::Paid, $actor, 'Bukti transfer diterima');
+            } else {
+                $this->transition($r, RentalStatus::AwaitingPayment, $actor, "Bukti transfer ditolak: $reason");
+            }
         });
     }
 

@@ -10,7 +10,9 @@ final class RentalStateMachine
 {
     private const ALLOWED = [
         'pendingConfirmation' => ['awaitingPayment', 'rejected', 'expired', 'cancelled'],
-        'awaitingPayment' => ['paid', 'cancelled'],
+        'awaitingPayment' => ['paymentReview', 'cancelled'],
+        // Penyedia memeriksa bukti transfer: diterima, atau dikembalikan supaya penyewa mengunggah ulang.
+        'paymentReview' => ['paid', 'awaitingPayment'],
         'paid' => ['pickedUp', 'noShow'],
         'pickedUp' => ['returned', 'overdue'],
         'overdue' => ['returned'],
@@ -23,7 +25,8 @@ final class RentalStateMachine
         'awaitingPayment' => ['provider'],
         'rejected' => ['provider'],
         'cancelled' => ['customer', null], // null: tidak dibayar 24 jam
-        'paid' => ['customer'],
+        'paymentReview' => ['customer'],
+        'paid' => ['provider'],
         'pickedUp' => ['provider'],
         'returned' => ['provider'],
         'completed' => ['provider', 'admin'],
@@ -34,7 +37,7 @@ final class RentalStateMachine
     ];
 
     /** Status yang ikut mengunci stok pada perhitungan ALG-2. */
-    public const LOCKING = ['pendingConfirmation', 'awaitingPayment', 'paid', 'pickedUp', 'overdue', 'returned'];
+    public const LOCKING = ['pendingConfirmation', 'awaitingPayment', 'paymentReview', 'paid', 'pickedUp', 'overdue', 'returned'];
 
     public static function canTransition(RentalStatus $from, RentalStatus $to): bool
     {

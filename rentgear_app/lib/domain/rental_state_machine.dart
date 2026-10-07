@@ -10,7 +10,9 @@ class RentalStateMachine {
       RentalStatus.expired,
       RentalStatus.cancelled,
     },
-    RentalStatus.awaitingPayment: {RentalStatus.paid, RentalStatus.cancelled},
+    RentalStatus.awaitingPayment: {RentalStatus.paymentReview, RentalStatus.cancelled},
+    // Penyedia memeriksa bukti transfer: diterima, atau dikembalikan supaya penyewa mengunggah ulang.
+    RentalStatus.paymentReview: {RentalStatus.paid, RentalStatus.awaitingPayment},
     RentalStatus.paid: {RentalStatus.pickedUp, RentalStatus.noShow},
     RentalStatus.pickedUp: {RentalStatus.returned, RentalStatus.overdue},
     RentalStatus.overdue: {RentalStatus.returned},
@@ -23,7 +25,8 @@ class RentalStateMachine {
     RentalStatus.awaitingPayment: {UserRole.provider},
     RentalStatus.rejected: {UserRole.provider},
     RentalStatus.cancelled: {UserRole.customer, null}, // null: tidak dibayar 24 jam
-    RentalStatus.paid: {UserRole.customer},
+    RentalStatus.paymentReview: {UserRole.customer},
+    RentalStatus.paid: {UserRole.provider},
     RentalStatus.pickedUp: {UserRole.provider},
     RentalStatus.returned: {UserRole.provider},
     RentalStatus.completed: {UserRole.provider, UserRole.admin},
@@ -37,6 +40,7 @@ class RentalStateMachine {
   static const lockingStatuses = {
     RentalStatus.pendingConfirmation,
     RentalStatus.awaitingPayment,
+    RentalStatus.paymentReview,
     RentalStatus.paid,
     RentalStatus.pickedUp,
     RentalStatus.overdue,

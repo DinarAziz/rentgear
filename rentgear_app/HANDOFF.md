@@ -1100,6 +1100,29 @@ motion graphics. "ppt" means the web deck in `../presentasi/`; the old `.pptx` w
 - 7 October: the title slide has a QR code to `https://rentgear.serverbaik.my.id` (inline SVG, made with the Python
   package `segno` in a throwaway venv). It was decoded from a screenshot of the slide; not scanned with a phone camera.
 
+## Transfer proof is checked by the store, 7 October 2026
+
+The user uploaded a proof and saw the rental jump straight to "Siap diambil". Before this change any photo counted
+as payment. The user said to build the check and to commit and deploy later.
+
+- New status `paymentReview` ("Pembayaran diperiksa") between `awaitingPayment` and `paid`, in both state machines.
+  It locks stock. The renter's upload moves the rental there; only the store moves it on.
+- Repository operation `reviewPayment(rentalId, actor, accept:, reason:)`; server route
+  `POST /api/v1/rentals/{id}/payment-review`. Accept gives `paid`. Reject needs a reason and sends the rental back
+  to `awaitingPayment` with the note "Bukti transfer ditolak: <alasan>"; `Rental.paymentRejection` reads that note
+  from the last status log, so there is no new column and no migration.
+- Screens: the store gets "Terima pembayaran" and "Tolak bukti" on the rental; the renter sees that the proof is
+  being checked, or the rejection reason above the upload button. The store's "needs action" tab and the admin's
+  active count include the new status.
+- Chosen here, not by the user (the question went unanswered): the renter may upload again without limit. There is
+  no timer on `paymentReview`, so a store that never answers leaves the rental waiting; the 24-hour cancel still
+  applies only to `awaitingPayment` and restarts after a rejection.
+- Tests: 108 app and 142 server pass, `flutter analyze` is clean. The deck shows 250, its status-flow slide has the
+  new step, and the per-group test counts on the testing slide were recounted from the test files (they had drifted).
+- Not committed, not deployed, and not seen on a device or in a browser; the screens are covered by two widget
+  tests only. An older APK or web build against the new server would show an unknown status, so deploy the server,
+  the web build and the APK together.
+
 ## Resume here (state saved 2026-10-06)
 
 Everything through stage 6 of `../docs/08-RENCANA-KERJA.md` is built, plus registration with email and password and

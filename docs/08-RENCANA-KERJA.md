@@ -86,7 +86,13 @@ Hosting publik (4 Oktober 2026): server dan situs berjalan di HP Redmi pemilik p
 Database di sana SQLite. Situs publik sekarang memakai server, jadi semua perangkat melihat data yang sama. Password
 admin di server publik berbeda dari akun demo lain. Cara memasang dan memperbarui ada di `rentgear_api/README.md`.
 
-Belum dibuat: panel admin berbasis web dan pencocokan nominal bukti transfer.
+Bukti transfer diperiksa penyedia (7 Oktober 2026). Setelah penyewa mengunggah bukti, status menjadi "Pembayaran
+diperiksa". Penyedia menerimanya, lalu status menjadi "Siap diambil", atau menolaknya dengan alasan, lalu penyewa
+kembali ke "Menunggu pembayaran" dan bisa mengunggah bukti baru. Jumlah unggah ulang tidak dibatasi. Stok tetap
+terkunci selama menunggu. Sebelumnya bukti apa pun langsung dianggap sah.
+
+Belum dibuat: panel admin berbasis web dan pencocokan nominal bukti transfer secara otomatis. Penyedia mencocokkan
+nominal sendiri dengan mutasi rekeningnya.
 
 ### Toko contoh tambahan (5 Oktober 2026)
 

@@ -370,18 +370,19 @@ function bangunAlur() {
   const status = [
     ['Menunggu konfirmasi', 'penyewa mengirim booking'],
     ['Menunggu pembayaran', 'penyedia mengonfirmasi'],
-    ['Siap diambil', 'penyewa mengunggah bukti transfer'],
+    ['Pembayaran diperiksa', 'penyewa mengunggah bukti transfer'],
+    ['Siap diambil', 'penyedia menerima bukti'],
     ['Sedang disewa', 'serah terima alat'],
     ['Sudah dikembalikan', 'penyedia menerima alat'],
     ['Selesai', 'jaminan dikembalikan'],
   ];
-  const titik = [[110, 480], [374, 410], [638, 370], [902, 290], [1166, 240], [1430, 150]];
+  const titik = [[110, 480], [330, 425], [550, 385], [770, 335], [990, 280], [1210, 220], [1430, 150]];
   const TINGGI = 760;
   // Syarat jaminan menempel di tengah perpindahan dari status ke-n ke status berikutnya.
   const syarat = [
     [0, 'Semua jaminan sudah dinyatakan valid'],
-    [2, 'Dokumen asli dipegang penyedia'],
-    [4, 'Dokumen asli kembali ke penyewa'],
+    [3, 'Dokumen asli dipegang penyedia'],
+    [5, 'Dokumen asli kembali ke penyewa'],
   ].map(([n, teks]) => ({
     x: (titik[n][0] + titik[n + 1][0]) / 2,
     y: (titik[n][1] + titik[n + 1][1]) / 2,
@@ -390,7 +391,7 @@ function bangunAlur() {
 
   const svg = buat('svg', {}, wadah);
   buat('path', { class: 'cabang', 'data-step': 2, d: 'M110 480 L110 680' }, svg);
-  buat('path', { class: 'cabang', 'data-step': 2, d: 'M374 410 C420 510 480 570 480 680' }, svg);
+  buat('path', { class: 'cabang', 'data-step': 2, d: 'M330 425 C376 520 436 575 436 680' }, svg);
   syarat.forEach(({ x, y }) => {
     buat('path', { class: 'cabang', 'data-step': 1, d: `M${x} ${y + 8} L${x} ${y + 76}` }, svg);
   });
@@ -401,7 +402,7 @@ function bangunAlur() {
     ...titik.map(([x, y], n) => `<div class="st" style="left:${x - 115}px;bottom:${TINGGI - y + 30}px"><b>${status[n][0]}</b><span>${status[n][1]}</span></div>`),
     ...syarat.map(({ x, y, teks }) => `<div class="syarat" data-step="1" style="left:${x - 120}px;top:${y + 78}px">${teks}</div>`),
     '<div class="gagal" data-step="2" style="left:62px;top:690px">Ditolak</div>',
-    '<div class="gagal" data-step="2" style="left:404px;top:690px">Dibatalkan</div>',
+    '<div class="gagal" data-step="2" style="left:360px;top:690px">Dibatalkan</div>',
     '<i class="jalan"></i>',
   ];
   wadah.insertAdjacentHTML('beforeend', html.join(''));
@@ -759,7 +760,7 @@ const adegan = {
 
   pengujian: {
     masuk(tl) {
-      tl.add(hitung($('#skor'), 0, 246, 1.6, 'power1.out'), 0.6)
+      tl.add(hitung($('#skor'), 0, 250, 1.6, 'power1.out'), 0.6)
         .from('.titik-uji i', { autoAlpha: 0, scale: 0.4, duration: d(0.35), ease: 'back.out(2)', stagger: 0.012 }, 0.6)
         .call(() => ledakkan($('#skor'), 110), null, 2.2)
         .fromTo('#skor', { scale: 1 }, { scale: 1.14, duration: d(0.22), ease: 'power2.out', yoyo: true, repeat: 1, transformOrigin: 'left bottom' }, 2.2);

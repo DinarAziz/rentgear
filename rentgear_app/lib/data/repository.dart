@@ -68,6 +68,9 @@ abstract class RentGearRepository {
   Future<Rental> cancelBooking(String rentalId, AppUser actor, String reason);
   Future<Rental> submitPayment(String rentalId, AppUser actor, Uint8List proof);
 
+  /// Penyedia memeriksa bukti transfer. Bila ditolak, [reason] wajib dan penyewa bisa mengunggah bukti baru.
+  Future<Rental> reviewPayment(String rentalId, AppUser actor, {required bool accept, String? reason});
+
   /// Penyedia menambah satu foto kondisi alat. Foto tidak bisa dihapus.
   Future<Rental> addConditionPhoto(String rentalId, AppUser actor, ConditionPhase phase, Uint8List photo);
 

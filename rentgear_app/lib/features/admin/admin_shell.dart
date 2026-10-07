@@ -98,6 +98,7 @@ class AdminDashboardScreen extends StatelessWidget {
             (r) => const {
               RentalStatus.pendingConfirmation,
               RentalStatus.awaitingPayment,
+              RentalStatus.paymentReview,
               RentalStatus.paid,
               RentalStatus.pickedUp,
               RentalStatus.overdue,

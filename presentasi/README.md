@@ -84,5 +84,5 @@ terbit.
   sebagai rencana, karena pengirim email belum dipasang dan kodenya belum sampai ke siapa pun.
 - Di slide "Mencegah booking dobel", langkah terakhir (dua orang memesan pada detik yang sama) hanya berlaku di mode
   server: server mengunci baris alat selama booking diproses.
-- Angka pengujian (246 tes: 105 aplikasi dan 141 server, hasil uji di Redmi 17 dan browser) berasal dari `../rentgear_app/HANDOFF.md`. Kalau jumlah tes
+- Angka pengujian (250 tes: 108 aplikasi dan 142 server, hasil uji di Redmi 17 dan browser) berasal dari `../rentgear_app/HANDOFF.md`. Kalau jumlah tes
   berubah, perbarui slide Pengujian dan angka di `adegan.pengujian` pada `deck.js`.

@@ -12,7 +12,9 @@ class RentalStateMachineTest extends TestCase
     {
         $steps = [
             [RentalStatus::PendingConfirmation, RentalStatus::AwaitingPayment, 'provider', ['verified']],
-            [RentalStatus::AwaitingPayment, RentalStatus::Paid, 'customer', ['verified']],
+            [RentalStatus::AwaitingPayment, RentalStatus::PaymentReview, 'customer', ['verified']],
+            [RentalStatus::PaymentReview, RentalStatus::Paid, 'provider', ['verified']],
+            [RentalStatus::PaymentReview, RentalStatus::AwaitingPayment, 'provider', ['verified']],
             [RentalStatus::Paid, RentalStatus::PickedUp, 'provider', ['held']],
             [RentalStatus::PickedUp, RentalStatus::Returned, 'provider', ['held']],
             [RentalStatus::Returned, RentalStatus::Completed, 'provider', ['returned']],
@@ -55,7 +57,7 @@ class RentalStateMachineTest extends TestCase
     public function test_locking_statuses_match_the_flutter_app(): void
     {
         $this->assertSame(
-            ['pendingConfirmation', 'awaitingPayment', 'paid', 'pickedUp', 'overdue', 'returned'],
+            ['pendingConfirmation', 'awaitingPayment', 'paymentReview', 'paid', 'pickedUp', 'overdue', 'returned'],
             RentalStateMachine::LOCKING,
         );
     }

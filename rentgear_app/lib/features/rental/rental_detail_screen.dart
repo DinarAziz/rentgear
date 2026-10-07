@@ -151,9 +151,16 @@ class _Body extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   const Text(
-                    'Lalu unggah foto bukti transfer lewat tombol di bawah.',
+                    'Lalu unggah foto bukti transfer lewat tombol di bawah. Penyedia memeriksanya sebelum alat bisa diambil.',
                     style: TextStyle(fontSize: 13, color: Colors.black54),
                   ),
+                  if (r.paymentRejection != null) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      '${r.paymentRejection}. Unggah bukti yang benar.',
+                      style: TextStyle(fontSize: 13, color: Colors.red.shade800),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -161,6 +168,16 @@ class _Body extends StatelessWidget {
         ],
         if (r.paymentProof != null) ...[
           const SectionTitle('Bukti transfer'),
+          if (r.status == RentalStatus.paymentReview)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                user.role == UserRole.provider
+                    ? 'Cocokkan nominal dan rekening tujuan dengan mutasi rekening Anda, lalu terima atau tolak.'
+                    : 'Penyedia sedang memeriksa bukti transfer ini.',
+                style: const TextStyle(fontSize: 13, color: Colors.black54),
+              ),
+            ),
           Card(
             clipBehavior: Clip.antiAlias,
             child: ListTile(
@@ -313,7 +330,7 @@ class _GuaranteeHint extends StatelessWidget {
         provider
             ? 'Periksa foto & nomor setiap jaminan, lalu tandai Valid atau Tolak.'
             : 'Penyedia sedang memeriksa jaminan Anda.',
-      RentalStatus.awaitingPayment || RentalStatus.paid =>
+      RentalStatus.awaitingPayment || RentalStatus.paymentReview || RentalStatus.paid =>
         provider
             ? 'Terima dokumen asli dan cocokkan dengan foto saat penyewa mengambil alat.'
             : 'Bawa dokumen asli saat mengambil alat.',
@@ -361,7 +378,7 @@ class _ActionBar extends StatelessWidget {
               if (bytes == null || !context.mounted) return;
               await act(
                 () => state.repo.submitPayment(r.id, user, bytes),
-                'Bukti transfer terkirim.',
+                'Bukti transfer terkirim. Menunggu diperiksa penyedia.',
               );
             },
           ),
@@ -523,6 +540,45 @@ class _ActionBar extends StatelessWidget {
                   );
                 },
                 child: const Text('Tolak booking'),
+              ),
+            );
+        case RentalStatus.paymentReview:
+          actions
+            ..add(
+              FilledButton.icon(
+                icon: const Icon(Icons.verified_outlined),
+                label: const Text('Terima pembayaran'),
+                onPressed: () async {
+                  final ok = await confirmDialog(
+                    context,
+                    title: 'Terima pembayaran',
+                    message:
+                        'Pastikan ${rupiah(r.grandTotal)} sudah masuk ke rekening Anda. Setelah diterima, alat siap diambil penyewa.',
+                    confirmLabel: 'Sudah masuk',
+                  );
+                  if (!ok || !context.mounted) return;
+                  await act(
+                    () => state.repo.reviewPayment(r.id, user, accept: true),
+                    'Pembayaran diterima. Alat siap diambil.',
+                  );
+                },
+              ),
+            )
+            ..add(
+              OutlinedButton(
+                onPressed: () async {
+                  final reason = await askReason(
+                    context,
+                    title: 'Tolak bukti transfer',
+                    hint: 'Misalnya: nominal kurang, atau uang belum masuk',
+                  );
+                  if (reason == null || !context.mounted) return;
+                  await act(
+                    () => state.repo.reviewPayment(r.id, user, accept: false, reason: reason),
+                    'Bukti ditolak. Penyewa diminta mengunggah ulang.',
+                  );
+                },
+                child: const Text('Tolak bukti'),
               ),
             );
         case RentalStatus.paid:

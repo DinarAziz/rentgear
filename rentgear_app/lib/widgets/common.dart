@@ -148,7 +148,8 @@ class EquipmentThumb extends StatelessWidget {
 
 Color statusColor(RentalStatus s) => switch (s) {
   RentalStatus.pendingConfirmation ||
-  RentalStatus.awaitingPayment => Colors.orange.shade800,
+  RentalStatus.awaitingPayment ||
+  RentalStatus.paymentReview => Colors.orange.shade800,
   RentalStatus.paid => Colors.blue.shade700,
   RentalStatus.pickedUp => AppColors.forest,
   RentalStatus.overdue || RentalStatus.disputed => Colors.red.shade700,

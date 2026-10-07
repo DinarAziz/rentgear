@@ -54,6 +54,7 @@ Route::prefix('v1')->group(function () {
         Route::post('rentals/{id}/reject', [RentalController::class, 'reject']);
         Route::post('rentals/{id}/cancel', [RentalController::class, 'cancel']);
         Route::post('rentals/{id}/payment', [RentalController::class, 'payment']);
+        Route::post('rentals/{id}/payment-review', [RentalController::class, 'paymentReview']);
         Route::post('rentals/{id}/condition-photos', [RentalController::class, 'conditionPhoto']);
         Route::post('rentals/{id}/handover', [RentalController::class, 'handover']);
         Route::post('rentals/{id}/return', [RentalController::class, 'receiveReturn']);

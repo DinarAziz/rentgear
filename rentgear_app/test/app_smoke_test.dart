@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -7,6 +9,7 @@ import 'package:rentgear/app.dart';
 import 'package:rentgear/core/location.dart';
 import 'package:rentgear/core/maps.dart';
 import 'package:rentgear/data/local_repository.dart';
+import 'package:rentgear/domain/models.dart';
 import 'package:rentgear/state/app_state.dart';
 
 Future<LocationResult> noLocation({required bool ask}) async =>
@@ -16,7 +19,26 @@ Future<LocationResult> noLocation({required bool ask}) async =>
 Future<LocationResult> inLumajang({required bool ask}) async =>
     (status: LocationStatus.found, point: const LatLng(-8.13, 113.22));
 
-Future<void> pumpApp(WidgetTester tester, {LocationFinder findLocation = noLocation}) async {
+/// PNG 1x1 piksel, supaya pratinjau bukti transfer bisa digambar di tes.
+final onePixelPng = Uint8List.fromList(const [
+  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01,
+  0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x44, 0x41,
+  0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00, 0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49,
+  0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+]);
+
+/// Repository yang transaksi INV-DEMO-0002 (Rina, toko Arjuna) sudah diunggahi bukti transfer.
+Future<LocalRentGearRepository> repoWithProofWaiting(WidgetTester tester) async {
+  final repo = LocalRentGearRepository.open(latency: Duration.zero);
+  await tester.runAsync(() async {
+    final rina = await repo.login('rina@rentgear.id', 'password');
+    await repo.submitPayment('r-2', rina, onePixelPng);
+    await repo.logout();
+  });
+  return repo;
+}
+
+Future<void> pumpApp(WidgetTester tester, {LocationFinder findLocation = noLocation, LocalRentGearRepository? repo}) async {
   await initializeDateFormatting('id_ID');
   tester.view.physicalSize = const Size(1170, 2532);
   tester.view.devicePixelRatio = 3;
@@ -25,7 +47,7 @@ Future<void> pumpApp(WidgetTester tester, {LocationFinder findLocation = noLocat
   debugTileProvider = BlankTileProvider();
   await tester.pumpWidget(ChangeNotifierProvider(
     create: (_) =>
-        AppState(LocalRentGearRepository.open(latency: Duration.zero), findLocation: findLocation),
+        AppState(repo ?? LocalRentGearRepository.open(latency: Duration.zero), findLocation: findLocation),
     child: const RentGearApp(),
   ));
 }
@@ -319,6 +341,47 @@ void main() {
     expect(find.text('Belum ada foto.'), findsNWidgets(2));
     // Hanya tahap serah terima yang bisa diisi sekarang.
     expect(find.text('Tambah'), findsOneWidget);
+  });
+
+  testWidgets('the store accepts a transfer proof and the rental becomes ready for pickup', (tester) async {
+    final repo = await repoWithProofWaiting(tester);
+    await pumpApp(tester, repo: repo);
+    await tester.tap(find.text('Penyedia · Arjuna'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('INV-DEMO-0002'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pembayaran diperiksa'), findsWidgets);
+    // Alat belum bisa diserahkan sebelum bukti diperiksa.
+    expect(find.text('Terima jaminan & serahkan alat'), findsNothing);
+
+    await tester.tap(find.text('Terima pembayaran'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sudah masuk'));
+    await tester.pumpAndSettle();
+    expect(find.text('Siap diambil'), findsWidgets);
+    expect(find.text('Terima jaminan & serahkan alat'), findsOneWidget);
+  });
+
+  testWidgets('the store rejects a transfer proof with a reason and the renter may upload again', (tester) async {
+    final repo = await repoWithProofWaiting(tester);
+    await pumpApp(tester, repo: repo);
+    await tester.tap(find.text('Penyedia · Arjuna'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('INV-DEMO-0002'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Tolak bukti'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Nominal kurang');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kirim'));
+    await tester.pumpAndSettle();
+    expect(find.text('Menunggu pembayaran'), findsWidgets);
+    expect(find.text('Terima pembayaran'), findsNothing);
+
+    final rental = await tester.runAsync(() => repo.rental('r-2'));
+    expect(rental!.status, RentalStatus.awaitingPayment);
+    expect(rental.paymentRejection, 'Bukti transfer ditolak: Nominal kurang');
   });
 
   testWidgets('the store edits its fine rules and the renter sees them', (tester) async {

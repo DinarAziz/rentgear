@@ -194,6 +194,8 @@ dengan tes Dart. `tests/Feature` menguji tiap alur lewat HTTP.
 
 - Nomor dokumen jaminan disimpan terenkripsi (`number_enc`); API hanya mengirim versi tersamar.
 - Foto jaminan dan bukti transfer ada di disk privat dan hanya bisa diunduh penyewa, pemilik toko, atau admin.
+- Bukti transfer tidak langsung sah. `POST rentals/{id}/payment` membawa transaksi ke `paymentReview`, lalu pemilik toko
+  memanggil `POST rentals/{id}/payment-review` dengan `accept` (dan `reason` bila menolak).
 - Foto alat bersifat publik lewat `/api/v1/media/equipment/...`.
 - Harga, deposit, dan denda dihitung server. Tanggal kembali untuk denda memakai jam server (Asia/Jakarta).
 - Kunci API (Gemini) hanya ada di `.env`, yang diabaikan git. Jangan menulisnya di kode, di `.env.example`, atau di

@@ -7,6 +7,7 @@ enum RentalStatus: string
 {
     case PendingConfirmation = 'pendingConfirmation';
     case AwaitingPayment = 'awaitingPayment';
+    case PaymentReview = 'paymentReview';
     case Paid = 'paid';
     case PickedUp = 'pickedUp';
     case Overdue = 'overdue';
@@ -23,6 +24,7 @@ enum RentalStatus: string
         return match ($this) {
             self::PendingConfirmation => 'Menunggu konfirmasi',
             self::AwaitingPayment => 'Menunggu pembayaran',
+            self::PaymentReview => 'Pembayaran diperiksa',
             self::Paid => 'Siap diambil',
             self::PickedUp => 'Sedang disewa',
             self::Overdue => 'Terlambat',

@@ -396,6 +396,10 @@ class HttpRentGearRepository implements RentGearRepository {
       _rental(await _multipart('rentals/$rentalId/payment', fields: const {}, files: {'proof': proof}));
 
   @override
+  Future<Rental> reviewPayment(String rentalId, AppUser actor, {required bool accept, String? reason}) =>
+      _action(rentalId, 'payment-review', {'accept': accept, 'reason': reason});
+
+  @override
   Future<Rental> handover(String rentalId, AppUser actor) => _action(rentalId, 'handover');
 
   @override

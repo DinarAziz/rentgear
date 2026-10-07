@@ -658,10 +658,23 @@ class LocalRentGearRepository implements RentGearRepository {
       _mutate(() {
         final r = _rentalById(rentalId);
         _requireRenter(r, actor);
-        // Versi mock: bukti langsung dianggap sah. Di server, bukti masuk
-        // tabel payments berstatus pending dan diverifikasi dulu.
-        _transition(r, RentalStatus.paid, actor, note: 'Bukti transfer diunggah');
+        _transition(r, RentalStatus.paymentReview, actor, note: 'Bukti transfer diunggah');
         r.paymentProof = proof;
+        return r;
+      });
+
+  @override
+  Future<Rental> reviewPayment(String rentalId, AppUser actor, {required bool accept, String? reason}) =>
+      _mutate(() {
+        final r = _rentalById(rentalId);
+        _requireOwner(r, actor);
+        if (accept) {
+          _transition(r, RentalStatus.paid, actor, note: 'Bukti transfer diterima');
+          return r;
+        }
+        final why = reason?.trim() ?? '';
+        if (why.isEmpty) throw const AppException('VALIDATION', 'Alasan penolakan wajib diisi.');
+        _transition(r, RentalStatus.awaitingPayment, actor, note: 'Bukti transfer ditolak: $why');
         return r;
       });
 
