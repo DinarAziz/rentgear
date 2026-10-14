@@ -1347,3 +1347,24 @@ The user created `rentgearofficial@gmail.com` and a Gmail App Password and wrote
 The user paused here ("save kita lanjutkan nanti") before presenting on the afternoon of 14 October. Open: check the
 test mail in the rentgearofficial inbox, a full reset with a real code, a new App Password after the presentation,
 deploy of the 8 October rental rules (needs `php artisan migrate --force` on the phone), and a push when asked.
+
+## PowerPoint copy of the deck and password toggle on login, 14 October 2026
+
+The lecturer asked for the deck as a PowerPoint file for submission; the user still presents from the web deck.
+
+- `../RentGear-presentasi.pptx` (30 slides, about 11 MB) is made from screenshots of the web deck at 1920x1080, one
+  picture per step. Each click in PowerPoint fades in the next step, the same steps as the web deck, and slides change
+  with a fade. The motion itself (3D mountain, flips, diagrams that move) is not in the file. Speaker notes hold each
+  slide's text.
+- The promo video slide is left out at the user's request, so the file has 30 slides and the counter reads "/ 30".
+  The start hint on slide 1 is hidden.
+- To rebuild after changing the deck: `node presentasi/ppt/capture.js <abs path to presentasi> <shots dir>`, then
+  `node presentasi/ppt/build.js <shots dir> <out.pptx>`. Both need `puppeteer-core`, `pptxgenjs`, `sharp` and `jszip`
+  installed next to them. The old `../rentgear-presentasi-final.pptx.pptx` from 27 September is out of date.
+- Login screen: an eye button now shows or hides the typed password, like the register and forgot-password screens.
+- Deployed to the public site at 16:16 as web build `main.dart.7a0ca88915.js`. It was built from `3a417f6` (the code
+  the server runs) plus this login change and the current `web/` icons, so the 8 October rental rules are still not
+  live. Only the site files were replaced (`/sdcard/rg/login.sh`); the API and `/presentasi/` were left alone, and the
+  old site is in `/root/rentgear/backup/site-<time>.tgz`. The APK on the Redmi was not rebuilt.
+- Wireless adb worked only after restarting the adb server outside the sandbox (`adb kill-server`), phone at
+  172.20.10.7 on the hotspot.
