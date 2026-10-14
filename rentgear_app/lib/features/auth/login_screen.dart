@@ -24,6 +24,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
+  bool _showPassword = false;
   bool _loading = false;
   String? _error;
 
@@ -159,11 +160,16 @@ class _LoginScreenState extends State<LoginScreen> {
       const SizedBox(height: 12),
       TextField(
         controller: _password,
-        obscureText: true,
+        obscureText: !_showPassword,
         textInputAction: TextInputAction.go,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           labelText: 'Password',
-          prefixIcon: Icon(Icons.lock_outline),
+          prefixIcon: const Icon(Icons.lock_outline),
+          suffixIcon: IconButton(
+            tooltip: _showPassword ? 'Sembunyikan password' : 'Lihat password',
+            icon: Icon(_showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+            onPressed: () => setState(() => _showPassword = !_showPassword),
+          ),
         ),
         onSubmitted: (_) => _login(),
       ),
