@@ -1329,3 +1329,17 @@ The user said the website still showed the default Flutter logo.
   and the title and description in the live `index.html` were patched with `sed`. The old file is in
   `/root/rentgear/backup/index-sebelum-ikon.html`. The public files match the repo by checksum.
 - A browser that visited before may keep the old favicon until its cache is cleared.
+
+## Mail sender on the public server, 14 October 2026
+
+The user created `rentgearofficial@gmail.com` and a Gmail App Password and wrote the `MAIL_*` lines into
+`.env.redmi` themselves (opened in VS Code; Claude did not read the file).
+
+- `.env.redmi` was pushed to `/sdcard/rg/env` and installed by `/sdcard/rg/mail.sh`; the old server `.env` is in
+  `/root/rentgear/backup/env-sebelum-mail`.
+- The App Password was written with spaces, which Laravel's dotenv parser refuses ("unexpected whitespace"), so the
+  API's `.env` was briefly invalid. `/sdcard/rg/mail2.sh` removed the spaces on the server. The error message echoed
+  the password into `/sdcard/rg/mail.log` and into the chat; the log was deleted. The user was told to replace the
+  App Password after the presentation. `.env.redmi` on the Mac still has the spaces (editing it was not allowed).
+- `php artisan rentgear:mail-test rentgearofficial@gmail.com` reported the mail sent over SMTP at 14:46.
+  Not yet checked: that it arrived, and a full reset with a real code from the app.
