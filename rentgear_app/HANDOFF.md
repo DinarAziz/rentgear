@@ -1343,3 +1343,7 @@ The user created `rentgearofficial@gmail.com` and a Gmail App Password and wrote
   App Password after the presentation. The user then removed the spaces in `.env.redmi` on the Mac too.
 - `php artisan rentgear:mail-test rentgearofficial@gmail.com` reported the mail sent over SMTP at 14:46.
   Not yet checked: that it arrived, and a full reset with a real code from the app.
+
+The user paused here ("save kita lanjutkan nanti") before presenting on the afternoon of 14 October. Open: check the
+test mail in the rentgearofficial inbox, a full reset with a real code, a new App Password after the presentation,
+deploy of the 8 October rental rules (needs `php artisan migrate --force` on the phone), and a push when asked.
