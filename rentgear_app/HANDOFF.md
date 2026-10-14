@@ -1368,3 +1368,8 @@ The lecturer asked for the deck as a PowerPoint file for submission; the user st
   old site is in `/root/rentgear/backup/site-<time>.tgz`. The APK on the Redmi was not rebuilt.
 - Wireless adb worked only after restarting the adb server outside the sandbox (`adb kill-server`), phone at
   172.20.10.7 on the hotspot.
+
+The user paused here ("save kita lanjut nanti") on 14 October after both commits (`a75a692`, `1d305e9`). Nothing is
+pushed. Open, as before: check the test mail in the rentgearofficial inbox and a full reset with a real code, a new
+Gmail App Password, deploy of the 8 October rental rules (needs `php artisan migrate --force` on the phone, and the
+APK rebuilt so it also gets the password button), and a push when asked.
