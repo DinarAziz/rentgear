@@ -348,7 +348,7 @@ function bangunTahap() {
     ['Analisis', 'Masalah penyewa dan penyedia, peran pengguna, daftar fitur.'],
     ['Perancangan', 'Algoritma, alur status, use case, rancangan database dan API.'],
     ['Implementasi', 'Aplikasi Flutter untuk Android dan web, server Laravel.'],
-    ['Pengujian', 'Tes otomatis dan uji langsung di HP.'],
+    ['Pengujian', 'Tes otomatis dan pengujian langsung di ponsel.'],
   ];
   const titik = [[120, 420], [520, 320], [910, 210], [1300, 100]];
   const jalur = lengkung(titik);
@@ -414,13 +414,13 @@ function bangunKerja() {
   const jalur = ['Penyewa', 'Sistem', 'Penyedia'];
   const langkah = [
     [0, 'Pilih alat dan tanggal sewa'],
-    [1, 'Cek alat kosong di tiap tanggal'],
+    [1, 'Periksa stok di setiap tanggal'],
     [0, 'Isi jaminan, kirim booking'],
     [2, 'Periksa jaminan, konfirmasi'],
     [0, 'Transfer, unggah bukti'],
     [2, 'Terima bukti, serahkan alat'],
     [2, 'Terima alat kembali, isi denda'],
-    [1, 'Potong denda, selesai'],
+    [1, 'Potong denda, sewa selesai'],
   ];
   const LEBAR = 168;
   const TINGGI = 180;
@@ -501,10 +501,10 @@ function bangunGoogle() {
     [1, 2, 'Pengguna memilih akun di layar Google'],
     [2, 1, 'ID token yang ditandatangani Google'],
     [1, 3, 'Kirim ID token ke /auth/google'],
-    [3, 2, 'Minta Google memeriksa token'],
+    [3, 2, 'Meminta Google memverifikasi token'],
     [3, 1, 'Token login RentGear'],
   ];
-  const catatan = ['Server mengecek: token dibuat untuk aplikasi ini, belum kedaluwarsa,', 'dan emailnya terverifikasi. Akun baru menjadi penyewa.'];
+  const catatan = ['Server memeriksa: token dibuat untuk aplikasi ini, belum kedaluwarsa,', 'dan email telah terverifikasi. Akun baru terdaftar sebagai penyewa.'];
   const mata = buat('marker', { id: 'mata-urutan', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto-start-reverse' }, buat('defs', {}, svg));
   buat('path', { d: 'M0 0L10 5L0 10z' }, mata);
   pihak.forEach(([nama, x]) => {
