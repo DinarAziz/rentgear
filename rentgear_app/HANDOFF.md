@@ -1296,3 +1296,18 @@ Other things to know:
   covered by a widget test; the store's approval and the admin's refund are.
 
 The user paused here ("save nanti lanjut").
+
+## Deck on the public server, 14 October 2026
+
+The user asked to put the deck on the Redmi over wireless adb.
+
+- Wireless adb: `adb connect 172.20.10.7:5555` on the phone hotspot. mDNS announced port 46127, which also connected
+  (the same phone); 37117 refused.
+- `presentasi/` (without `README.md`) was zipped to `/sdcard/rg/deck.zip` and unpacked by `/sdcard/rg/deck.sh`
+  (run with `sh /sdcard/rg/run.sh deck`) into `/var/www/rentgear_serverbaik_my_id/presentasi/`. A web deploy uses
+  `unzip -o` into the same root, so it leaves the deck in place.
+- The public address answered 530 at first: Termux had stopped the stack again. `hidup.sh` brought nginx, the tunnel
+  and the API back at 13:46.
+- `https://rentgear.serverbaik.my.id/presentasi/` answers 200, and so do `deck.js`, `promo.mp4`, `three.min.js` and
+  the app screenshots. The deck was not opened in a browser or on a projector after the deploy.
+- The rental rules from 8 October (date change, mismatch report) are still not deployed to the server.
