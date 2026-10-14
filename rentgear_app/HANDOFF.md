@@ -1316,3 +1316,16 @@ The user asked to put the deck on the Redmi over wireless adb.
   and the diagram labels in `deck.js`. Quotes inside the chat illustration on slide 6 were left as chat. All 31
   slides were rendered at 1920x1080 in headless Chrome with every step shown; no text runs off the screen. The new
   deck was deployed to `/presentasi/` at 14:25 and checked from the public address.
+
+## RentGear logo on the website, 14 October 2026
+
+The user said the website still showed the default Flutter logo.
+
+- `web/favicon.png` and the four `web/icons/Icon-*.png` were made from `assets/icon/icon.png` (the app's launcher icon)
+  with `sips`. `web/manifest.json` and `web/index.html` now say "RentGear" with the app's green (#2E6B4F) instead of
+  "rentgear", "A new Flutter project." and Flutter blue.
+- The public site was not rebuilt, because the live `main.dart` predates the 8 October rental rules and the server
+  has not run that migration. Only the icon files and `manifest.json` were copied to the phone (`/sdcard/rg/ikon.sh`),
+  and the title and description in the live `index.html` were patched with `sed`. The old file is in
+  `/root/rentgear/backup/index-sebelum-ikon.html`. The public files match the repo by checksum.
+- A browser that visited before may keep the old favicon until its cache is cleared.
