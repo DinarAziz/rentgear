@@ -1311,3 +1311,8 @@ The user asked to put the deck on the Redmi over wireless adb.
 - `https://rentgear.serverbaik.my.id/presentasi/` answers 200, and so do `deck.js`, `promo.mp4`, `three.min.js` and
   the app screenshots. The deck was not opened in a browser or on a projector after the deploy.
 - The rental rules from 8 October (date change, mismatch report) are still not deployed to the server.
+- Later the same day the user asked for more formal language in the deck before presenting that afternoon. "Intinya:"
+  became "Ringkasan:", and casual words (bisa, dipakai, lewat, HP, dobel, tiap) were rewritten across `index.html`
+  and the diagram labels in `deck.js`. Quotes inside the chat illustration on slide 6 were left as chat. All 31
+  slides were rendered at 1920x1080 in headless Chrome with every step shown; no text runs off the screen. The new
+  deck was deployed to `/presentasi/` at 14:25 and checked from the public address.
