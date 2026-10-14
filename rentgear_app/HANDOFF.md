@@ -1340,6 +1340,6 @@ The user created `rentgearofficial@gmail.com` and a Gmail App Password and wrote
 - The App Password was written with spaces, which Laravel's dotenv parser refuses ("unexpected whitespace"), so the
   API's `.env` was briefly invalid. `/sdcard/rg/mail2.sh` removed the spaces on the server. The error message echoed
   the password into `/sdcard/rg/mail.log` and into the chat; the log was deleted. The user was told to replace the
-  App Password after the presentation. `.env.redmi` on the Mac still has the spaces (editing it was not allowed).
+  App Password after the presentation. The user then removed the spaces in `.env.redmi` on the Mac too.
 - `php artisan rentgear:mail-test rentgearofficial@gmail.com` reported the mail sent over SMTP at 14:46.
   Not yet checked: that it arrived, and a full reset with a real code from the app.
