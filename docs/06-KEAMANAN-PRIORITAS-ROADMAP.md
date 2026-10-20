@@ -181,7 +181,7 @@ lengkap yang mulus daripada sepuluh fitur setengah jadi.
 | S-05 | Penjelasan skor detail (breakdown s1–s6 per kandidat) |
 | S-06 | Konfigurasi bobot scoring di panel admin |
 | S-07 | Dispute workflow lengkap |
-| S-08 | Diskon durasi (sewa ≥3 hari) |
+| S-08 | Diskon durasi (sewa ≥3 dan ≥7 hari), diatur toko, batas platform 50% — selesai 21 Oktober 2026 |
 | S-09 | Export laporan transaksi (CSV/PDF) |
 | S-10 | Audit log viewer |
 | S-11 | Notifikasi email |

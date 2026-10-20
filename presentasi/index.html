@@ -698,24 +698,47 @@
     </div>
   </section>
 
+  <section class="slide" id="aturan" data-pos="Pos 8" data-label="Implementasi">
+    <h2 class="head">Aturan sewa dan diskon</h2>
+    <ul class="terbaru dua">
+      <li data-in>
+        <svg viewBox="0 0 68 68" class="ikon"><path d="M10 34V12h22l26 26-22 22z"/><circle cx="22" cy="24" r="4"/><path d="M30 46l14-14"/></svg>
+        <div><h3>Diskon sewa lama</h3><p>Toko mengatur diskon untuk sewa 3 dan 7 hari, paling tinggi 50%. Diskon memotong biaya sewa, bukan deposit, dan dikunci saat booking.</p></div>
+      </li>
+      <li data-step="1">
+        <svg viewBox="0 0 68 68" class="ikon"><rect x="8" y="14" width="52" height="44" rx="6"/><path d="M8 28h52M22 8v12M46 8v12M24 44h20M38 38l6 6-6 6"/></svg>
+        <div><h3>Ganti tanggal</h3><p>Penyewa mengajukan sebelum alat diambil, toko menyetujui. Lama sewa tetap, sehingga tidak menjadi perpanjangan.</p></div>
+      </li>
+      <li data-step="2">
+        <svg viewBox="0 0 68 68" class="ikon"><path d="M34 8l26 46H8z"/><path d="M34 26v14M34 46v2"/></svg>
+        <div><h3>Barang tidak sesuai</h3><p>Dilaporkan pada hari serah terima. Admin memutuskan: dana dikembalikan, alat ditukar, atau laporan ditolak.</p></div>
+      </li>
+      <li data-step="3">
+        <svg viewBox="0 0 68 68" class="ikon"><circle cx="34" cy="34" r="24"/><path d="M34 20v15l10 6"/></svg>
+        <div><h3>Batal sebelum bayar</h3><p>Pembatalan hanya sebelum transfer. Aturan ini ditampilkan pada layar booking dan kartu cara bayar.</p></div>
+      </li>
+    </ul>
+    <p class="inti" data-step="3"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Diskon diatur toko karena toko yang menanggungnya; platform hanya memasang batas.</p>
+  </section>
+
   <!-- Pos 9 -->
   <section class="slide" id="pengujian" data-pos="Pos 9" data-label="Pengujian">
     <h2 class="head">Pengujian</h2>
     <div class="uji">
       <div data-in>
-        <p class="skor"><b class="angka" id="skor">271</b><span>dari 271</span></p>
-        <p class="teks">skenario tes otomatis lulus: 119 di aplikasi, 152 di server.</p>
+        <p class="skor"><b class="angka" id="skor">282</b><span>dari 282</span></p>
+        <p class="teks">skenario tes otomatis lulus: 124 di aplikasi, 158 di server.</p>
         <p class="kecil jelas">Tes otomatis adalah kode yang menjalankan aplikasi, kemudian memeriksa hasilnya secara mandiri. Dijalankan dengan <code>flutter test</code> dan <code>php artisan test</code>.</p>
       </div>
       <div class="narasi">
         <div data-hide-at="1">
           <ul class="kelompok" data-in>
-            <li><h3>Aplikasi: sewa, stok, jaminan, foto kondisi <b>30</b></h3><div class="titik-uji" data-n="30"></div><p>Contoh: pemesanan ganda ditolak, booking tanpa jaminan ditolak, bukti transfer yang ditolak dapat diunggah ulang.</p></li>
+            <li><h3>Aplikasi: sewa, stok, jaminan, diskon <b>46</b></h3><div class="titik-uji" data-n="46"></div><p>Contoh: pemesanan ganda ditolak, booking tanpa jaminan ditolak, bukti transfer yang ditolak dapat diunggah ulang.</p></li>
             <li><h3>Aplikasi: denda, blacklist, toko, peta, audit <b>35</b></h3><div class="titik-uji" data-n="35"></div><p>Contoh: keterlambatan 3 hari dikenai 1,5 kali tarif, rating toko merupakan rata-rata ulasan.</p></li>
             <li><h3>Aplikasi: layar dan format <b>28</b></h3><div class="titik-uji" data-n="28"></div><p>Contoh: halaman awal menampilkan toko, formulir pendaftaran menolak email yang tidak valid.</p></li>
             <li><h3>Aplikasi: sambungan ke server <b>15</b></h3><div class="titik-uji" data-n="15"></div><p>Contoh: galat dari server ditampilkan dengan pesan yang sama, dan server yang mati tidak membuat aplikasi macet.</p></li>
-            <li><h3>Server: aturan inti <b>26</b></h3><div class="titik-uji" data-n="26"></div><p>Kasus yang sama dengan tes aplikasi untuk membuktikan bahwa kedua sisi menghasilkan angka yang sama.</p></li>
-            <li><h3>Server: API <b>116</b></h3><div class="titik-uji" data-n="116"></div><p>Contoh: unit terakhir hanya diberikan kepada satu booking, email yang sudah terdaftar ditolak, foto KTP tidak dapat dibuka pihak lain.</p></li>
+            <li><h3>Server: aturan inti <b>30</b></h3><div class="titik-uji" data-n="30"></div><p>Kasus yang sama dengan tes aplikasi untuk membuktikan bahwa kedua sisi menghasilkan angka yang sama.</p></li>
+            <li><h3>Server: API <b>128</b></h3><div class="titik-uji" data-n="128"></div><p>Contoh: unit terakhir hanya diberikan kepada satu booking, email yang sudah terdaftar ditolak, foto KTP tidak dapat dibuka pihak lain.</p></li>
           </ul>
         </div>
         <table class="tabel-uji" data-step="1">

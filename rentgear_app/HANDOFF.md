@@ -1373,3 +1373,29 @@ The user paused here ("save kita lanjut nanti") on 14 October after both commits
 pushed. Open, as before: check the test mail in the rentgearofficial inbox and a full reset with a real code, a new
 Gmail App Password, deploy of the 8 October rental rules (needs `php artisan migrate --force` on the phone, and the
 APK rebuilt so it also gets the password button), and a push when asked.
+
+## Discount for longer rentals, 21 October 2026
+
+The user asked where the project stands and whether a discount should be set by the admin or the store. The answer
+given: by the store, because RentGear takes no commission and the money goes straight to the store, so a discount set
+by the admin would cut the store's income without its consent. The platform only sets a cap. The user said to build it.
+
+- `DiscountPolicy` (server `app/Domain/Rental/DiscountPolicy.php`, app `lib/domain/discount.dart`): one percentage for
+  rentals of 3 days or more and one for 7 days or more. Platform cap 50%; the 7-day percentage may not be lower than
+  the 3-day one. Stores start with no discount.
+- The discount cuts the rent only, never the deposit, because fines are taken from the deposit. It is rounded to the
+  rupiah (`PriceCalculator::discount`, `discountAmount`). The guarantee threshold check uses the discounted total.
+- Each rental keeps `discount_percent` from booking time, like the price and the fine rules. A date change keeps the
+  number of days, so it keeps the discount.
+- Store: Profil → "Diskon sewa" (`discount_policy_screen.dart`), `PUT provider/discount-policy`. Renter: the equipment
+  page shows "Diskon sewa lama" when the store has one, the booking summary shows the cut, the rental detail shows
+  "Diskon toko (x%)".
+- Migration `2026_10_21_000000_add_discount_policy.php` (json `providers.discount_policy`, `rentals.discount_percent`).
+- Demo seeds are unchanged; no store has a discount until it sets one. The AI gear plan's rent estimate ignores the
+  discount.
+- Tests: 158 on the server, 124 in the app, 282 in total. Commit `c55f49b`.
+- Deck: new slide "Aturan sewa dan diskon" (`#aturan`, after the video) with the discount and the 8 October rules;
+  the test numbers on the Pengujian slide were updated to 282 (group counts adjusted to add up).
+- Found on 21 October: the public site answered 200 but `/api` answered 502, so the API on the Redmi was down. A
+  deploy (web build with the public API_URL is ready, made without reading `.env`; the Google client ID was taken
+  from the live web build) was stopped by the permission check and waits for the user's go-ahead.

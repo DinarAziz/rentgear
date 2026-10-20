@@ -17,11 +17,11 @@ Clicker presentasi mengirim Page Down dan Page Up, jadi bisa langsung dipakai. A
 
 ## Isi
 
-31 slide dengan urutan sidang: judul, filosofi logo, latar belakang (data usaha sewa alat, kasus dari berita, kasus
+32 slide dengan urutan sidang: judul, filosofi logo, latar belakang (data usaha sewa alat, kasus dari berita, kasus
 dari jurnal, ringkasan masalah), rumusan masalah, tujuan dan manfaat, inovasi, batasan masalah, metode, perancangan
 (alur bisnis, peran, alur kerja aplikasi, alur status, flowchart booking, jenis algoritma yang dipakai, algoritma
 ketersediaan, susunan aplikasi, tech stack, ERD, struktur database), keamanan (pengamanan data, enkripsi password,
-login dengan Google), implementasi (screenshot dan video), pengujian, kesimpulan dan rencana lanjutan, sumber data,
+login dengan Google), implementasi (screenshot, video, aturan sewa dan diskon), pengujian, kesimpulan dan rencana lanjutan, sumber data,
 lalu tanya jawab. Nama bagian (misalnya "Latar belakang") tertulis di atas judul tiap slide; teksnya diambil dari
 `data-label`. Latar gunung ikut naik dari basecamp saat senja sampai puncak saat matahari
 terbit.
@@ -101,5 +101,5 @@ terbit.
   sebagai rencana, karena pengirim email belum dipasang dan kodenya belum sampai ke siapa pun.
 - Di slide "Mencegah booking dobel", langkah terakhir (dua orang memesan pada detik yang sama) hanya berlaku di mode
   server: server mengunci baris alat selama booking diproses.
-- Angka pengujian (271 tes: 119 aplikasi dan 152 server, hasil uji di Redmi 17 dan browser) berasal dari `../rentgear_app/HANDOFF.md`. Kalau jumlah tes
+- Angka pengujian (282 tes: 124 aplikasi dan 158 server, hasil uji di Redmi 17 dan browser) berasal dari `../rentgear_app/HANDOFF.md`. Kalau jumlah tes
   berubah, perbarui slide Pengujian dan angka di `adegan.pengujian` pada `deck.js`.

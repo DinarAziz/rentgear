@@ -702,6 +702,10 @@ ol, ul { list-style: none; }
 .terbaru svg { width: 84px; height: 84px; }
 .terbaru h3 { font-family: var(--display); font-weight: 800; font-size: 54px; line-height: 1; margin-bottom: 10px; }
 .terbaru p { font-size: 31px; line-height: 1.36; }
+.terbaru.dua { grid-template-columns: 1fr 1fr; column-gap: 64px; max-width: 1640px; }
+.terbaru.dua li { padding: 26px 0; border-bottom: 1.5px solid var(--line); }
+.terbaru.dua h3 { font-size: 44px; }
+.terbaru.dua p { font-size: 27px; }
 
 /* ---------- alur bisnis ---------- */
 
