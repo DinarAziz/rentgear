@@ -79,7 +79,8 @@ final class BookingService
             }
 
             $days = AvailabilityService::inclusiveDays($start, $end);
-            $total = PriceCalculator::grandTotal($equipment->price_per_day, $equipment->deposit_amount, $qty, $days);
+            $discount = $provider->discountPolicy()->percentFor($days);
+            $total = PriceCalculator::grandTotal($equipment->price_per_day, $equipment->deposit_amount, $qty, $days, $discount);
             $policy = new GuaranteePolicy($provider->accepted_types, $provider->base_required,
                 $provider->high_value_threshold, $provider->high_value_required);
             $errors = $policy->validate(array_map(fn ($g) => [
@@ -104,6 +105,7 @@ final class BookingService
                 'deposit_snapshot' => $equipment->deposit_amount,
                 // Aturan denda ikut dikunci, seperti harga dan deposit.
                 'fine_policy' => $provider->finePolicy()->toArray(),
+                'discount_percent' => $discount,
                 'status' => 'pendingConfirmation',
             ]);
             foreach ($guarantees as $g) {

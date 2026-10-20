@@ -36,6 +36,7 @@ Route::prefix('v1')->group(function () {
         Route::put('provider/guarantee-policy', [ProviderController::class, 'guaranteePolicy']);
         Route::put('provider/location', [ProviderController::class, 'location']);
         Route::put('provider/fine-policy', [ProviderController::class, 'finePolicy']);
+        Route::put('provider/discount-policy', [ProviderController::class, 'discountPolicy']);
 
         Route::get('providers', [StoreController::class, 'index']);
         Route::get('providers/{id}', [StoreController::class, 'show']);

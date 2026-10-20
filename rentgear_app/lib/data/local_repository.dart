@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import '../core/format.dart';
 import '../domain/availability.dart';
 import '../domain/equipment_rules.dart';
+import '../domain/discount.dart';
 import '../domain/fines.dart';
 import '../domain/guarantee.dart';
 import '../domain/models.dart';
@@ -129,6 +130,7 @@ class LocalRentGearRepository implements RentGearRepository {
             'status': p.status.name,
             'policy': codec.policy(p.policy),
             'finePolicy': p.finePolicy.toJson(),
+            'discountPolicy': p.discountPolicy.toJson(),
             'latitude': p.latitude,
             'longitude': p.longitude,
           },
@@ -170,6 +172,7 @@ class LocalRentGearRepository implements RentGearRepository {
         ..status = ProviderStatus.values.byName(saved['status'] as String)
         ..policy = codec.policyFrom(saved['policy'] as Map<String, dynamic>)
         ..finePolicy = FinePolicy.fromJson(saved['finePolicy'] as Map<String, dynamic>?)
+        ..discountPolicy = DiscountPolicy.fromJson(saved['discountPolicy'] as Map<String, dynamic>?)
         // Data lama belum menyimpan lokasi; pakai titik bawaan toko.
         ..latitude = (saved['latitude'] as num?)?.toDouble() ?? p.latitude
         ..longitude = (saved['longitude'] as num?)?.toDouble() ?? p.longitude;
@@ -567,7 +570,9 @@ class LocalRentGearRepository implements RentGearRepository {
         }
 
         final days = inclusiveDays(start, end);
-        final total = e.pricePerDay * req.qty * days + e.depositAmount * req.qty;
+        final discountPercent = p.discountPolicy.percentFor(days);
+        final rent = e.pricePerDay * req.qty * days;
+        final total = rent - discountAmount(rent, discountPercent) + e.depositAmount * req.qty;
         final errors = p.policy.validate(req.guarantees,
             rentalValue: total);
         if (errors.isNotEmpty) {
@@ -612,7 +617,8 @@ class LocalRentGearRepository implements RentGearRepository {
           ],
         )
           // Aturan denda ikut dikunci, seperti harga dan deposit.
-          ..finePolicy = p.finePolicy;
+          ..finePolicy = p.finePolicy
+          ..discountPercent = discountPercent;
         _rentals.add(rental);
         _idempotency[req.idempotencyKey] = id;
         return rental;
@@ -1025,6 +1031,19 @@ class LocalRentGearRepository implements RentGearRepository {
         final error = policy.error;
         if (error != null) throw AppException('VALIDATION', error);
         p.finePolicy = policy;
+        return p;
+      });
+
+  @override
+  Future<ProviderProfile> updateDiscountPolicy(String providerId, DiscountPolicy policy, AppUser actor) =>
+      _mutate(() {
+        final p = _providerById(providerId);
+        if (actor.providerId != p.id) {
+          throw const AppException('FORBIDDEN', 'Bukan toko Anda.');
+        }
+        final error = policy.error;
+        if (error != null) throw AppException('VALIDATION', error);
+        p.discountPolicy = policy;
         return p;
       });
 

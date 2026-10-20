@@ -1,3 +1,4 @@
+import '../domain/discount.dart';
 import '../domain/fines.dart';
 import '../domain/guarantee.dart';
 import '../domain/models.dart';
@@ -112,6 +113,7 @@ abstract final class ApiCodec {
     )
       ..rating = _double(j['rating'])
       ..finePolicy = FinePolicy.fromJson(j['finePolicy'] as Map<String, dynamic>?)
+      ..discountPolicy = DiscountPolicy.fromJson(j['discountPolicy'] as Map<String, dynamic>?)
       ..reviewCount = j['reviewCount'] as int
       ..followerCount = j['followerCount'] as int;
   }
@@ -209,6 +211,7 @@ abstract final class ApiCodec {
       ..damageFee = _double(j['damageFee'])
       ..damageNote = j['damageNote'] as String?
       ..finePolicy = FinePolicy.fromJson(j['finePolicy'] as Map<String, dynamic>?)
+      ..discountPercent = (j['discountPercent'] as num?)?.toInt() ?? 0
       ..damageReview = _byName(DamageReview.values, j['damageReview']) ?? DamageReview.none
       ..reviewReason = j['reviewReason'] as String?
       ..reviewNote = j['reviewNote'] as String?

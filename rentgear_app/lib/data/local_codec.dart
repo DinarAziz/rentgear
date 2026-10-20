@@ -136,6 +136,7 @@ class LocalCodec {
         'cancelReason': r.cancelReason,
         'paymentProof': r.paymentProof == null ? null : savePhoto('${r.id}-payment', r.paymentProof!),
         'finePolicy': r.finePolicy.toJson(),
+        'discountPercent': r.discountPercent,
         'conditionPhotos': [
           for (final (i, p) in r.conditionPhotos.indexed)
             {'phase': p.phase.name, 'at': _date(p.at), 'file': savePhoto('${r.id}-condition-$i', p.bytes)},
@@ -202,6 +203,7 @@ class LocalCodec {
         ..cancelReason = j['cancelReason'] as String?
         ..paymentProof = loadPhoto(j['paymentProof'] as String?)
         ..finePolicy = FinePolicy.fromJson(j['finePolicy'] as Map<String, dynamic>?)
+        ..discountPercent = (j['discountPercent'] as num?)?.toInt() ?? 0
         // Foto yang berkasnya hilang dilewati; data lama belum punya kunci ini.
         ..conditionPhotos.addAll([
           for (final p in ((j['conditionPhotos'] as List?) ?? const []).cast<Map<String, dynamic>>())

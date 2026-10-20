@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Domain\Fines\FinePolicy;
 use App\Domain\Guarantee\GuaranteePolicy;
+use App\Domain\Rental\DiscountPolicy;
 use App\Domain\Guarantee\GuaranteeType;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\Present;
@@ -106,6 +107,20 @@ class ProviderController extends Controller
             throw new ApiException('VALIDATION', $error);
         }
         $provider->update(['fine_policy' => $policy->toArray()]);
+
+        return ApiResponse::ok(Present::providerById($provider->id));
+    }
+
+    /** Penyedia mengatur diskon durasi tokonya. Berlaku untuk booking berikutnya, bukan sewa yang sudah dipesan. */
+    public function discountPolicy(Request $request): JsonResponse
+    {
+        $provider = $this->ownStore($request);
+        $data = $request->validate(['shortPercent' => 'required|integer', 'longPercent' => 'required|integer']);
+        $policy = DiscountPolicy::fromArray($data);
+        if (($error = $policy->error()) !== null) {
+            throw new ApiException('VALIDATION', $error);
+        }
+        $provider->update(['discount_policy' => $policy->toArray()]);
 
         return ApiResponse::ok(Present::providerById($provider->id));
     }

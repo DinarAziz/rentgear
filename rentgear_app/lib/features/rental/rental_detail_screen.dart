@@ -130,7 +130,9 @@ class _Body extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             child: Column(
               children: [
-                InfoRow('Sewa', rupiah(r.subtotal)),
+                InfoRow('Sewa', rupiah(r.rentGross)),
+                if (r.discount > 0)
+                  InfoRow('Diskon toko (${r.discountPercent}%)', '− ${rupiah(r.discount)}'),
                 InfoRow('Deposit', rupiah(r.depositTotal)),
                 const Divider(),
                 InfoRow('Total', rupiah(r.grandTotal), bold: true),

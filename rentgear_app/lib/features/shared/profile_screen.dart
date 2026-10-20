@@ -3,10 +3,12 @@ import 'package:provider/provider.dart';
 
 import '../../core/responsive.dart';
 import '../../core/theme.dart';
+import '../../domain/discount.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
 import '../../widgets/common.dart';
 import '../customer/provider_store_screen.dart';
+import '../provider/discount_policy_screen.dart';
 import '../provider/fine_policy_screen.dart';
 import '../provider/store_location_screen.dart';
 import 'photo_credits_screen.dart';
@@ -93,6 +95,19 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute<void>(builder: (_) => FinePolicyScreen(provider: p)),
+                      ),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.sell_outlined),
+                      title: const Text('Diskon sewa'),
+                      subtitle: Text(p.discountPolicy.isEmpty
+                          ? 'Belum ada diskon'
+                          : '${p.discountPolicy.shortPercent}% / ${p.discountPolicy.longPercent}% '
+                              'untuk ${DiscountPolicy.shortDays} / ${DiscountPolicy.longDays} hari'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(builder: (_) => DiscountPolicyScreen(provider: p)),
                       ),
                     ),
                     ListTile(

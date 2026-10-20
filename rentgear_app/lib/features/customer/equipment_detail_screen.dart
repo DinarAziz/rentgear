@@ -10,6 +10,7 @@ import '../../state/app_state.dart';
 import '../../widgets/blacklist_notice.dart';
 import '../../widgets/common.dart';
 import '../../widgets/photo_widgets.dart';
+import '../provider/discount_policy_screen.dart';
 import '../rental/fine_widgets.dart';
 import 'booking_screen.dart';
 import 'provider_store_screen.dart';
@@ -152,6 +153,10 @@ class EquipmentDetailScreen extends StatelessWidget {
             ),
             const SectionTitle('Jaminan yang diterima'),
             _GuaranteeInfo(policy: p.policy),
+            if (!p.discountPolicy.isEmpty) ...[
+              const SectionTitle('Diskon sewa lama'),
+              DiscountPolicyInfo(policy: p.discountPolicy),
+            ],
             const SectionTitle('Aturan denda toko'),
             FinePolicyInfo(policy: p.finePolicy),
           ];

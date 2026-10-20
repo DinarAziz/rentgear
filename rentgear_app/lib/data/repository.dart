@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../domain/discount.dart';
 import '../domain/fines.dart';
 import '../domain/guarantee.dart';
 import '../domain/models.dart';
@@ -117,6 +118,10 @@ abstract class RentGearRepository {
   /// Penyedia mengatur aturan denda tokonya. Berlaku untuk booking berikutnya,
   /// bukan sewa yang sudah dipesan.
   Future<ProviderProfile> updateFinePolicy(String providerId, FinePolicy policy, AppUser actor);
+
+  /// Penyedia mengatur diskon durasi tokonya, dalam batas platform. Berlaku
+  /// untuk booking berikutnya, bukan sewa yang sudah dipesan.
+  Future<ProviderProfile> updateDiscountPolicy(String providerId, DiscountPolicy policy, AppUser actor);
 
   /// Penyedia memindahkan titik tokonya di peta.
   Future<ProviderProfile> updateProviderLocation(

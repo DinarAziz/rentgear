@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/format.dart';
 import '../../core/responsive.dart';
 import '../../domain/availability.dart';
+import '../../domain/discount.dart';
 import '../../domain/guarantee.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
@@ -57,9 +58,11 @@ class _BookingScreenState extends State<BookingScreen> {
   String get renterName => context.read<AppState>().currentUser.name;
 
   int get _days => _range == null ? 0 : inclusiveDays(_range!.start, _range!.end);
-  double get _subtotal => e.pricePerDay * _qty * _days;
+  double get _rent => e.pricePerDay * _qty * _days;
+  int get _discountPercent => widget.provider.discountPolicy.percentFor(_days);
+  double get _discount => discountAmount(_rent, _discountPercent);
   double get _deposit => e.depositAmount * _qty;
-  double get _total => _subtotal + _deposit;
+  double get _total => _rent - _discount + _deposit;
   int get _required => policy.requiredCount(_total);
 
   /// Batas atas jumlah unit yang boleh dipilih.
@@ -346,7 +349,9 @@ class _BookingScreenState extends State<BookingScreen> {
                         style: TextStyle(color: Colors.black54))
                     : Column(
                         children: [
-                          InfoRow('Sewa ${rupiah(e.pricePerDay)} × $_qty unit × $_days hari', rupiah(_subtotal)),
+                          InfoRow('Sewa ${rupiah(e.pricePerDay)} × $_qty unit × $_days hari', rupiah(_rent)),
+                          if (_discount > 0)
+                            InfoRow('Diskon sewa $_days hari ($_discountPercent%)', '− ${rupiah(_discount)}'),
                           InfoRow('Deposit (uang jaminan)', rupiah(_deposit)),
                           const Divider(),
                           InfoRow('Total dibayar', rupiah(_total), bold: true),

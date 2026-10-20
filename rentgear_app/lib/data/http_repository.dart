@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../domain/discount.dart';
 import '../domain/fines.dart';
 import '../domain/guarantee.dart';
 import '../domain/models.dart';
@@ -446,6 +447,10 @@ class HttpRentGearRepository implements RentGearRepository {
   @override
   Future<ProviderProfile> updateFinePolicy(String providerId, FinePolicy policy, AppUser actor) async =>
       _provider(await _send('PUT', 'provider/fine-policy', policy.toJson()));
+
+  @override
+  Future<ProviderProfile> updateDiscountPolicy(String providerId, DiscountPolicy policy, AppUser actor) async =>
+      _provider(await _send('PUT', 'provider/discount-policy', policy.toJson()));
 
   @override
   Future<ProviderProfile> updateProviderLocation(String providerId, AppUser actor,

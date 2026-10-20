@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'availability.dart';
+import 'discount.dart';
 import 'fines.dart';
 import 'guarantee.dart';
 
@@ -108,6 +109,9 @@ class ProviderProfile {
 
   /// Aturan denda toko. Berlaku untuk booking berikutnya.
   FinePolicy finePolicy = const FinePolicy();
+
+  /// Diskon durasi toko. Berlaku untuk booking berikutnya.
+  DiscountPolicy discountPolicy = const DiscountPolicy();
 
   /// Lokasi toko di peta. Penyedia bisa memindahkannya.
   double latitude;
@@ -395,6 +399,9 @@ class Rental {
   /// Aturan denda toko saat booking dibuat, dikunci seperti harga dan deposit.
   FinePolicy finePolicy = const FinePolicy();
 
+  /// Persen diskon durasi saat booking dibuat, dikunci seperti harga.
+  int discountPercent = 0;
+
   /// Foto kondisi alat saat diserahkan dan saat kembali, urut waktu.
   /// Hanya ditambah, tidak pernah dihapus.
   final List<ConditionPhoto> conditionPhotos = [];
@@ -406,7 +413,12 @@ class Rental {
 
   /// Mis. "Sepatu Hiking × 1 (ukuran 42)".
   String get itemLabel => '$equipmentName × $qty${size == null ? '' : ' (ukuran $size)'}';
-  double get subtotal => pricePerDaySnapshot * qty * durationDays;
+  /// Biaya sewa sebelum diskon.
+  double get rentGross => pricePerDaySnapshot * qty * durationDays;
+  double get discount => discountAmount(rentGross, discountPercent);
+
+  /// Biaya sewa setelah diskon.
+  double get subtotal => rentGross - discount;
   double get depositTotal => depositSnapshot * qty;
   double get grandTotal => subtotal + depositTotal;
 
