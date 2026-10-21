@@ -1436,3 +1436,10 @@ presentation the same day.
 - Found while recording: the guarantee form still said "Harus sama dengan nama akun penyewa" under the holder's name,
   though that rule was dropped on 8 October. It now says "Sesuai nama yang tertulis di dokumen". 124 app tests pass and
   `flutter analyze` is clean. The public site still shows the old text until the next web deploy.
+- Same day, the user found the Damayanti voice stiff and chose ElevenLabs, female voice. The user made a free
+  account and put the API key in `demo-video/elevenlabs.key` (git-ignored, never printed). Free accounts cannot use
+  Voice Library voices over the API (402 `paid_plan_required`), so the native Indonesian voices (Arunika, Nilasari,
+  Kennisa) are out unless the user adds $5 of credits. Six samples of built-in voices were sent; the user asked for a
+  recommendation and got Matilda on `eleven_multilingual_v2` (consistent across 30 separate requests, stitched with
+  previous/next text). The video is now 2:49. The library voice Arunika was added to the user's ElevenLabs account
+  as "RentGear 1" before the 402; it is still there.

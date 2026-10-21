@@ -1,7 +1,13 @@
 {
   "voice": {
-    "name": "Damayanti",
-    "rate": 172
+    "engine": "elevenlabs",
+    "model": "eleven_multilingual_v2",
+    "voiceId": "XrExE9yKIg1WjnnlVkGX",
+    "mac": {
+      "name": "Damayanti",
+      "rate": 172
+    },
+    "voiceName": "Matilda"
   },
   "scenes": [
     {
@@ -9,8 +15,7 @@
       "kind": "intro",
       "sentences": [
         {
-          "text": "Ini RentGear, aplikasi sewa alat hiking dan camping dari banyak toko dalam satu tempat.",
-          "speak": "Ini Rent Gear, aplikasi sewa alat hiking dan camping dari banyak toko, dalam satu tempat."
+          "text": "Ini RentGear, aplikasi sewa alat hiking dan camping dari banyak toko dalam satu tempat."
         },
         {
           "text": "Video ini menunjukkan cara memakainya, dari toko mengatur diskon sampai transaksi selesai."
@@ -137,7 +142,6 @@
       "sentences": [
         {
           "text": "Tekan Sewa Sekarang, lalu pilih tanggal. Aplikasi langsung mengecek stok pada tanggal itu.",
-          "speak": "Tekan Sewa Sekarang, lalu pilih tanggal. Aplikasi langsung mengecek stok pada tanggal itu.",
           "step": 0,
           "at": "sewa-form"
         },
@@ -153,7 +157,6 @@
         },
         {
           "text": "Setujui ketentuan sewa, lalu kirim booking.",
-          "speak": "Setujui ketentuan sewa, lalu kirim bukingnya.",
           "step": 4,
           "at": "sewa-setuju"
         }
@@ -189,7 +192,6 @@
         },
         {
           "text": "Toko memeriksa foto dan nomor jaminan, menandainya valid, lalu mengonfirmasi booking.",
-          "speak": "Toko memeriksa foto dan nomor jaminan, menandainya valid, lalu mengonfirmasi bukingnya.",
           "step": 2,
           "at": "toko2-valid"
         }
@@ -376,7 +378,6 @@
       "sentences": [
         {
           "text": "Admin mengawasi semuanya dari dashboard di layar lebar.",
-          "speak": "Admin mengawasi semuanya dari dasbor di layar lebar.",
           "step": 0,
           "at": "admin-dashboard"
         },
@@ -400,8 +401,7 @@
       "kind": "outro",
       "sentences": [
         {
-          "text": "Itulah alur lengkap RentGear: pesan, jaminan, bayar, serah terima, kembali, dan ulasan.",
-          "speak": "Itulah alur lengkap Rent Gear: pesan, jaminan, bayar, serah terima, kembali, dan ulasan."
+          "text": "Itulah alur lengkap RentGear: pesan, jaminan, bayar, serah terima, kembali, dan ulasan."
         },
         {
           "text": "Coba sekarang di rentgear.serverbaik.my.id.",

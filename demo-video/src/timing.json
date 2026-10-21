@@ -2,143 +2,143 @@
  "intro": [
   {
    "file": "voice/intro-0.wav",
-   "seconds": 6.465688
+   "seconds": 6.263771
   },
   {
    "file": "voice/intro-1.wav",
-   "seconds": 6.806563
+   "seconds": 5.756271
   }
  ],
  "diskon": [
   {
    "file": "voice/diskon-0.wav",
-   "seconds": 5.710854
+   "seconds": 4.921479
   },
   {
    "file": "voice/diskon-1.wav",
-   "seconds": 5.057146
+   "seconds": 4.107521
   },
   {
    "file": "voice/diskon-2.wav",
-   "seconds": 5.542729
+   "seconds": 4.421417
   },
   {
    "file": "voice/diskon-3.wav",
-   "seconds": 6.229646
+   "seconds": 5.101854
   }
  ],
  "cari": [
   {
    "file": "voice/cari-0.wav",
-   "seconds": 5.491313
+   "seconds": 4.658396
   },
   {
    "file": "voice/cari-1.wav",
-   "seconds": 5.199854
+   "seconds": 4.46575
   },
   {
    "file": "voice/cari-2.wav",
-   "seconds": 7.124
+   "seconds": 6.485083
   }
  ],
  "booking": [
   {
    "file": "voice/booking-0.wav",
-   "seconds": 6.391063
+   "seconds": 5.11225
   },
   {
    "file": "voice/booking-1.wav",
-   "seconds": 6.08225
+   "seconds": 6.171479
   },
   {
    "file": "voice/booking-2.wav",
-   "seconds": 6.189146
+   "seconds": 5.58625
   },
   {
    "file": "voice/booking-3.wav",
-   "seconds": 3.311417
+   "seconds": 2.506625
   }
  ],
  "konfirmasi": [
   {
    "file": "voice/konfirmasi-0.wav",
-   "seconds": 1.828396
+   "seconds": 1.485375
   },
   {
    "file": "voice/konfirmasi-1.wav",
-   "seconds": 6.275375
+   "seconds": 4.989625
   }
  ],
  "bayar": [
   {
    "file": "voice/bayar-0.wav",
-   "seconds": 6.185333
+   "seconds": 5.495667
   },
   {
    "file": "voice/bayar-1.wav",
-   "seconds": 5.289354
+   "seconds": 4.028833
   }
  ],
  "serah": [
   {
    "file": "voice/serah-0.wav",
-   "seconds": 5.369375
+   "seconds": 4.775729
   },
   {
    "file": "voice/serah-1.wav",
-   "seconds": 5.528917
+   "seconds": 4.580188
   },
   {
    "file": "voice/serah-2.wav",
-   "seconds": 4.114396
+   "seconds": 3.700188
   }
  ],
  "kembali": [
   {
    "file": "voice/kembali-0.wav",
-   "seconds": 3.215875
+   "seconds": 2.661375
   },
   {
    "file": "voice/kembali-1.wav",
-   "seconds": 5.236521
+   "seconds": 4.770417
   },
   {
    "file": "voice/kembali-2.wav",
-   "seconds": 4.331063
+   "seconds": 3.294125
   }
  ],
  "ulasan": [
   {
    "file": "voice/ulasan-0.wav",
-   "seconds": 3.077375
+   "seconds": 3.004417
   },
   {
    "file": "voice/ulasan-1.wav",
-   "seconds": 4.605229
+   "seconds": 3.774563
   }
  ],
  "admin": [
   {
    "file": "voice/admin-0.wav",
-   "seconds": 3.624646
+   "seconds": 3.250792
   },
   {
    "file": "voice/admin-1.wav",
-   "seconds": 4.554479
+   "seconds": 4.267896
   },
   {
    "file": "voice/admin-2.wav",
-   "seconds": 5.705333
+   "seconds": 4.251542
   }
  ],
  "outro": [
   {
    "file": "voice/outro-0.wav",
-   "seconds": 7.396646
+   "seconds": 6.668479
   },
   {
    "file": "voice/outro-1.wav",
-   "seconds": 2.289333
+   "seconds": 1.668958
   }
  ]
 }
