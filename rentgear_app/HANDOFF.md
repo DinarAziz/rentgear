@@ -1505,3 +1505,44 @@ admin; and an AI assistant that stays on hiking and camping gear. Reader-facing 
 
 Not deployed. Deploying needs `php artisan migrate` on the Redmi (new columns) and a new web build; existing pending
 stores on the public server must send documents before the admin can verify them.
+
+## Deployed store verification; grading table gaps closed, 21 October 2026 (late morning)
+
+The user ran `sh /sdcard/rg/run.sh verif` and `hidup.sh`. Checked from the public address: build
+`main.dart.90322255bf.js`, the `add_store_verification` migration ran, Puncak Outdoor got the sample documents, and
+with the agus account its verification and KTP photo load.
+
+The user then sent the lecturer's grading table ("Tabel penilaian proyek mahasiswa", RENT GEAR column) and asked to
+close every gap. Done, in commits after `7794d06`:
+
+- `Payment` is its own class and table (`payments`): one row per transfer proof, amount locked by the server
+  (`Rental::amountDue`), reviewed once, rejected proofs kept. Migration `2026_10_21_020000_create_payments_table`
+  moves `rentals.payment_proof_path` into it and drops the column (checked up and down on a copy). App: `Payment`,
+  `PaymentStatus`, `Rental.payments`, a "Pembayaran" history on the rental detail. Old route `files/payments/{id}`
+  still serves the latest proof for older APKs.
+- Parallel booking test `rentgear_api/tests/concurrency/bersamaan.sh`: with DEFERRED SQLite transactions 2 of 8
+  renters got a 500 "database is locked". `config/database.php` now uses IMMEDIATE and `busy_timeout` 5000; three
+  runs then gave 1 booked, 7 `SLOT_UNAVAILABLE`, 0 errors. Found at the same time: `deploy/start.sh` ran a single
+  worker because `artisan serve` ignores `PHP_CLI_SERVER_WORKERS` without `--no-reload`; fixed.
+- Stock can no longer drop below units already booked or rented (`stockReductionError` in `equipment_rules.dart`,
+  same rule in `EquipmentService`).
+- `GearStatus` (rented, booked today, available, last damage): shown in Alat Saya, in a new admin screen
+  "Status Alat Hari Ini" (Dashboard > Stok), and the gear form has a "Catatan kerusakan" list.
+- Docs: `docs/00-KESESUAIAN-PENILAIAN.md` maps each table row to evidence; `09` class diagram and PBO, `10` activity
+  diagrams, `11` test report (38 cases) with saved results in `docs/hasil-uji/`, `12` user guide, `13` operations
+  guide. All six Mermaid diagrams were parsed and rendered with mermaid 10.9.1.
+- Deck: test counts now 318 (139 app, 179 server). The PowerPoint copy still says 282; not rebuilt.
+- Tests: 179 server, 139 app, analyzer clean. Checked in Chrome at 400x860 (local mode): admin dashboard and Status
+  Alat, Alat Saya, Catatan kerusakan, and the stock rule message.
+- Privacy rule from the user: no reading `.env` or anything outside `/Users/ds/Kuliah/Semester-1`; temp files go to
+  `/Users/ds/Kuliah/Semester-1/.tmp-claude/` (outside the repo).
+
+## Resume here (state saved 2026-10-21, before the payments deploy)
+
+`api.tgz`, `web.zip` (build `main.dart.269a852beb.js`), `deck.zip` and `bayar.sh` are on the Redmi in `/sdcard/rg/`.
+The user still has to run `sh /sdcard/rg/run.sh bayar` and then `sh /sdcard/rg/hidup.sh` in Termux. `bayar.sh` backs
+up the database, `storage/app` and the site, runs the payments migration, installs the new `start.sh` (4 workers), and
+replaces the site and `/presentasi/`. After it runs: read `/sdcard/rg/bayar.log` over adb and check the public site.
+
+Still open from before: a new Gmail App Password and Gemini key, a GitHub push when asked, rebuilding the APK on the
+Redmi, the Arunika voice for the video, and the PowerPoint copy of the deck.
