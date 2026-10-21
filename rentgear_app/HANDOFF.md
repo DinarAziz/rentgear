@@ -1443,3 +1443,30 @@ presentation the same day.
   recommendation and got Matilda on `eleven_multilingual_v2` (consistent across 30 separate requests, stitched with
   previous/next text). The video is now 2:49. The library voice Arunika was added to the user's ElevenLabs account
   as "RentGear 1" before the 402; it is still there.
+
+## Resume here (state saved 2026-10-21, late morning)
+
+The user paused with "save, saya akan mulai di session baru" after the demo video. Everything below is committed on
+`master` (latest `e8ac9e2`); nothing is pushed, because the user has not asked for a push.
+
+Done on 21 October, in order: the store-set duration discount (server, app, tests: 158 server and 124 app tests pass),
+a deck slide "Aturan sewa dan diskon" and the rebuilt `../RentGear-presentasi-kelompok4.pptx`, the deploy of the
+discount and the 8 October rental rules to the public server (the user ran the two Termux commands because the
+permission check blocked typing over adb), the fix of the stale guarantee hint, and the Remotion demo video with the
+ElevenLabs voice Matilda. The video files `../RentGear-demo-cara-pakai.mp4` (62 MB) and
+`../RentGear-demo-cara-pakai-ringan.mp4` (19 MB, for phones) are untracked on purpose.
+
+Waiting on the user:
+
+1. Deploy of the guarantee hint fix to the public site (web build only; same `run.sh` route as `diskon.sh`).
+2. Whether to put the new video into the deck's video slide in place of the old 24-second promo.
+3. A native Indonesian ElevenLabs voice (Arunika) needs $5 of credits on the user's account; then set
+   `voice.voiceId` in `demo-video/src/script.json` to `o5s6XRBkPSTD4syv6mZg`, run `node capture/voice.mjs`, and
+   render. "RentGear 1" (Arunika) is still in the account's My Voices.
+4. A new Gmail App Password and a new Gemini key (both passed through the chat earlier).
+5. A push to GitHub, when the user says "push".
+6. The APK on the Redmi was not rebuilt, so the phone app has no discount yet.
+7. The deck's `/presentasi/` on the public server has the discount slide; the deck numbers say 282 tests.
+
+The local web server on 127.0.0.1:8090 used for the recording was stopped. To record again, see
+`demo-video/README.md`.
