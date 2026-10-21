@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/format.dart';
 import '../../core/responsive.dart';
 import '../../domain/availability.dart';
+import '../../domain/gear_status.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
 import '../../widgets/common.dart';
@@ -14,14 +15,14 @@ import 'equipment_form_screen.dart';
 class ProviderEquipmentScreen extends StatelessWidget {
   const ProviderEquipmentScreen({super.key});
 
-  Future<List<(Equipment, int)>> _load(AppState state) async {
-    final items = await state.repo.providerEquipment(
-      state.currentUser.providerId!,
-    );
+  Future<List<(Equipment, int, GearStatus)>> _load(AppState state) async {
+    final providerId = state.currentUser.providerId!;
+    final items = await state.repo.providerEquipment(providerId);
+    final rentals = await state.repo.providerRentals(providerId);
     final today = dateOnly(DateTime.now());
     return [
       for (final e in items)
-        (e, await state.repo.availableQty(e.id, today, today)),
+        (e, await state.repo.availableQty(e.id, today, today), GearStatus.of(e, rentals, today)),
     ];
   }
 
@@ -40,7 +41,7 @@ class ProviderEquipmentScreen extends StatelessWidget {
         icon: const Icon(Icons.add),
         label: const Text('Tambah alat'),
       ),
-      body: AsyncView<List<(Equipment, int)>>(
+      body: AsyncView<List<(Equipment, int, GearStatus)>>(
         load: () => _load(state),
         builder: (context, items) => items.isEmpty
             ? EmptyState(
@@ -55,7 +56,7 @@ class ProviderEquipmentScreen extends StatelessWidget {
                 bottomPadding: 96,
                 itemCount: items.length,
                 itemBuilder: (context, i) {
-                  final (e, available) = items[i];
+                  final (e, available, status) = items[i];
                   return FadeSlideIn(
                     delay: FadeSlideIn.stagger(i),
                     child: Card(
@@ -98,6 +99,22 @@ class ProviderEquipmentScreen extends StatelessWidget {
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: Colors.black54,
+                                        ),
+                                      ),
+                                    if (status.rented > 0 || status.booked > 0)
+                                      Text(
+                                        [
+                                          if (status.rented > 0) '${status.rented} sedang disewa',
+                                          if (status.booked > 0) '${status.booked} dipesan hari ini',
+                                        ].join(' · '),
+                                        style: const TextStyle(fontSize: 12, color: Colors.black54),
+                                      ),
+                                    if (status.lastDamage case final d?)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: Pill(
+                                          'Kerusakan terakhir: ${d.returnCondition!.label}, ${tanggal(d.returnedAt!)}',
+                                          color: Colors.orange.shade800,
                                         ),
                                       ),
                                     if (!e.isActive)

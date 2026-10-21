@@ -209,6 +209,27 @@ void main() {
     expect(find.text('Verifikasi Penyedia'), findsOneWidget);
   });
 
+  testWidgets('admin sees which gear is rented, booked or free today', (tester) async {
+    await pumpApp(tester);
+    await tester.tap(find.text('Admin'));
+    await tester.pumpAndSettle();
+    final link = find.text('Status alat hari ini');
+    await tester.scrollUntilVisible(link, 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(link);
+    await tester.pumpAndSettle();
+    expect(find.text('Status Alat Hari Ini'), findsOneWidget);
+    expect(find.text('Sedang disewa'), findsOneWidget);
+    // Data demo: tenda ultralight sedang disewa, dua headlamp terlambat kembali.
+    await tester.tap(find.text('Hanya alat yang sedang dipakai'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tenda Ultralight 2 Orang'), findsOneWidget);
+    expect(find.textContaining('1 disewa'), findsWidgets);
+    await tester.scrollUntilVisible(find.text('Headlamp 300 Lumen'), 300, scrollable: find.byType(Scrollable).last);
+    expect(find.text('Headlamp 300 Lumen'), findsOneWidget);
+    expect(find.textContaining('2 disewa'), findsWidgets);
+    expect(find.text('Kompor Portable + 1 Gas'), findsNothing);
+  });
+
   testWidgets('blacklisted customer cannot open the booking form', (tester) async {
     await pumpApp(tester);
     await tester.tap(find.text('Admin'));

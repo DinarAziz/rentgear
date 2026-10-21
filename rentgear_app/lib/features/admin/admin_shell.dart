@@ -15,6 +15,7 @@ import '../rental/rental_detail_screen.dart';
 import '../shared/profile_screen.dart';
 import 'admin_audit_screen.dart';
 import 'admin_customers_screen.dart';
+import 'admin_gear_status_screen.dart';
 import 'admin_store_review_screen.dart';
 
 class AdminShell extends StatefulWidget {
@@ -123,6 +124,9 @@ class AdminDashboardScreen extends StatelessWidget {
           final mismatchReports = rentals
               .where((r) => r.mismatch == MismatchStatus.pending)
               .toList();
+          final rentedUnits = rentals
+              .where((r) => r.status == RentalStatus.pickedUp || r.status == RentalStatus.overdue)
+              .fold<int>(0, (sum, r) => sum + r.qty);
 
           final stats = [
             ('Total transaksi', '${rentals.length}', Icons.receipt_long),
@@ -131,6 +135,7 @@ class AdminDashboardScreen extends StatelessWidget {
             ('Penyedia menunggu', '$pending', Icons.hourglass_top),
             ('Denda ditinjau', '${fineReviews.length}', Icons.gavel_outlined),
             ('Laporan barang', '${mismatchReports.length}', Icons.report_problem_outlined),
+            ('Unit sedang disewa', '$rentedUnits', Icons.backpack_outlined),
             ('Nilai sewa selesai', rupiah(revenue), Icons.payments_outlined),
           ];
           // Card height follows the system font scale so large text does not overflow.
@@ -241,6 +246,20 @@ class AdminDashboardScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 rentalCards(mismatchReports),
               ],
+              const SectionTitle('Stok'),
+              Card(
+                clipBehavior: Clip.antiAlias,
+                child: ListTile(
+                  leading: const Icon(Icons.inventory_2_outlined),
+                  title: const Text('Status alat hari ini'),
+                  subtitle: const Text('Unit yang disewa, dipesan, dan tersedia di tiap toko'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(builder: (_) => const AdminGearStatusScreen()),
+                  ),
+                ),
+              ),
               SectionTitle(
                 'Transaksi terbaru',
                 trailing: TextButton(

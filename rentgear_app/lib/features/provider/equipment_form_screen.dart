@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../core/format.dart';
 import '../../core/responsive.dart';
 import '../../domain/equipment_rules.dart';
+import '../../domain/gear_status.dart';
 import '../../domain/models.dart';
 import '../../state/app_state.dart';
 import '../../widgets/common.dart';
@@ -434,6 +435,7 @@ class _EquipmentFormScreenState extends State<EquipmentFormScreen> {
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                     : Text(_initial == null ? 'Tambah alat' : 'Simpan perubahan'),
               ),
+              if (_initial case final e?) _DamageLog(equipment: e),
               const SizedBox(height: 24),
             ],
           ),
@@ -492,4 +494,47 @@ Widget _fieldPair(BuildContext context, Widget first, Widget second) {
       Expanded(child: second),
     ],
   );
+}
+
+/// Catatan kerusakan alat ini dari pengembalian yang rusak atau hilang, supaya
+/// toko tahu unit mana yang perlu diperbaiki sebelum disewakan lagi.
+class _DamageLog extends StatelessWidget {
+  const _DamageLog({required this.equipment});
+
+  final Equipment equipment;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.read<AppState>();
+    return AsyncView<List<Rental>>(
+      load: () async => GearStatus.damageHistory(equipment, await state.repo.providerRentals(equipment.providerId)),
+      builder: (context, damaged) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionTitle('Catatan kerusakan'),
+          if (damaged.isEmpty)
+            const Text('Belum ada pengembalian yang rusak atau hilang.', style: TextStyle(color: Colors.black54))
+          else
+            for (final r in damaged)
+              Card(
+                child: ListTile(
+                  leading: Icon(Icons.build_circle_outlined, color: Colors.orange.shade800),
+                  title: Text('${r.returnCondition!.label} · ${tanggal(r.returnedAt!)}'),
+                  subtitle: Text([
+                    '${r.invoiceCode} · ${r.customerName}${r.size == null ? '' : ' · ukuran ${r.size}'}',
+                    if (r.damageNote case final note? when note.isNotEmpty) 'Catatan: $note',
+                    'Denda kerusakan ${rupiah(r.damageFee)}',
+                  ].join('\n')),
+                ),
+              ),
+          const SizedBox(height: 4),
+          const Text(
+            'Setelah alat diperbaiki atau diganti, perbarui stok di atas. Matikan "Tampilkan di katalog" selama '
+            'alat masih diperbaiki.',
+            style: TextStyle(fontSize: 13, color: Colors.black54),
+          ),
+        ],
+      ),
+    );
+  }
 }
