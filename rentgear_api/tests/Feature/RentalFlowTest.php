@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Rental;
 use Illuminate\Support\Facades\Storage;
 use Tests\ApiTestCase;
 
@@ -22,7 +23,7 @@ class RentalFlowTest extends ApiTestCase
 
         $this->as('budi')->post("/api/v1/rentals/$id/payment", ['proof' => $this->photo()], ['Accept' => 'application/json'])
             ->assertOk()->assertJsonPath('data.status', 'paymentReview')->assertJsonPath('data.hasPaymentProof', true);
-        Storage::disk('local')->assertExists("payments/$id.jpg");
+        Storage::disk('local')->assertExists(Rental::findOrFail($id)->latestPayment()->proof_path);
 
         // Bukti belum diperiksa, jadi alat belum bisa diserahkan.
         $this->assertApiError($this->as('sari')->postJson("/api/v1/rentals/$id/handover"), 'INVALID_STATE', 409);

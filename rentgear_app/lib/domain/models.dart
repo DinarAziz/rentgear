@@ -398,6 +398,53 @@ class StatusLog {
   bool get isNote => from == to;
 }
 
+enum PaymentStatus {
+  submitted('Diperiksa toko'),
+  accepted('Diterima'),
+  rejected('Ditolak');
+
+  const PaymentStatus(this.label);
+  final String label;
+}
+
+/// Satu kali penyewa mengirim bukti transfer untuk sebuah sewa. Nominalnya
+/// dikunci saat bukti dikirim. Bukti yang ditolak tetap tersimpan sebagai
+/// riwayat, dan bukti berikutnya menjadi [Payment] baru.
+class Payment {
+  Payment({
+    required this.id,
+    required this.amount,
+    required this.submittedAt,
+    this.proof,
+    this.status = PaymentStatus.submitted,
+    this.note,
+    this.reviewedAt,
+    this.reviewedBy,
+  });
+
+  final String id;
+  final double amount;
+  final DateTime submittedAt;
+  Uint8List? proof;
+  PaymentStatus status;
+
+  /// Alasan penolakan dari toko.
+  String? note;
+  DateTime? reviewedAt;
+  String? reviewedBy;
+
+  bool get isOpen => status == PaymentStatus.submitted;
+
+  /// Toko memutuskan bukti transfer, sekali saja.
+  void review({required bool accept, required String reviewer, String? reason, DateTime? at}) {
+    if (!isOpen) throw const AppException('INVALID_STATE', 'Bukti transfer ini sudah diperiksa.');
+    status = accept ? PaymentStatus.accepted : PaymentStatus.rejected;
+    note = accept ? null : reason;
+    reviewedAt = at ?? DateTime.now();
+    reviewedBy = reviewer;
+  }
+}
+
 /// Laporan penyewa bahwa barang tidak sesuai, dan keputusan admin atasnya.
 enum MismatchStatus {
   none('Tidak ada laporan'),
@@ -472,7 +519,9 @@ class Rental {
   final List<Guarantee> guarantees;
   final DateTime createdAt;
   final List<StatusLog> logs;
-  Uint8List? paymentProof;
+
+  /// Bukti transfer, terlama lebih dulu. Yang terakhir adalah kiriman yang berlaku.
+  final List<Payment> payments = [];
   String? cancelReason;
 
   /// Terisi saat penyedia menerima alat kembali, bersama kondisi dan dendanya.
@@ -523,6 +572,11 @@ class Rental {
   double get subtotal => rentGross - discount;
   double get depositTotal => depositSnapshot * qty;
   double get grandTotal => subtotal + depositTotal;
+
+  Payment? get latestPayment => payments.lastOrNull;
+
+  /// Foto bukti transfer yang berlaku.
+  Uint8List? get paymentProof => latestPayment?.proof;
 
   double get fineTotal => lateFee + damageFee;
 

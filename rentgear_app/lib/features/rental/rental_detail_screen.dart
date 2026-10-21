@@ -203,8 +203,8 @@ class _Body extends StatelessWidget {
             ),
           ),
         ],
-        if (r.paymentProof != null) ...[
-          const SectionTitle('Bukti transfer'),
+        if (r.payments.isNotEmpty) ...[
+          const SectionTitle('Pembayaran'),
           if (r.status == RentalStatus.paymentReview)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
@@ -215,36 +215,8 @@ class _Body extends StatelessWidget {
                 style: const TextStyle(fontSize: 13, color: Colors.black54),
               ),
             ),
-          Card(
-            clipBehavior: Clip.antiAlias,
-            child: ListTile(
-              leading: Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Image.memory(
-                  r.paymentProof!,
-                  fit: BoxFit.cover,
-                  cacheWidth: 150,
-                ),
-              ),
-              title: const Text('Lihat bukti transfer'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute<void>(
-                  fullscreenDialog: true,
-                  builder: (_) => PhotoViewerScreen(
-                    photos: [MemoryPhoto('${r.id}-payment', r.paymentProof!)],
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // Terbaru di atas; bukti yang ditolak tetap tampil sebagai riwayat.
+          for (final p in r.payments.reversed) _PaymentTile(payment: p),
         ],
         if (ConditionPhotosSection.visibleFor(r, user)) ...[
           const SectionTitle('Foto kondisi alat'),
@@ -932,4 +904,58 @@ Future<Uint8List?> _pickPaymentProof(BuildContext context, double total) async {
   if (ok) return bytes;
   if (!context.mounted) return null;
   return _pickPaymentProof(context, total);
+}
+
+/// Satu bukti transfer: nominal, status, tanggal, dan alasan bila ditolak.
+class _PaymentTile extends StatelessWidget {
+  const _PaymentTile({required this.payment});
+
+  final Payment payment;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = payment;
+    final proof = p.proof;
+    final color = switch (p.status) {
+      PaymentStatus.submitted => Colors.orange.shade800,
+      PaymentStatus.accepted => Colors.green.shade800,
+      PaymentStatus.rejected => Colors.red.shade700,
+    };
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        leading: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.black12),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: proof == null
+              ? const Icon(Icons.receipt_long_outlined, color: Colors.black38)
+              : Image.memory(proof, fit: BoxFit.cover, cacheWidth: 150),
+        ),
+        title: Row(
+          children: [
+            Expanded(child: Text(rupiah(p.amount), style: const TextStyle(fontWeight: FontWeight.w600))),
+            Pill(p.status.label, color: color),
+          ],
+        ),
+        subtitle: Text([
+          'Dikirim ${tanggalJam(p.submittedAt)}',
+          if (p.note case final note?) 'Alasan: $note',
+        ].join('\n')),
+        onTap: proof == null
+            ? null
+            : () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    fullscreenDialog: true,
+                    builder: (_) => PhotoViewerScreen(photos: [MemoryPhoto(p.id, proof)]),
+                  ),
+                ),
+      ),
+    );
+  }
 }

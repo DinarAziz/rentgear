@@ -22,12 +22,14 @@ class FileController extends Controller
         return $this->stream('local', $guarantee->photo_path);
     }
 
-    public function payment(Request $request, string $rentalId): StreamedResponse
+    /** Tanpa [paymentId]: bukti transfer terakhir, yang berlaku. */
+    public function payment(Request $request, string $rentalId, ?string $paymentId = null): StreamedResponse
     {
         $rental = Rental::find($rentalId) ?? throw new ApiException('NOT_FOUND', 'Transaksi tidak ditemukan.');
         RentalController::authorizeView($rental, $request);
+        $payment = $paymentId === null ? $rental->latestPayment() : $rental->payments->firstWhere('id', $paymentId);
 
-        return $this->stream('local', $rental->payment_proof_path);
+        return $this->stream('local', $payment?->proof_path);
     }
 
     public function condition(Request $request, string $photoId): StreamedResponse

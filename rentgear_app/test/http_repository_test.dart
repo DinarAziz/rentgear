@@ -238,6 +238,31 @@ void main() {
     expect(seen.length, 1);
   });
 
+  test('riwayat pembayaran dibaca dan tiap bukti diunduh dengan id-nya', () async {
+    tokens.write('t');
+    final json = rentalJson(status: 'paid')
+      ..['hasPaymentProof'] = true
+      ..['payments'] = [
+        {'id': 'pay-1', 'amount': 140000, 'status': 'rejected', 'note': 'Nominal kurang', 'hasProof': true,
+         'submittedAt': '2026-10-02T09:00:00+07:00', 'reviewedAt': '2026-10-02T10:00:00+07:00', 'reviewedBy': 'Semeru Camp Rent'},
+        {'id': 'pay-2', 'amount': 140000, 'status': 'accepted', 'note': null, 'hasProof': true,
+         'submittedAt': '2026-10-02T11:00:00+07:00', 'reviewedAt': '2026-10-02T12:00:00+07:00', 'reviewedBy': 'Semeru Camp Rent'},
+      ];
+    final api = repo((request) async {
+      final path = request.url.path;
+      if (path.endsWith('/files/payments/r-9/pay-1')) return http.Response.bytes([1], 200);
+      if (path.endsWith('/files/payments/r-9/pay-2')) return http.Response.bytes([2], 200);
+      return ok(json);
+    });
+
+    final r = await api.rental('r-9');
+    expect(r.payments.map((p) => p.status), [PaymentStatus.rejected, PaymentStatus.accepted]);
+    expect(r.payments.first.note, 'Nominal kurang');
+    expect(r.payments.first.proof, [1]);
+    expect(r.paymentProof, [2]);
+    expect(r.latestPayment!.amount, 140000);
+  });
+
   test('detail transaksi mengunduh foto jaminan dan bukti transfer', () async {
     tokens.write('t');
     final json = rentalJson(status: 'paid')

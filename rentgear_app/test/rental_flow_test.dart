@@ -85,6 +85,22 @@ void main() {
     ]);
   });
 
+  test('payment history survives restart', () async {
+    final dir = Directory.systemTemp.createTempSync('rentgear_payment');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    var local = LocalRentGearRepository.open(store: LocalStore(dir), latency: Duration.zero);
+    final rina = await local.login('rina@rentgear.id', 'password');
+    await local.submitPayment('r-2', rina, Uint8List.fromList([7]));
+    await local.reviewPayment('r-2', await local.login('sari@rentgear.id', 'password'), accept: false, reason: 'Buram');
+
+    local = LocalRentGearRepository.open(store: LocalStore(dir), latency: Duration.zero);
+    final back = await local.rental('r-2');
+    expect(back.payments.single.status, PaymentStatus.rejected);
+    expect(back.payments.single.note, 'Buram');
+    expect(back.payments.single.proof, [7]);
+    expect(back.payments.single.amount, back.grandTotal);
+  });
+
   test('a rejected transfer proof goes back to the renter, who can upload again', () async {
     final rina = await repo.login('rina@rentgear.id', 'password');
     final dewi = await repo.login('dewi@rentgear.id', 'password'); // pemilik toko lain
@@ -111,6 +127,15 @@ void main() {
     expect(r.paymentRejection, isNull);
     r = await repo.reviewPayment(id, sari, accept: true);
     expect(r.status, RentalStatus.paid);
+
+    // Tiap bukti menjadi satu Payment; yang ditolak tetap tersimpan beserta alasannya.
+    expect(r.payments.map((p) => p.status), [PaymentStatus.rejected, PaymentStatus.accepted]);
+    expect(r.payments.first.note, 'Nominal kurang');
+    expect(r.payments.first.reviewedBy, 'Arjuna Outdoor');
+    // Nominal dikunci saat bukti dikirim: sewa setelah diskon ditambah deposit.
+    expect(r.payments.every((p) => p.amount == r.grandTotal), isTrue);
+    expect(() => r.payments.last.review(accept: false, reviewer: 'Arjuna Outdoor', reason: 'x'),
+        throwsA(isA<AppException>().having((e) => e.code, 'code', 'INVALID_STATE')));
   });
 
   test('booking without guarantee is refused', () async {

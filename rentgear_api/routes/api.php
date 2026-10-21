@@ -74,7 +74,7 @@ Route::prefix('v1')->group(function () {
         Route::post('rentals/{id}/review', [RentalController::class, 'review']);
 
         Route::get('files/guarantees/{guaranteeId}', [FileController::class, 'guarantee']);
-        Route::get('files/payments/{rentalId}', [FileController::class, 'payment']);
+        Route::get('files/payments/{rentalId}/{paymentId?}', [FileController::class, 'payment']);
         Route::get('files/condition/{photoId}', [FileController::class, 'condition']);
 
         Route::put('providers/{id}/status', [AdminController::class, 'providerStatus']);

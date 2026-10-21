@@ -114,6 +114,42 @@ class LocalCodec {
         ..heldAt = _parse(j['heldAt'])
         ..returnedAt = _parse(j['returnedAt']);
 
+  /// Data lama menyimpan satu bukti di `paymentProof`; dibaca sebagai satu pembayaran.
+  List<Payment> _paymentsFrom(Map<String, dynamic> j) {
+    final saved = j['payments'] as List?;
+    if (saved == null) {
+      final proof = loadPhoto(j['paymentProof'] as String?);
+      if (proof == null) return [];
+      final status = RentalStatus.values.byName(j['status'] as String);
+      return [
+        Payment(
+          id: '${j['id']}-payment',
+          amount: 0,
+          submittedAt: _parse(j['createdAt'])!,
+          proof: proof,
+          status: switch (status) {
+            RentalStatus.paymentReview => PaymentStatus.submitted,
+            RentalStatus.awaitingPayment => PaymentStatus.rejected,
+            _ => PaymentStatus.accepted,
+          },
+        ),
+      ];
+    }
+    return [
+      for (final p in saved.cast<Map<String, dynamic>>())
+        Payment(
+          id: p['id'] as String,
+          amount: (p['amount'] as num).toDouble(),
+          submittedAt: _parse(p['submittedAt'])!,
+          proof: loadPhoto(p['proof'] as String?),
+          status: PaymentStatus.values.byName(p['status'] as String),
+          note: p['note'] as String?,
+          reviewedAt: _parse(p['reviewedAt']),
+          reviewedBy: p['reviewedBy'] as String?,
+        ),
+    ];
+  }
+
   Map<String, dynamic> rental(Rental r) => {
         'id': r.id,
         'invoiceCode': r.invoiceCode,
@@ -134,7 +170,19 @@ class LocalCodec {
         'status': r.status.name,
         'createdAt': _date(r.createdAt),
         'cancelReason': r.cancelReason,
-        'paymentProof': r.paymentProof == null ? null : savePhoto('${r.id}-payment', r.paymentProof!),
+        'payments': [
+          for (final p in r.payments)
+            {
+              'id': p.id,
+              'amount': p.amount,
+              'status': p.status.name,
+              'note': p.note,
+              'submittedAt': _date(p.submittedAt),
+              'reviewedAt': _date(p.reviewedAt),
+              'reviewedBy': p.reviewedBy,
+              'proof': p.proof == null ? null : savePhoto(p.id, p.proof!),
+            },
+        ],
         'finePolicy': r.finePolicy.toJson(),
         'discountPercent': r.discountPercent,
         'conditionPhotos': [
@@ -201,7 +249,7 @@ class LocalCodec {
         ],
       )
         ..cancelReason = j['cancelReason'] as String?
-        ..paymentProof = loadPhoto(j['paymentProof'] as String?)
+        ..payments.addAll(_paymentsFrom(j))
         ..finePolicy = FinePolicy.fromJson(j['finePolicy'] as Map<String, dynamic>?)
         ..discountPercent = (j['discountPercent'] as num?)?.toInt() ?? 0
         // Foto yang berkasnya hilang dilewati; data lama belum punya kunci ini.

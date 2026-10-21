@@ -8,6 +8,7 @@ use App\Domain\Fines\ReturnCondition;
 use App\Domain\Rental\RentalStateMachine;
 use App\Domain\Rental\RentalStatus;
 use App\Models\ConditionPhoto;
+use App\Models\Payment;
 use App\Models\Equipment;
 use App\Models\Rental;
 use App\Models\Review;
@@ -216,7 +217,11 @@ final class RentalFlowService
         return $this->on($rentalId, function (Rental $r) use ($actor, $proof) {
             $this->requireRenter($r, $actor);
             $this->transition($r, RentalStatus::PaymentReview, $actor, 'Bukti transfer diunggah');
-            $r->update(['payment_proof_path' => $proof->storeAs('payments', "{$r->id}.".$proof->extension(), 'local')]);
+            // Tiap kiriman disimpan dengan namanya sendiri, supaya bukti yang pernah ditolak tidak tertimpa.
+            $payment = $r->payments()->create([
+                'amount' => $r->amountDue(), 'status' => Payment::SUBMITTED, 'submitted_at' => now(),
+            ]);
+            $payment->update(['proof_path' => $proof->storeAs("payments/{$r->id}", "{$payment->id}.".$proof->extension(), 'local')]);
         });
     }
 
@@ -230,6 +235,9 @@ final class RentalFlowService
             } else {
                 $this->transition($r, RentalStatus::AwaitingPayment, $actor, "Bukti transfer ditolak: $reason");
             }
+            // Sewa lama dari sebelum tabel pembayaran ada bisa belum punya baris pembayaran.
+            $r->payments()->where('status', Payment::SUBMITTED)->latest('submitted_at')->first()
+                ?->review($accept, $actor->provider->business_name, $reason);
         });
     }
 

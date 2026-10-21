@@ -22,7 +22,7 @@ class RentalController extends Controller
 
     private function present(Rental $rental): JsonResponse
     {
-        return ApiResponse::ok(Present::rental($rental->fresh(['guarantees', 'logs', 'review', 'conditionPhotos'])));
+        return ApiResponse::ok(Present::rental($rental->fresh(['guarantees', 'logs', 'review', 'conditionPhotos', 'payments'])));
     }
 
     private function reason(Request $request): string
@@ -34,7 +34,7 @@ class RentalController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
-        $rentals = Rental::with('guarantees', 'logs', 'review', 'conditionPhotos')
+        $rentals = Rental::with('guarantees', 'logs', 'review', 'conditionPhotos', 'payments')
             ->when($user->isCustomer(), fn ($q) => $q->where('customer_id', $user->id))
             ->when($user->isProvider(), fn ($q) => $q->where('provider_id', $user->provider_id))
             ->orderByDesc('created_at')->orderByDesc('id')

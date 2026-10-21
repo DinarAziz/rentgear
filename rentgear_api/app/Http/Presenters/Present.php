@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\BlacklistEntry;
 use App\Models\Equipment;
 use App\Models\Guarantee;
+use App\Models\Payment;
 use App\Models\Provider;
 use App\Models\Rental;
 use App\Models\Review;
@@ -128,6 +129,16 @@ final class Present
         ];
     }
 
+    /** Fotonya diunduh lewat `files/payments/{rentalId}/{paymentId}`. */
+    public static function payment(Payment $p): array
+    {
+        return [
+            'id' => $p->id, 'amount' => $p->amount, 'status' => $p->status, 'note' => $p->note,
+            'hasProof' => $p->proof_path !== null, 'submittedAt' => self::time($p->submitted_at),
+            'reviewedAt' => self::time($p->reviewed_at), 'reviewedBy' => $p->reviewed_by,
+        ];
+    }
+
     /** Transaksi harus dimuat dengan relasi `guarantees`, `logs`, dan `review`. */
     public static function rental(Rental $r): array
     {
@@ -143,7 +154,9 @@ final class Present
             'finePolicy' => $r->finePolicy()->toArray(),
             'discountPercent' => (int) $r->discount_percent,
             'status' => $r->status, 'createdAt' => self::time($r->created_at),
-            'cancelReason' => $r->cancel_reason, 'hasPaymentProof' => $r->payment_proof_path !== null,
+            // `hasPaymentProof` tetap dikirim untuk APK lama; bukti yang berlaku adalah pembayaran terakhir.
+            'cancelReason' => $r->cancel_reason, 'hasPaymentProof' => $r->latestPayment()?->proof_path !== null,
+            'payments' => $r->payments->map(self::payment(...))->all(),
             'returnedAt' => self::time($r->returned_at), 'returnCondition' => $r->return_condition,
             'lateFee' => $r->late_fee, 'damageFee' => $r->damage_fee, 'damageNote' => $r->damage_note,
             'damageReview' => $r->damage_review, 'reviewReason' => $r->review_reason, 'reviewNote' => $r->review_note,

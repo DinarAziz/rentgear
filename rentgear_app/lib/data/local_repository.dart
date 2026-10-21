@@ -753,7 +753,12 @@ class LocalRentGearRepository implements RentGearRepository {
         final r = _rentalById(rentalId);
         _requireRenter(r, actor);
         _transition(r, RentalStatus.paymentReview, actor, note: 'Bukti transfer diunggah');
-        r.paymentProof = proof;
+        r.payments.add(Payment(
+          id: '${r.id}-payment-${r.payments.length + 1}',
+          amount: r.grandTotal,
+          submittedAt: DateTime.now(),
+          proof: proof,
+        ));
         return r;
       });
 
@@ -762,13 +767,16 @@ class LocalRentGearRepository implements RentGearRepository {
       _mutate(() {
         final r = _rentalById(rentalId);
         _requireOwner(r, actor);
+        final open = r.latestPayment?.isOpen ?? false ? r.latestPayment : null;
         if (accept) {
           _transition(r, RentalStatus.paid, actor, note: 'Bukti transfer diterima');
+          open?.review(accept: true, reviewer: r.providerName);
           return r;
         }
         final why = reason?.trim() ?? '';
         if (why.isEmpty) throw const AppException('VALIDATION', 'Alasan penolakan wajib diisi.');
         _transition(r, RentalStatus.awaitingPayment, actor, note: 'Bukti transfer ditolak: $why');
+        open?.review(accept: false, reviewer: r.providerName, reason: why);
         return r;
       });
 

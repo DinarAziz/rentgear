@@ -187,6 +187,17 @@ abstract final class ApiCodec {
         ..heldAt = _time(j['heldAt'])
         ..returnedAt = _time(j['returnedAt']);
 
+  /// Fotonya diunduh terpisah oleh repository.
+  static Payment payment(Map<String, dynamic> j) => Payment(
+        id: j['id'] as String,
+        amount: _double(j['amount']),
+        submittedAt: _time(j['submittedAt'])!,
+        status: PaymentStatus.values.byName(j['status'] as String),
+        note: j['note'] as String?,
+        reviewedAt: _time(j['reviewedAt']),
+        reviewedBy: j['reviewedBy'] as String?,
+      );
+
   static Rental rental(Map<String, dynamic> j) {
     final photoUrl = j['photoUrl'] as String?;
     final review = j['review'] as Map<String, dynamic>?;
@@ -224,6 +235,7 @@ abstract final class ApiCodec {
       ],
     )
       ..cancelReason = j['cancelReason'] as String?
+      ..payments.addAll([for (final p in _maps(j['payments'] ?? const [])) payment(p)])
       ..returnedAt = _time(j['returnedAt'])
       ..returnCondition = _byName(ReturnCondition.values, j['returnCondition'])
       ..lateFee = _double(j['lateFee'])

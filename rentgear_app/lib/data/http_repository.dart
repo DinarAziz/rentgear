@@ -340,8 +340,22 @@ class HttpRentGearRepository implements RentGearRepository {
         ..clear()
         ..addAll(withPhotos);
     }
-    if (json['hasPaymentProof'] == true) {
-      rental.paymentProof = await _file('files/payments/$id');
+    // Semua bukti diunduh, termasuk yang ditolak, untuk riwayat pembayaran.
+    final sent = ((json['payments'] as List?) ?? const []).cast<Map<String, dynamic>>();
+    final proofs = await Future.wait([
+      for (final p in sent) p['hasProof'] == true ? _file('files/payments/$id/${p['id']}') : Future.value(null),
+    ]);
+    for (final (i, p) in rental.payments.indexed) {
+      p.proof = proofs[i];
+    }
+    // Server lama belum mengirim daftar pembayaran, hanya satu bukti.
+    if (json['payments'] == null && json['hasPaymentProof'] == true) {
+      rental.payments.add(Payment(
+        id: '$id-payment',
+        amount: rental.grandTotal,
+        submittedAt: rental.createdAt,
+        proof: await _file('files/payments/$id'),
+      ));
     }
     final condition = ((json['conditionPhotos'] as List?) ?? const []).cast<Map<String, dynamic>>();
     final bytes = await Future.wait([for (final p in condition) _file('files/condition/${p['id']}')]);
