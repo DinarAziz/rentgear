@@ -1495,7 +1495,7 @@ admin; and an AI assistant that stays on hiking and camping gear. Reader-facing 
   verification (persisted under `verifications`) but not `openStore` (UNSUPPORTED, like register). New screens:
   `store_verification_screen.dart`, `admin_store_review_screen.dart`, `open_store_screen.dart`, plus
   `widgets/verification_widgets.dart`. The admin provider list now opens "Periksa dokumen" instead of quick buttons.
-- Tests: 172 server (14 new) and 133 app (10 new) pass, `flutter analyze` clean.
+- Tests: 172 server (14 new) and 133 app (9 new) pass, `flutter analyze` clean.
 - Checked against a local API with a throwaway SQLite DB: admin review screen in Chrome at 400x860 (photos load with
   the token), and over HTTP: open store, submit, same-NIK warning, reject with reason, mail in `laravel.log`. Real
   Gemini refused a prompt-injection plan and answered a Ranu Kumbolo plan. Not checked on a phone; the reject dialog
