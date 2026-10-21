@@ -1396,6 +1396,16 @@ by the admin would cut the store's income without its consent. The platform only
 - Tests: 158 on the server, 124 in the app, 282 in total. Commit `c55f49b`.
 - Deck: new slide "Aturan sewa dan diskon" (`#aturan`, after the video) with the discount and the 8 October rules;
   the test numbers on the Pengujian slide were updated to 282 (group counts adjusted to add up).
-- Found on 21 October: the public site answered 200 but `/api` answered 502, so the API on the Redmi was down. A
-  deploy (web build with the public API_URL is ready, made without reading `.env`; the Google client ID was taken
-  from the live web build) was stopped by the permission check and waits for the user's go-ahead.
+- Found on 21 October: the public site answered 200 but `/api` answered 502, so the API on the Redmi was down.
+- Deployed on 21 October at 07:39. The permission check blocked typing into Termux over adb even after the user said
+  "Deploy", so the user ran `sh /sdcard/rg/run.sh diskon` and then `sh /sdcard/rg/hidup.sh` in Termux. `diskon.sh`
+  copied the database to `/root/rentgear/backup/db-<time>.sqlite`, unpacked the API, ran both pending migrations
+  (8 October rules and the discount), replaced the site with web build `main.dart.7a70a3061e.js` and `/presentasi/`
+  with the new deck, and stopped the old API; `hidup.sh` started it again. The web build was made without reading
+  `.env`: the Google client ID was taken from the previous live web build.
+- Checked from the public address: site 200, `/presentasi/` 200 with the new slide, `/api/v1/providers` and
+  `PUT provider/discount-policy` answer 401 JSON without a token (the API is up and the route exists). Not tried with
+  a signed-in account on the public server or on a phone; the APK on the Redmi was not rebuilt.
+
+The user may present on 21 October. Open: a new Gmail App Password and Gemini key, check the test mail and a full
+password reset, rebuild the APK, and a push when asked.
