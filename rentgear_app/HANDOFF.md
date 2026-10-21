@@ -1409,3 +1409,30 @@ by the admin would cut the store's income without its consent. The platform only
 
 The user may present on 21 October. Open: a new Gmail App Password and Gemini key, check the test mail and a full
 password reset, rebuild the APK, and a push when asked.
+
+## Demo and how-to video with Remotion, 21 October 2026
+
+The user asked for a demo and how-to video made with Remotion, "as complete as possible", possibly for a
+presentation the same day.
+
+- `../demo-video/` is a Remotion 4 project (README in Indonesian there). Output: `../RentGear-demo-cara-pakai.mp4`
+  (1920x1080, 30 fps, 3:04, about 66 MB, not committed; `demo-video/out/` is ignored).
+- The footage is the real app, not mockups: the local-mode web build served on 127.0.0.1:8090 is driven by
+  `capture/run.mjs` in headless Chrome through Flutter's accessibility tree (taps found by label), one 3x screenshot
+  per step plus `public/shots/manifest.json` with every tap point and the boxes of labelled elements. The flow: the
+  store sets a 10% / 20% discount, Budi books Tenda Dome 4 Orang for 3 days (today to the day after tomorrow) with a
+  specimen KTP, the store marks the KTP valid and confirms, Budi uploads a specimen transfer slip, the store accepts
+  the payment, hands over the gear with a condition photo, takes it back in good condition and closes the rental,
+  Budi leaves a 5-star review, and the admin (1440x900) verifies Puncak Outdoor and opens the transaction and the
+  audit trail.
+- Flutter web scrolls a third of a wheel delta per event; `run.mjs` sends 300 per 100 px. Text fields are found as
+  `input` elements by their aria-label.
+- Narration: macOS voice Damayanti (`capture/voice.mjs`, from `src/script.json`), subtitles on screen, a soft click on
+  each tap. Each sentence names the screenshot it talks about (`at`), and a sentence with many screenshots gets a
+  longer pause so no screen flashes by. Highlights (`focus.box`) dim the rest of the screen instead of zooming, because
+  zooming cut off the left-aligned text.
+- Look follows the deck: dark pine background with contour lines, Big Shoulders Display and Outfit, forest green and
+  summit orange, the app icon and the deck's QR code to the public site.
+- Found while recording: the guarantee form still said "Harus sama dengan nama akun penyewa" under the holder's name,
+  though that rule was dropped on 8 October. It now says "Sesuai nama yang tertulis di dokumen". 124 app tests pass and
+  `flutter analyze` is clean. The public site still shows the old text until the next web deploy.

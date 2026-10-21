@@ -1,0 +1,144 @@
+{
+ "intro": [
+  {
+   "file": "voice/intro-0.wav",
+   "seconds": 6.465688
+  },
+  {
+   "file": "voice/intro-1.wav",
+   "seconds": 6.806563
+  }
+ ],
+ "diskon": [
+  {
+   "file": "voice/diskon-0.wav",
+   "seconds": 5.710854
+  },
+  {
+   "file": "voice/diskon-1.wav",
+   "seconds": 5.057146
+  },
+  {
+   "file": "voice/diskon-2.wav",
+   "seconds": 5.542729
+  },
+  {
+   "file": "voice/diskon-3.wav",
+   "seconds": 6.229646
+  }
+ ],
+ "cari": [
+  {
+   "file": "voice/cari-0.wav",
+   "seconds": 5.491313
+  },
+  {
+   "file": "voice/cari-1.wav",
+   "seconds": 5.199854
+  },
+  {
+   "file": "voice/cari-2.wav",
+   "seconds": 7.124
+  }
+ ],
+ "booking": [
+  {
+   "file": "voice/booking-0.wav",
+   "seconds": 6.391063
+  },
+  {
+   "file": "voice/booking-1.wav",
+   "seconds": 6.08225
+  },
+  {
+   "file": "voice/booking-2.wav",
+   "seconds": 6.189146
+  },
+  {
+   "file": "voice/booking-3.wav",
+   "seconds": 3.311417
+  }
+ ],
+ "konfirmasi": [
+  {
+   "file": "voice/konfirmasi-0.wav",
+   "seconds": 1.828396
+  },
+  {
+   "file": "voice/konfirmasi-1.wav",
+   "seconds": 6.275375
+  }
+ ],
+ "bayar": [
+  {
+   "file": "voice/bayar-0.wav",
+   "seconds": 6.185333
+  },
+  {
+   "file": "voice/bayar-1.wav",
+   "seconds": 5.289354
+  }
+ ],
+ "serah": [
+  {
+   "file": "voice/serah-0.wav",
+   "seconds": 5.369375
+  },
+  {
+   "file": "voice/serah-1.wav",
+   "seconds": 5.528917
+  },
+  {
+   "file": "voice/serah-2.wav",
+   "seconds": 4.114396
+  }
+ ],
+ "kembali": [
+  {
+   "file": "voice/kembali-0.wav",
+   "seconds": 3.215875
+  },
+  {
+   "file": "voice/kembali-1.wav",
+   "seconds": 5.236521
+  },
+  {
+   "file": "voice/kembali-2.wav",
+   "seconds": 4.331063
+  }
+ ],
+ "ulasan": [
+  {
+   "file": "voice/ulasan-0.wav",
+   "seconds": 3.077375
+  },
+  {
+   "file": "voice/ulasan-1.wav",
+   "seconds": 4.605229
+  }
+ ],
+ "admin": [
+  {
+   "file": "voice/admin-0.wav",
+   "seconds": 3.624646
+  },
+  {
+   "file": "voice/admin-1.wav",
+   "seconds": 4.554479
+  },
+  {
+   "file": "voice/admin-2.wav",
+   "seconds": 5.705333
+  }
+ ],
+ "outro": [
+  {
+   "file": "voice/outro-0.wav",
+   "seconds": 7.396646
+  },
+  {
+   "file": "voice/outro-1.wav",
+   "seconds": 2.289333
+  }
+ ]
+}

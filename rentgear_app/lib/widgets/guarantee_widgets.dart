@@ -233,7 +233,7 @@ class _GuaranteeFormState extends State<GuaranteeForm> {
               textCapitalization: TextCapitalization.words,
               decoration: const InputDecoration(
                 labelText: 'Nama pemilik dokumen',
-                helperText: 'Harus sama dengan nama akun penyewa',
+                helperText: 'Sesuai nama yang tertulis di dokumen',
                 helperMaxLines: 2,
               ),
               onChanged: (v) {
