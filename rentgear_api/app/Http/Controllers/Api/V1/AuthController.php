@@ -48,9 +48,6 @@ class AuthController extends Controller
         return $this->session($user);
     }
 
-    /** Titik awal toko baru di peta (Alun-alun Malang). Penyedia memindahkannya dari menu Profil. */
-    private const DEFAULT_LOCATION = ['latitude' => -7.9826, 'longitude' => 112.6308];
-
     private const REGISTER_MESSAGES = [
         'required' => 'Lengkapi semua isian.',
         'required_if' => 'Lengkapi data toko.',
@@ -93,7 +90,7 @@ class AuthController extends Controller
                     'business_name' => trim($data['businessName']), 'city' => $user->city,
                     'address' => trim($data['address']), 'bank_account' => trim($data['bankAccount']),
                     'status' => Provider::PENDING, 'accepted_types' => ['ktp'],
-                    ...self::DEFAULT_LOCATION,
+                    ...Provider::DEFAULT_LOCATION,
                 ]);
                 $user->update(['provider_id' => $provider->id]);
             }

@@ -45,7 +45,7 @@ final class Present
         return [
             'id' => $p->id, 'ownerId' => $p->owner_id, 'businessName' => $p->business_name, 'city' => $p->city,
             'address' => $p->address, 'status' => $p->status, 'latitude' => $p->latitude, 'longitude' => $p->longitude,
-            'bankAccount' => $p->bank_account,
+            'bankAccount' => $p->bank_account, 'documentsSubmitted' => $p->hasDocuments(),
             'policy' => [
                 'acceptedTypes' => $p->accepted_types,
                 'baseRequired' => $p->base_required,
@@ -57,6 +57,25 @@ final class Present
             'rating' => round((float) ($p->rating_avg ?? 0), 4),
             'reviewCount' => (int) ($p->reviews_count ?? 0),
             'followerCount' => (int) ($p->follower_count ?? 0),
+        ];
+    }
+
+    /**
+     * Dokumen verifikasi toko, hanya untuk pemilik toko dan admin. Foto diambil lewat `files/providers/...`,
+     * dan NIK hanya tampil tersamar.
+     */
+    public static function verification(Provider $p, array $sameOwnerStores): array
+    {
+        $file = fn (string $name) => url("api/v1/files/providers/{$p->id}/$name");
+
+        return [
+            'providerId' => $p->id, 'status' => $p->status,
+            'submittedAt' => self::time($p->submitted_at), 'reviewedAt' => self::time($p->reviewed_at),
+            'rejectionReason' => $p->rejection_reason, 'nikMasked' => $p->owner_nik_masked,
+            'ktpPhotoUrl' => $p->ktp_photo_path === null ? null : $file('ktp'),
+            'selfiePhotoUrl' => $p->selfie_photo_path === null ? null : $file('selfie'),
+            'storePhotoUrls' => array_map($file, array_map(fn (int $i) => "store-$i", array_keys($p->store_photo_paths ?? []))),
+            'sameOwnerStores' => $sameOwnerStores,
         ];
     }
 

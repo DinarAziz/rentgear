@@ -9,6 +9,7 @@ use App\Models\BlacklistEntry;
 use App\Models\Provider;
 use App\Models\User;
 use App\Services\BlacklistService;
+use App\Services\StoreVerificationService;
 use App\Support\ApiException;
 use App\Support\ApiResponse;
 use App\Support\Audit;
@@ -18,9 +19,6 @@ use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
-    /** Sama dengan `ProviderStatus.label` di aplikasi. */
-    private const STATUS_LABELS = ['pending' => 'Menunggu verifikasi', 'verified' => 'Terverifikasi', 'rejected' => 'Ditolak'];
-
     public function __construct(private readonly BlacklistService $blacklist) {}
 
     private function requireAdmin(Request $request): User
@@ -39,15 +37,14 @@ class AdminController extends Controller
             ?? throw new ApiException('NOT_FOUND', 'Penyewa tidak ditemukan.');
     }
 
-    public function providerStatus(Request $request, string $id): JsonResponse
+    public function providerStatus(Request $request, StoreVerificationService $verification, string $id): JsonResponse
     {
         $admin = $this->requireAdmin($request);
-        $data = $request->validate(['status' => ['required', Rule::in(['pending', 'verified', 'rejected'])]]);
+        $data = $request->validate([
+            'status' => ['required', Rule::in(['pending', 'verified', 'rejected'])], 'reason' => 'nullable|string|max:255',
+        ]);
         $provider = Provider::find($id) ?? throw new ApiException('NOT_FOUND', 'Penyedia tidak ditemukan.');
-        $before = $provider->status;
-        $provider->update(['status' => $data['status']]);
-        Audit::record($admin, Audit::PROVIDER_STATUS, $provider->business_name,
-            'Dari '.self::STATUS_LABELS[$before].' menjadi '.self::STATUS_LABELS[$data['status']].'.');
+        $verification->decide($provider, $admin, $data['status'], $data['reason'] ?? null);
 
         return ApiResponse::ok(Present::providerById($id));
     }

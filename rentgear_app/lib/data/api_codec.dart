@@ -114,9 +114,28 @@ abstract final class ApiCodec {
       ..rating = _double(j['rating'])
       ..finePolicy = FinePolicy.fromJson(j['finePolicy'] as Map<String, dynamic>?)
       ..discountPolicy = DiscountPolicy.fromJson(j['discountPolicy'] as Map<String, dynamic>?)
+      ..documentsSubmitted = j['documentsSubmitted'] as bool? ?? false
       ..reviewCount = j['reviewCount'] as int
       ..followerCount = j['followerCount'] as int;
   }
+
+  static StoreVerification verification(
+    Map<String, dynamic> j, {
+    ItemPhoto? ktpPhoto,
+    ItemPhoto? selfiePhoto,
+    List<ItemPhoto> storePhotos = const [],
+  }) => StoreVerification(
+        providerId: j['providerId'] as String,
+        status: ProviderStatus.values.byName(j['status'] as String),
+        submittedAt: _time(j['submittedAt']),
+        reviewedAt: _time(j['reviewedAt']),
+        rejectionReason: j['rejectionReason'] as String?,
+        nikMasked: j['nikMasked'] as String?,
+        ktpPhoto: ktpPhoto,
+        selfiePhoto: selfiePhoto,
+        storePhotos: storePhotos,
+        sameOwnerStores: (j['sameOwnerStores'] as List?)?.cast<String>() ?? const [],
+      );
 
   static Equipment equipment(Map<String, dynamic> j) => Equipment(
         id: j['id'] as String,

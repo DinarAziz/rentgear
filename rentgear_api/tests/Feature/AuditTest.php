@@ -49,7 +49,7 @@ class AuditTest extends ApiTestCase
         $this->assertApiError($this->as('budi')->getJson('/api/v1/audit'), 'FORBIDDEN', 403);
         $this->assertApiError($this->as('sari')->getJson('/api/v1/audit'), 'FORBIDDEN', 403);
 
-        $this->as('admin')->putJson('/api/v1/providers/p-puncak/status', ['status' => 'rejected'])->assertOk();
+        $this->as('admin')->putJson('/api/v1/providers/p-puncak/status', ['status' => 'rejected', 'reason' => 'Foto KTP buram'])->assertOk();
         $id = AuditLog::firstOrFail()->id;
         $this->deleteJson("/api/v1/audit/$id")->assertStatus(404);
         $this->putJson("/api/v1/audit/$id", ['detail' => 'x'])->assertStatus(404);

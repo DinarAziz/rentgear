@@ -61,9 +61,26 @@ class SeedData {
           status: ProviderStatus.pending,
           latitude: -7.8707,
           longitude: 112.5269,
+          bankAccount: 'BNI 0451 2233 89 a.n. Agus Pratama',
           policy: const GuaranteePolicy(acceptedTypes: {GuaranteeType.ktp, GuaranteeType.sim}),
         ),
       ];
+
+  /// Puncak Outdoor sudah mengirim dokumen, jadi admin bisa mencoba
+  /// memeriksanya. Gambarnya bertanda CONTOH, sama dengan seeder server.
+  Map<String, StoreVerification> verifications() => {
+        'p-puncak': StoreVerification(
+          providerId: 'p-puncak',
+          status: ProviderStatus.pending,
+          submittedAt: now.subtract(const Duration(hours: 3)),
+          nikMasked: maskDocumentNumber(puncakNik),
+          ktpPhoto: const AssetPhoto('assets/demo/ktp-contoh.jpg'),
+          selfiePhoto: const AssetPhoto('assets/demo/swafoto-contoh.jpg'),
+          storePhotos: const [AssetPhoto('assets/demo/toko-contoh.jpg')],
+        ),
+      };
+
+  static const puncakNik = '3579010101900004';
 
   /// Ulasan dari penyewa lama, supaya halaman toko tidak kosong saat demo.
   List<Review> reviews() => [

@@ -11,20 +11,37 @@ use App\Support\ApiResponse;
 use App\Support\Audit;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 
 /** Saran dari AI. Tidak ada rute di sini yang mengubah data transaksi. */
 class AiController extends Controller
 {
     public function __construct(private readonly AiAdvisor $advisor) {}
 
+    /** Batas saran paket alat per akun per hari, supaya AI tidak dipakai untuk hal lain dalam jumlah banyak. */
+    public const DAILY_RECOMMENDATIONS = 20;
+
+    private const TRIP_LIMIT = 200;
+
     public function recommend(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'trip' => 'required|string|min:3|max:300', 'people' => 'required|integer|min:1|max:20',
+            'trip' => 'required|string|min:3|max:'.self::TRIP_LIMIT, 'people' => 'required|integer|min:1|max:20',
             'days' => 'required|integer|min:1|max:14',
-        ]);
+        ], ['trip.max' => 'Rencana perjalanan paling banyak '.self::TRIP_LIMIT.' huruf.']);
+        // Baris baru dan karakter kontrol dibuang; rencana cukup satu kalimat.
+        $trip = trim(preg_replace('/[\p{C}\s]+/u', ' ', $data['trip']));
+        if (preg_match_all('/\p{L}/u', $trip) < 3) {
+            throw new ApiException('AI_OFF_TOPIC', AiAdvisor::OFF_TOPIC_MESSAGE);
+        }
 
-        return ApiResponse::ok($this->advisor->recommend(trim($data['trip']), (int) $data['people'], (int) $data['days']));
+        $limit = 'ai-recommend:'.$request->user()->id;
+        if (RateLimiter::tooManyAttempts($limit, self::DAILY_RECOMMENDATIONS)) {
+            throw new ApiException('TOO_MANY_REQUESTS', 'Batas saran AI hari ini sudah habis. Coba lagi besok.');
+        }
+        RateLimiter::hit($limit, 86400);
+
+        return ApiResponse::ok($this->advisor->recommend($trip, (int) $data['people'], (int) $data['days']));
     }
 
     public function fineOpinion(Request $request, string $id): JsonResponse

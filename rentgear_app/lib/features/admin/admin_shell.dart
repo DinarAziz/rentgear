@@ -9,11 +9,13 @@ import '../../domain/models.dart';
 import '../../state/app_state.dart';
 import '../../widgets/common.dart';
 import '../../widgets/motion.dart';
+import '../../widgets/verification_widgets.dart';
 import '../customer/my_rentals_screen.dart';
 import '../rental/rental_detail_screen.dart';
 import '../shared/profile_screen.dart';
 import 'admin_audit_screen.dart';
 import 'admin_customers_screen.dart';
+import 'admin_store_review_screen.dart';
 
 class AdminShell extends StatefulWidget {
   const AdminShell({super.key});
@@ -292,6 +294,11 @@ class _CardWrap extends StatelessWidget {
 class AdminProvidersScreen extends StatelessWidget {
   const AdminProvidersScreen({super.key});
 
+  void _review(BuildContext context, ProviderProfile p) => Navigator.push(
+        context,
+        MaterialPageRoute<void>(builder: (_) => AdminStoreReviewScreen(providerId: p.id)),
+      );
+
   @override
   Widget build(BuildContext context) {
     final state = context.read<AppState>();
@@ -303,28 +310,6 @@ class AdminProvidersScreen extends StatelessWidget {
           itemCount: providers.length,
           itemBuilder: (context, i) {
             final p = providers[i];
-            Future<void> set(ProviderStatus s) async {
-              final verify = s == ProviderStatus.verified;
-              final ok = await confirmDialog(
-                context,
-                title: verify
-                    ? 'Verifikasi ${p.businessName}?'
-                    : 'Tolak ${p.businessName}?',
-                message: verify
-                    ? 'Alat penyedia ini akan tampil di katalog dan bisa disewa.'
-                    : 'Penyedia ini tidak bisa menyewakan alat sampai diverifikasi.',
-                confirmLabel: verify ? 'Verifikasi' : 'Tolak',
-              );
-              if (!ok || !context.mounted) return;
-              await runAction(
-                context,
-                () => state.run(
-                  (repo) => repo.setProviderStatus(p.id, s, state.currentUser),
-                ),
-                success: '${p.businessName}: ${s.label}',
-              );
-            }
-
             return FadeSlideIn(
               delay: FadeSlideIn.stagger(i),
               child: Card(
@@ -345,16 +330,7 @@ class AdminProvidersScreen extends StatelessWidget {
                           ),
                           StatusCrossfade(
                             value: p.status,
-                            child: Pill(
-                              p.status.label,
-                              color: switch (p.status) {
-                                ProviderStatus.verified =>
-                                  Colors.green.shade800,
-                                ProviderStatus.pending =>
-                                  Colors.orange.shade800,
-                                ProviderStatus.rejected => Colors.red.shade700,
-                              },
-                            ),
+                            child: Pill(p.status.label, color: providerStatusColor(p.status)),
                           ),
                         ],
                       ),
@@ -367,26 +343,31 @@ class AdminProvidersScreen extends StatelessWidget {
                         'Jaminan: ${p.policy.acceptedTypes.map((t) => t.label).join(', ')}',
                         style: const TextStyle(fontSize: 13),
                       ),
-                      if (p.status == ProviderStatus.pending) ...[
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () => set(ProviderStatus.rejected),
-                                child: const Text('Tolak'),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: FilledButton(
-                                onPressed: () => set(ProviderStatus.verified),
-                                child: const Text('Verifikasi'),
-                              ),
-                            ),
-                          ],
+                      // Toko lama sudah terverifikasi sebelum ada dokumen, jadi tidak diberi catatan.
+                      if (p.documentsSubmitted || p.status != ProviderStatus.verified) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          p.documentsSubmitted ? 'Dokumen verifikasi sudah dikirim' : 'Dokumen verifikasi belum dikirim',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: p.documentsSubmitted ? Colors.black87 : Colors.black54,
+                          ),
                         ),
                       ],
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: p.status == ProviderStatus.pending && p.documentsSubmitted
+                            ? FilledButton.icon(
+                                onPressed: () => _review(context, p),
+                                icon: const Icon(Icons.fact_check_outlined),
+                                label: const Text('Periksa dokumen'),
+                              )
+                            : OutlinedButton(
+                                onPressed: () => _review(context, p),
+                                child: const Text('Lihat detail'),
+                              ),
+                      ),
                     ],
                   ),
                 ),

@@ -5,6 +5,7 @@ import '../../domain/models.dart';
 import '../../state/app_state.dart';
 import '../../widgets/common.dart';
 import '../customer/my_rentals_screen.dart';
+import 'store_verification_screen.dart';
 
 class ProviderOrdersScreen extends StatelessWidget {
   const ProviderOrdersScreen({super.key});
@@ -54,12 +55,29 @@ class ProviderOrdersScreen extends StatelessWidget {
               children: [
                 if (profile.status != ProviderStatus.verified)
                   MaterialBanner(
-                    content: Text(
-                      'Status toko: ${profile.status.label}. '
-                      'Alat Anda belum tampil di katalog sampai admin memverifikasi.',
+                    content: Text(switch (profile.status) {
+                      ProviderStatus.rejected =>
+                        'Verifikasi toko ditolak. Lihat alasannya, perbaiki, lalu kirim ulang.',
+                      _ when profile.documentsSubmitted =>
+                        'Dokumen toko sedang diperiksa admin. Alat Anda tampil di katalog setelah diverifikasi.',
+                      _ => 'Kirim dokumen verifikasi toko. Alat Anda belum tampil di katalog sampai admin memverifikasi.',
+                    }),
+                    leading: Icon(
+                      profile.status == ProviderStatus.rejected ? Icons.report_outlined : Icons.hourglass_top,
                     ),
-                    leading: const Icon(Icons.hourglass_top),
-                    actions: const [SizedBox.shrink()],
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (_) => StoreVerificationScreen(providerId: profile.id),
+                          ),
+                        ),
+                        child: Text(profile.documentsSubmitted && profile.status == ProviderStatus.pending
+                            ? 'Lihat'
+                            : 'Kirim dokumen'),
+                      ),
+                    ],
                   ),
                 Expanded(
                   child: TabBarView(

@@ -25,7 +25,9 @@ class LocalRentGearRepository implements RentGearRepository {
         _providers = seed.providers(),
         _rentals = seed.rentals(),
         _reviews = seed.reviews(),
-        _follows = seed.follows();
+        _follows = seed.follows(),
+        _verifications = seed.verifications(),
+        _niks = {'p-puncak': SeedData.puncakNik};
 
   /// [store] `null` = hanya di memori (dipakai unit test).
   factory LocalRentGearRepository.open({
@@ -60,6 +62,11 @@ class LocalRentGearRepository implements RentGearRepository {
 
   /// Id penyewa -> id toko yang diikutinya.
   Map<String, Set<String>> _follows;
+
+  /// Id toko -> dokumen verifikasinya, dan NIK pemilik untuk mencari toko
+  /// lain dengan pemilik yang sama.
+  Map<String, StoreVerification> _verifications;
+  Map<String, String> _niks;
   final Map<String, String> _idempotency = {};
   final Map<String, BlacklistEntry> _blacklist = {};
 
@@ -124,10 +131,25 @@ class LocalRentGearRepository implements RentGearRepository {
           if (r.reply != null) r.id: {'reply': r.reply, 'at': r.repliedAt!.toIso8601String()},
       },
       'follows': {for (final f in _follows.entries) f.key: f.value.toList()},
+      'verifications': {
+        for (final v in _verifications.values)
+          v.providerId: {
+            'submittedAt': v.submittedAt?.toIso8601String(),
+            'reviewedAt': v.reviewedAt?.toIso8601String(),
+            'rejectionReason': v.rejectionReason,
+            'nik': _niks[v.providerId],
+            'ktpPhoto': v.ktpPhoto == null ? null : codec.photo(v.ktpPhoto!),
+            'selfiePhoto': v.selfiePhoto == null ? null : codec.photo(v.selfiePhoto!),
+            'storePhotos': [for (final p in v.storePhotos) codec.photo(p)],
+          },
+      },
       'providers': {
         for (final p in _providers)
           p.id: {
             'status': p.status.name,
+            'businessName': p.businessName,
+            'address': p.address,
+            'bankAccount': p.bankAccount,
             'policy': codec.policy(p.policy),
             'finePolicy': p.finePolicy.toJson(),
             'discountPolicy': p.discountPolicy.toJson(),
@@ -170,6 +192,9 @@ class LocalRentGearRepository implements RentGearRepository {
       if (saved == null) continue;
       p
         ..status = ProviderStatus.values.byName(saved['status'] as String)
+        ..businessName = saved['businessName'] as String? ?? p.businessName
+        ..address = saved['address'] as String? ?? p.address
+        ..bankAccount = saved['bankAccount'] as String? ?? p.bankAccount
         ..policy = codec.policyFrom(saved['policy'] as Map<String, dynamic>)
         ..finePolicy = FinePolicy.fromJson(saved['finePolicy'] as Map<String, dynamic>?)
         ..discountPolicy = DiscountPolicy.fromJson(saved['discountPolicy'] as Map<String, dynamic>?)
@@ -200,7 +225,32 @@ class LocalRentGearRepository implements RentGearRepository {
     if (follows != null) {
       _follows = {for (final f in follows.entries) f.key: {...(f.value as List).cast<String>()}};
     }
+    // Data lama belum menyimpan dokumen verifikasi; pakai data demo.
+    final verifications = data['verifications'] as Map<String, dynamic>?;
+    if (verifications != null) {
+      _verifications = {};
+      _niks = {};
+      for (final entry in verifications.entries) {
+        final v = entry.value as Map<String, dynamic>;
+        ItemPhoto? photo(Object? j) => j == null ? null : codec.photoFrom(j as Map<String, dynamic>);
+        final nik = v['nik'] as String?;
+        if (nik != null) _niks[entry.key] = nik;
+        _verifications[entry.key] = StoreVerification(
+          providerId: entry.key,
+          status: _providerById(entry.key).status,
+          submittedAt: _parseTime(v['submittedAt']),
+          reviewedAt: _parseTime(v['reviewedAt']),
+          rejectionReason: v['rejectionReason'] as String?,
+          nikMasked: nik == null ? null : maskDocumentNumber(nik),
+          ktpPhoto: photo(v['ktpPhoto']),
+          selfiePhoto: photo(v['selfiePhoto']),
+          storePhotos: [for (final p in v['storePhotos'] as List) ?photo(p)],
+        );
+      }
+    }
   }
+
+  static DateTime? _parseTime(Object? value) => value == null ? null : DateTime.parse(value as String);
 
   /// Hitung ulang rating, jumlah ulasan, dan jumlah pengikut tiap toko.
   void _refreshStoreStats() {
@@ -211,7 +261,8 @@ class LocalRentGearRepository implements RentGearRepository {
         ..rating = reviews.isEmpty
             ? 0
             : reviews.fold(0, (sum, r) => sum + r.rating) / reviews.length
-        ..followerCount = _follows.values.where((ids) => ids.contains(p.id)).length;
+        ..followerCount = _follows.values.where((ids) => ids.contains(p.id)).length
+        ..documentsSubmitted = _verifications[p.id]?.submitted ?? false;
     }
   }
 
@@ -224,6 +275,8 @@ class LocalRentGearRepository implements RentGearRepository {
         _rentals = fresh.rentals();
         _reviews = fresh.reviews();
         _follows = fresh.follows();
+        _verifications = fresh.verifications();
+        _niks = {'p-puncak': SeedData.puncakNik};
         _refreshStoreStats();
         _idempotency.clear();
         _blacklist.clear();
@@ -1066,15 +1119,107 @@ class LocalRentGearRepository implements RentGearRepository {
 
   @override
   Future<ProviderProfile> setProviderStatus(
-          String providerId, ProviderStatus status, AppUser actor) =>
+          String providerId, ProviderStatus status, AppUser actor, {String? reason}) =>
       _mutate(() {
         _requireAdmin(actor);
         final p = _providerById(providerId);
+        final current = _verifications[p.id];
+        final note = reason?.trim() ?? '';
+        if (status == ProviderStatus.verified && !(current?.submitted ?? false)) {
+          throw const AppException('INVALID_STATE', 'Toko belum mengirim dokumen verifikasi.');
+        }
+        if (status == ProviderStatus.rejected && note.isEmpty) {
+          throw const AppException(
+              'VALIDATION', 'Tulis alasan penolakan, supaya pemilik toko tahu yang harus diperbaiki.');
+        }
+        final detail = 'Dari ${p.status.label} menjadi ${status.label}.';
         _record(actor, AuditAction.providerStatus,
-            target: p.businessName, detail: 'Dari ${p.status.label} menjadi ${status.label}.');
+            target: p.businessName,
+            detail: status == ProviderStatus.rejected ? '$detail Alasan: $note' : detail);
         p.status = status;
+        _verifications[p.id] = StoreVerification(
+          providerId: p.id,
+          status: status,
+          submittedAt: current?.submittedAt,
+          reviewedAt: status == ProviderStatus.pending ? null : DateTime.now(),
+          rejectionReason: status == ProviderStatus.rejected ? note : null,
+          nikMasked: current?.nikMasked,
+          ktpPhoto: current?.ktpPhoto,
+          selfiePhoto: current?.selfiePhoto,
+          storePhotos: current?.storePhotos ?? const [],
+        );
+        _refreshStoreStats();
         return p;
       });
+
+  @override
+  Future<StoreVerification> storeVerification(String providerId, AppUser actor) => _delay(() {
+        final p = _providerById(providerId);
+        if (actor.role != UserRole.admin && actor.providerId != p.id) {
+          throw const AppException('FORBIDDEN', 'Dokumen ini hanya untuk pemilik toko dan admin.');
+        }
+        final v = _verifications[p.id] ?? StoreVerification(providerId: p.id, status: p.status);
+        if (actor.role != UserRole.admin) return v;
+        // Hanya admin yang melihat toko lain milik orang yang sama.
+        final nik = _niks[p.id];
+        return StoreVerification(
+          providerId: v.providerId,
+          status: v.status,
+          submittedAt: v.submittedAt,
+          reviewedAt: v.reviewedAt,
+          rejectionReason: v.rejectionReason,
+          nikMasked: v.nikMasked,
+          ktpPhoto: v.ktpPhoto,
+          selfiePhoto: v.selfiePhoto,
+          storePhotos: v.storePhotos,
+          sameOwnerStores: [
+            for (final other in _providers)
+              if (nik != null && other.id != p.id && _niks[other.id] == nik) other.businessName,
+          ]..sort(),
+        );
+      });
+
+  @override
+  Future<StoreVerification> submitVerification(
+          String providerId, AppUser actor, VerificationRequest request) =>
+      _mutate(() {
+        final p = _providerById(providerId);
+        if (actor.role != UserRole.provider || actor.providerId != p.id) {
+          throw const AppException('FORBIDDEN', 'Bukan toko Anda.');
+        }
+        if (p.status == ProviderStatus.verified) {
+          throw const AppException('INVALID_STATE', 'Toko sudah terverifikasi.');
+        }
+        final error = request.error;
+        if (error != null) throw AppException('VALIDATION', error);
+        final nik = request.nik.replaceAll(RegExp(r'\s'), '');
+        final stamp = DateTime.now().microsecondsSinceEpoch;
+        p
+          ..businessName = request.businessName.trim()
+          ..address = request.address.trim()
+          ..bankAccount = request.bankAccount.trim()
+          ..status = ProviderStatus.pending;
+        _niks[p.id] = nik;
+        final verification = StoreVerification(
+          providerId: p.id,
+          status: ProviderStatus.pending,
+          submittedAt: DateTime.now(),
+          nikMasked: maskDocumentNumber(nik),
+          ktpPhoto: MemoryPhoto('${p.id}-ktp-$stamp', request.ktpPhoto!),
+          selfiePhoto: MemoryPhoto('${p.id}-selfie-$stamp', request.selfiePhoto!),
+          storePhotos: [
+            for (final (i, bytes) in request.storePhotos.indexed) MemoryPhoto('${p.id}-store-$i-$stamp', bytes),
+          ],
+        );
+        _verifications[p.id] = verification;
+        _record(actor, AuditAction.storeDocumentsSent, target: p.businessName);
+        _refreshStoreStats();
+        return verification;
+      });
+
+  @override
+  Future<AppUser> openStore(AppUser actor, OpenStoreRequest request) => throw const AppException(
+      'UNSUPPORTED', 'Buka toko hanya tersedia saat aplikasi terhubung ke server.');
 
   // ---------------------------------------------------------------- toko
 

@@ -67,8 +67,9 @@ class _AiRecommendScreenState extends State<AiRecommendScreen> {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         children: [
           const Text(
-            'Ceritakan rencana perjalanan Anda. AI akan memilihkan alat dari '
-            'katalog RentGear.',
+            'Ceritakan rencana pendakian atau camping Anda. AI memilihkan alat dari '
+            'katalog RentGear. Asisten ini hanya membahas perlengkapan perjalanan, '
+            'bukan pertanyaan lain.',
             style: TextStyle(color: Colors.black54),
           ),
           const SizedBox(height: 12),
@@ -80,10 +81,11 @@ class _AiRecommendScreenState extends State<AiRecommendScreen> {
                 TextField(
                   controller: _trip,
                   maxLines: 2,
-                  maxLength: 300,
+                  // Sama dengan batas di server (`AiController::TRIP_LIMIT`).
+                  maxLength: 200,
                   textInputAction: TextInputAction.done,
                   decoration: const InputDecoration(
-                    labelText: 'Rencana perjalanan',
+                    labelText: 'Tujuan dan rencana perjalanan',
                     hintText: 'Mis. Semeru 3 hari, musim hujan, masak sendiri',
                   ),
                 ),

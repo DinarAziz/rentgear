@@ -147,7 +147,26 @@ void main() {
     expect(find.text('Jaminan dipegang'), findsOneWidget);
     await tester.tap(find.text('Penyedia'));
     await tester.pumpAndSettle();
-    expect(find.text('Verifikasi'), findsOneWidget);
+    expect(find.text('Dokumen verifikasi sudah dikirim'), findsOneWidget);
+
+    // Admin memeriksa dokumen Puncak Outdoor, lalu menolak dengan alasan.
+    await tester.ensureVisible(find.text('Periksa dokumen'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Periksa dokumen'));
+    await tester.pumpAndSettle();
+    expect(find.text('Periksa Toko'), findsOneWidget);
+    expect(find.text('NIK pemilik'), findsOneWidget);
+    expect(find.text('KTP'), findsOneWidget);
+    // Daftar dibangun saat digulir, jadi tombol di bawah baru ada setelah digulir.
+    await tester.scrollUntilVisible(find.text('Tolak'), 200, scrollable: find.byType(Scrollable).last);
+    await tester.tap(find.text('Tolak'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Foto KTP buram');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kirim'));
+    await tester.pumpAndSettle();
+    expect(find.text('Verifikasi ditolak'), findsOneWidget);
+    expect(find.text('Alasan admin: Foto KTP buram'), findsOneWidget);
   });
 
   testWidgets('admin sees customer history and can blacklist', (tester) async {

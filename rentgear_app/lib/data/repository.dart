@@ -127,8 +127,20 @@ abstract class RentGearRepository {
   Future<ProviderProfile> updateProviderLocation(
       String providerId, AppUser actor, {required double latitude, required double longitude});
 
+  /// Admin memverifikasi atau menolak toko. Verifikasi butuh dokumen yang
+  /// sudah dikirim; penolakan wajib dengan [reason].
   Future<ProviderProfile> setProviderStatus(
-      String providerId, ProviderStatus status, AppUser actor);
+      String providerId, ProviderStatus status, AppUser actor, {String? reason});
+
+  /// Dokumen verifikasi toko, untuk pemilik toko dan admin.
+  Future<StoreVerification> storeVerification(String providerId, AppUser actor);
+
+  /// Penyedia mengirim data toko dan dokumen. Kiriman baru menggantikan yang
+  /// lama, dan toko kembali menunggu admin.
+  Future<StoreVerification> submitVerification(String providerId, AppUser actor, VerificationRequest request);
+
+  /// Penyewa membuka toko dan akunnya menjadi akun penyedia. Hanya ada di server.
+  Future<AppUser> openStore(AppUser actor, OpenStoreRequest request);
 
   /// Ulasan sebuah toko, terbaru lebih dulu.
   Future<List<Review>> providerReviews(String providerId);

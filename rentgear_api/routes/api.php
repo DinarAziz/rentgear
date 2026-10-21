@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\FileController;
 use App\Http\Controllers\Api\V1\ProviderController;
 use App\Http\Controllers\Api\V1\RentalController;
 use App\Http\Controllers\Api\V1\StoreController;
+use App\Http\Controllers\Api\V1\StoreVerificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -37,6 +38,10 @@ Route::prefix('v1')->group(function () {
         Route::put('provider/location', [ProviderController::class, 'location']);
         Route::put('provider/fine-policy', [ProviderController::class, 'finePolicy']);
         Route::put('provider/discount-policy', [ProviderController::class, 'discountPolicy']);
+        Route::post('provider/open', [StoreVerificationController::class, 'open']);
+        Route::post('provider/verification', [StoreVerificationController::class, 'submit']);
+        Route::get('providers/{id}/verification', [StoreVerificationController::class, 'show']);
+        Route::get('files/providers/{id}/{name}', [StoreVerificationController::class, 'file']);
 
         Route::get('providers', [StoreController::class, 'index']);
         Route::get('providers/{id}', [StoreController::class, 'show']);

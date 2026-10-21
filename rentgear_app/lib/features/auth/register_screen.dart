@@ -220,9 +220,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 12),
                       const Text(
-                        'Toko baru diperiksa admin dulu. Alat tampil di katalog setelah '
-                        'toko diverifikasi. Sesudah daftar, atur titik toko di peta lewat '
-                        'Profil > Lokasi toko di peta.',
+                        'Toko baru diperiksa admin dulu. Sesudah daftar, kirim foto KTP, '
+                        'swafoto dengan KTP, dan foto toko lewat Profil > Verifikasi toko. '
+                        'Alat tampil di katalog setelah toko diverifikasi.',
                         style: TextStyle(fontSize: 13, color: Colors.black54),
                       ),
                     ],

@@ -24,6 +24,10 @@ final class Audit
 
     public const PROVIDER_STATUS = 'provider_status';
 
+    public const STORE_OPENED = 'store_opened';
+
+    public const STORE_DOCUMENTS_SENT = 'store_documents_sent';
+
     public const DAMAGE_FEE_DECIDED = 'damage_fee_decided';
 
     public const MISMATCH_DECIDED = 'mismatch_decided';

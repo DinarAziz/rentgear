@@ -18,10 +18,13 @@ class GeminiClient
     /**
      * Minta jawaban JSON yang mengikuti [schema] (format OpenAPI yang dipakai Gemini).
      *
+     * [system] berisi aturan dari server. Gemini memperlakukannya lebih kuat daripada [prompt], jadi teks yang diketik
+     * pengguna di dalam [prompt] tidak bisa menggantinya.
+     *
      * @param  list<array{label: string, mime: string, data: string}>  $images  foto (base64), tiap foto diberi label
      * @return array<string, mixed>
      */
-    public function json(string $prompt, array $schema, array $images = []): array
+    public function json(string $prompt, array $schema, array $images = [], ?string $system = null): array
     {
         $key = config('services.gemini.api_key');
         if (empty($key)) {
@@ -36,6 +39,7 @@ class GeminiClient
             $response = Http::withHeaders(['x-goog-api-key' => $key])->timeout(9)
                 ->retry(2, 0, fn (Throwable $e) => $e instanceof ConnectionException, throw: false)
                 ->post("https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent", [
+                    ...($system === null ? [] : ['systemInstruction' => ['parts' => [['text' => $system]]]]),
                     'contents' => [['parts' => [
                         ['text' => $prompt],
                         ...collect($images)->flatMap(fn (array $i) => [

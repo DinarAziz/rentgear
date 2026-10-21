@@ -77,7 +77,24 @@ class DemoSeeder extends Seeder
         Provider::create([
             'id' => 'p-puncak', 'owner_id' => 'u-agus', 'business_name' => 'Puncak Outdoor', 'city' => 'Batu',
             'address' => 'Jl. Panglima Sudirman No. 88, Batu', 'latitude' => -7.8707, 'longitude' => 112.5269,
-            'status' => 'pending', 'accepted_types' => ['ktp', 'sim'],
+            'status' => 'pending', 'bank_account' => 'BNI 0451 2233 89 a.n. Agus Pratama', 'accepted_types' => ['ktp', 'sim'],
+        ]);
+        $this->storeDocuments('p-puncak', '3579010101900004');
+    }
+
+    /** Puncak Outdoor sudah mengirim dokumen, jadi admin bisa mencoba memeriksanya. Gambarnya bertanda CONTOH. */
+    private function storeDocuments(string $providerId, string $nik): void
+    {
+        $dir = "store-verifications/$providerId";
+        $copy = function (string $file) use ($dir) {
+            Storage::disk('local')->put("$dir/$file", File::get(database_path("seeders/files/$file")));
+
+            return "$dir/$file";
+        };
+        Provider::findOrFail($providerId)->update([
+            'owner_nik_enc' => $nik, 'owner_nik_masked' => GuaranteePolicy::mask($nik), 'owner_nik_hash' => Provider::nikHash($nik),
+            'ktp_photo_path' => $copy('ktp-contoh.jpg'), 'selfie_photo_path' => $copy('swafoto-contoh.jpg'),
+            'store_photo_paths' => [$copy('toko-contoh.jpg')], 'submitted_at' => $this->now->subHours(3),
         ]);
     }
 

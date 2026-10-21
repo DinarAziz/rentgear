@@ -68,7 +68,7 @@ void main() {
     var local = LocalRentGearRepository.open(store: LocalStore(dir), latency: Duration.zero);
     await expectLater(local.login('admin@rentgear.id', 'salah'), throwsCode('AUTH_FAILED'));
     var admin = await local.login('admin@rentgear.id', 'password');
-    await local.setProviderStatus('p-puncak', ProviderStatus.rejected, admin);
+    await local.setProviderStatus('p-puncak', ProviderStatus.rejected, admin, reason: 'Foto KTP buram');
 
     local = LocalRentGearRepository.open(store: LocalStore(dir), latency: Duration.zero);
     admin = await local.login('admin@rentgear.id', 'password');

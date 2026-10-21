@@ -130,7 +130,7 @@ class _AuditTile extends StatelessWidget {
         Icons.lock_open_outlined,
         Colors.green.shade800,
       ),
-      AuditAction.providerStatus => (
+      AuditAction.providerStatus || AuditAction.storeOpened || AuditAction.storeDocumentsSent => (
         Icons.storefront_outlined,
         Colors.blue.shade700,
       ),

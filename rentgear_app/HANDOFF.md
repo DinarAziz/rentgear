@@ -1470,3 +1470,38 @@ Waiting on the user:
 
 The local web server on 127.0.0.1:8090 used for the recording was stopped. To record again, see
 `demo-video/README.md`.
+
+## Store verification and AI topic limits, 21 October 2026
+
+Asked by the user: a sign-up and verification process for providers (options A to D: documents, rejection with a
+reason and resubmission, "Buka toko" from a renter account, email on the result), with verification still done by the
+admin; and an AI assistant that stays on hiking and camping gear. Reader-facing description: section 7 of
+`../docs/08-RENCANA-KERJA.md`.
+
+- Server: migration `2026_10_21_010000_add_store_verification.php` (encrypted owner NIK, masked NIK, HMAC hash for
+  same-owner checks, photo paths, `submitted_at`, `reviewed_at`, `rejection_reason`). `StoreVerificationService`,
+  `StoreVerificationController`, mail `StoreVerificationResult`. `AdminController::providerStatus` now delegates to
+  the service: verifying needs documents, rejecting needs `reason`, the owner gets an email (a mail failure is logged
+  and does not undo the decision). `Provider::DEFAULT_LOCATION` moved from `AuthController`. New audit actions
+  `store_opened` and `store_documents_sent`.
+- AI: `GeminiClient::json` takes a `system` instruction. `recommend` sends the rules there and the renter's text as
+  JSON data, requires `relevan`, and refuses off-topic plans with `AI_OFF_TOPIC`. Text is clipped (300/160 chars),
+  plans are at most 200 chars, and each account gets 20 recommendations a day.
+- Seed (server and app): Puncak Outdoor has submitted sample documents (images marked CONTOH in
+  `rentgear_api/database/seeders/files/` and `rentgear_app/assets/demo/`) and a BNI account. The server seeder copies
+  the images to `storage/app/private/store-verifications/p-puncak/`.
+- App: `StoreVerification`, `VerificationRequest`, `OpenStoreRequest` in `models.dart`; repository methods
+  `storeVerification`, `submitVerification`, `openStore`, and `setProviderStatus(..., reason:)`. Local mode supports
+  verification (persisted under `verifications`) but not `openStore` (UNSUPPORTED, like register). New screens:
+  `store_verification_screen.dart`, `admin_store_review_screen.dart`, `open_store_screen.dart`, plus
+  `widgets/verification_widgets.dart`. The admin provider list now opens "Periksa dokumen" instead of quick buttons.
+- Tests: 172 server (14 new) and 133 app (10 new) pass, `flutter analyze` clean.
+- Checked against a local API with a throwaway SQLite DB: admin review screen in Chrome at 400x860 (photos load with
+  the token), and over HTTP: open store, submit, same-NIK warning, reject with reason, mail in `laravel.log`. Real
+  Gemini refused a prompt-injection plan and answered a Ranu Kumbolo plan. Not checked on a phone; the reject dialog
+  in the hidden browser pane lagged, the widget test covers that flow.
+- A mistake this session: `dart format lib` reformatted 36 files; they were rebuilt from HEAD plus the edits, so the
+  diff holds only real changes.
+
+Not deployed. Deploying needs `php artisan migrate` on the Redmi (new columns) and a new web build; existing pending
+stores on the public server must send documents before the admin can verify them.

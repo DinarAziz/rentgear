@@ -136,8 +136,10 @@ class HttpRentGearRepository implements RentGearRepository {
   }
 
   /// Berkas privat (foto jaminan, bukti transfer). `null` bila tidak ada.
-  Future<Uint8List?> _file(String path) async {
-    final response = await _run(() => _client.get(_uri(path), headers: _headers));
+  Future<Uint8List?> _file(String path) => _fileAt(_uri(path));
+
+  Future<Uint8List?> _fileAt(Uri uri) async {
+    final response = await _run(() => _client.get(uri, headers: _headers));
     return response.statusCode == 200 ? response.bodyBytes : null;
   }
 
@@ -459,8 +461,53 @@ class HttpRentGearRepository implements RentGearRepository {
 
   @override
   Future<ProviderProfile> setProviderStatus(
-          String providerId, ProviderStatus status, AppUser actor) async =>
-      _provider(await _send('PUT', 'providers/$providerId/status', {'status': status.name}));
+          String providerId, ProviderStatus status, AppUser actor, {String? reason}) async =>
+      _provider(await _send('PUT', 'providers/$providerId/status', {'status': status.name, 'reason': ?reason}));
+
+  @override
+  Future<StoreVerification> storeVerification(String providerId, AppUser actor) async =>
+      _verification(await _get('providers/$providerId/verification') as Map<String, dynamic>);
+
+  @override
+  Future<StoreVerification> submitVerification(
+      String providerId, AppUser actor, VerificationRequest request) async {
+    final error = request.error;
+    if (error != null) throw AppException('VALIDATION', error);
+    final data = await _multipart('provider/verification', fields: {
+      'businessName': request.businessName.trim(),
+      'address': request.address.trim(),
+      'bankAccount': request.bankAccount.trim(),
+      'nik': request.nik.replaceAll(RegExp(r'\s'), ''),
+    }, files: {
+      'ktpPhoto': request.ktpPhoto!,
+      'selfiePhoto': request.selfiePhoto!,
+      for (final (i, photo) in request.storePhotos.indexed) 'storePhotos[$i]': photo,
+    });
+    return _verification(data as Map<String, dynamic>);
+  }
+
+  /// Foto dokumen ikut diunduh, karena tidak bisa dibuka tanpa token.
+  Future<StoreVerification> _verification(Map<String, dynamic> j) async {
+    Future<ItemPhoto?> photo(Object? url, String id) async {
+      if (url == null) return null;
+      final bytes = await _fileAt(Uri.parse(url as String));
+      return bytes == null ? null : MemoryPhoto(id, bytes);
+    }
+
+    final urls = (j['storePhotoUrls'] as List).cast<String>();
+    final id = j['providerId'] as String;
+    final photos = await Future.wait([
+      photo(j['ktpPhotoUrl'], '$id-ktp'),
+      photo(j['selfiePhotoUrl'], '$id-selfie'),
+      for (final (i, url) in urls.indexed) photo(url, '$id-store-$i'),
+    ]);
+    return ApiCodec.verification(j,
+        ktpPhoto: photos[0], selfiePhoto: photos[1], storePhotos: photos.skip(2).nonNulls.toList());
+  }
+
+  @override
+  Future<AppUser> openStore(AppUser actor, OpenStoreRequest request) async =>
+      ApiCodec.user(await _send('POST', 'provider/open', request.toJson()) as Map<String, dynamic>);
 
   @override
   Future<List<Review>> providerReviews(String providerId) async =>

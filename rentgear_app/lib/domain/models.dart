@@ -101,10 +101,15 @@ class ProviderProfile {
 
   final String id;
   final String ownerId;
-  final String businessName;
+
+  /// Nama, alamat, dan rekening bisa diperbaiki saat dokumen verifikasi dikirim ulang.
+  String businessName;
   final String city;
-  final String address;
+  String address;
   ProviderStatus status;
+
+  /// Dokumen verifikasi sudah dikirim, jadi admin bisa memeriksanya.
+  bool documentsSubmitted = false;
   GuaranteePolicy policy;
 
   /// Aturan denda toko. Berlaku untuk booking berikutnya.
@@ -124,7 +129,104 @@ class ProviderProfile {
   int followerCount = 0;
 
   /// Rekening tujuan transfer, mis. "BCA 1234567890 a.n. Arjuna Outdoor".
-  final String? bankAccount;
+  String? bankAccount;
+}
+
+/// Dokumen verifikasi toko. Hanya pemilik toko dan admin yang bisa melihatnya,
+/// dan NIK hanya tampil tersamar.
+class StoreVerification {
+  const StoreVerification({
+    required this.providerId,
+    required this.status,
+    this.submittedAt,
+    this.reviewedAt,
+    this.rejectionReason,
+    this.nikMasked,
+    this.ktpPhoto,
+    this.selfiePhoto,
+    this.storePhotos = const [],
+    this.sameOwnerStores = const [],
+  });
+
+  final String providerId;
+  final ProviderStatus status;
+  final DateTime? submittedAt;
+  final DateTime? reviewedAt;
+
+  /// Alasan admin menolak toko. Pemilik toko memperbaikinya lalu mengirim ulang.
+  final String? rejectionReason;
+  final String? nikMasked;
+  final ItemPhoto? ktpPhoto;
+
+  /// Foto pemilik sambil memegang KTP.
+  final ItemPhoto? selfiePhoto;
+  final List<ItemPhoto> storePhotos;
+
+  /// Toko lain dengan NIK pemilik yang sama. Hanya diisi untuk admin.
+  final List<String> sameOwnerStores;
+
+  bool get submitted => submittedAt != null;
+}
+
+/// Data toko dan dokumen yang dikirim penyedia untuk diverifikasi admin.
+class VerificationRequest {
+  const VerificationRequest({
+    required this.businessName,
+    required this.address,
+    required this.bankAccount,
+    required this.nik,
+    required this.ktpPhoto,
+    required this.selfiePhoto,
+    required this.storePhotos,
+  });
+
+  /// Sama dengan `Provider::MAX_STORE_PHOTOS` di server.
+  static const maxStorePhotos = 3;
+  static final nikPattern = RegExp(r'^[0-9]{16}$');
+
+  final String businessName;
+  final String address;
+  final String bankAccount;
+  final String nik;
+  final Uint8List? ktpPhoto;
+  final Uint8List? selfiePhoto;
+  final List<Uint8List> storePhotos;
+
+  /// Pesan galat pertama, atau `null` bila lengkap. Pesannya sama dengan server.
+  String? get error {
+    if ([businessName, address, bankAccount].any((v) => v.trim().isEmpty)) return 'Lengkapi semua isian.';
+    if (!nikPattern.hasMatch(nik.replaceAll(RegExp(r'\s'), ''))) return 'NIK harus 16 angka.';
+    if (ktpPhoto == null) return 'Lampirkan foto KTP.';
+    if (selfiePhoto == null) return 'Lampirkan foto diri sambil memegang KTP.';
+    if (storePhotos.isEmpty) return 'Lampirkan minimal satu foto toko atau stok alat.';
+    if (storePhotos.length > maxStorePhotos) return 'Foto toko paling banyak $maxStorePhotos.';
+    return null;
+  }
+}
+
+/// Penyewa membuka toko. Akunnya menjadi akun penyedia.
+class OpenStoreRequest {
+  const OpenStoreRequest({
+    required this.businessName,
+    required this.address,
+    required this.bankAccount,
+    required this.phone,
+    required this.city,
+  });
+
+  final String businessName;
+  final String address;
+  final String bankAccount;
+  final String phone;
+  final String city;
+
+  Map<String, dynamic> toJson() => {
+    'businessName': businessName,
+    'address': address,
+    'bankAccount': bankAccount,
+    'phone': phone,
+    'city': city,
+  };
 }
 
 class Category {
@@ -596,6 +698,8 @@ abstract final class AuditAction {
   static const passwordResetRequested = 'password_reset_requested';
   static const passwordReset = 'password_reset';
   static const providerStatus = 'provider_status';
+  static const storeOpened = 'store_opened';
+  static const storeDocumentsSent = 'store_documents_sent';
   static const damageFeeDecided = 'damage_fee_decided';
   static const mismatchDecided = 'mismatch_decided';
   static const blacklistAdded = 'blacklist_added';
@@ -612,6 +716,8 @@ abstract final class AuditAction {
     passwordResetRequested => 'Kode ganti password diminta',
     passwordReset => 'Password diganti lewat kode email',
     providerStatus => 'Status penyedia diubah',
+    storeOpened => 'Penyewa membuka toko',
+    storeDocumentsSent => 'Dokumen verifikasi toko dikirim',
     damageFeeDecided => 'Denda kerusakan diputuskan',
     mismatchDecided => 'Laporan barang tidak sesuai diputuskan',
     blacklistAdded => 'Masuk blacklist',

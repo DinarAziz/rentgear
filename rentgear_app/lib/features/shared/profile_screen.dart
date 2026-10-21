@@ -10,7 +10,10 @@ import '../../widgets/common.dart';
 import '../customer/provider_store_screen.dart';
 import '../provider/discount_policy_screen.dart';
 import '../provider/fine_policy_screen.dart';
+import '../../widgets/verification_widgets.dart';
 import '../provider/store_location_screen.dart';
+import '../provider/store_verification_screen.dart';
+import 'open_store_screen.dart';
 import 'photo_credits_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -68,12 +71,7 @@ class ProfileScreen extends StatelessWidget {
                         children: [
                           Text(p.address),
                           const SizedBox(height: 6),
-                          Pill(p.status.label,
-                              color: switch (p.status) {
-                                ProviderStatus.verified => Colors.green.shade800,
-                                ProviderStatus.pending => Colors.orange.shade800,
-                                ProviderStatus.rejected => Colors.red.shade700,
-                              }),
+                          Pill(p.status.label, color: providerStatusColor(p.status)),
                         ],
                       ),
                     ),
@@ -82,6 +80,21 @@ class ProfileScreen extends StatelessWidget {
                         leading: const Icon(Icons.account_balance_outlined),
                         title: Text(bank),
                       ),
+                    ListTile(
+                      leading: const Icon(Icons.verified_user_outlined),
+                      title: const Text('Verifikasi toko'),
+                      subtitle: Text(switch (p.status) {
+                        ProviderStatus.verified => 'Terverifikasi',
+                        ProviderStatus.rejected => 'Ditolak, lihat alasan dan kirim ulang',
+                        ProviderStatus.pending when p.documentsSubmitted => 'Dokumen terkirim, menunggu admin',
+                        ProviderStatus.pending => 'Kirim KTP, swafoto, dan foto toko',
+                      }),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(builder: (_) => StoreVerificationScreen(providerId: p.id)),
+                      ),
+                    ),
                     ListTile(
                       leading: const Icon(Icons.reviews_outlined),
                       title: const Text('Halaman toko dan ulasan'),
@@ -120,6 +133,22 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+            ),
+          ],
+          // Akun penyedia hanya bisa dibuat di server.
+          if (user.role == UserRole.customer && state.repo.isRemote) ...[
+            const SizedBox(height: 12),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.add_business_outlined),
+                title: const Text('Buka toko di RentGear'),
+                subtitle: const Text('Sewakan alat hiking milik Anda'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(builder: (_) => const OpenStoreScreen()),
                 ),
               ),
             ),
