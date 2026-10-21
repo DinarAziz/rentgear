@@ -38,10 +38,13 @@ return [
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-            'busy_timeout' => null,
+            // Booking yang datang bersamaan mengantre: transaksi IMMEDIATE langsung mengunci tulis, dan yang lain
+            // menunggu sampai 5 detik lalu membaca stok terbaru. Dengan DEFERRED, sebagian permintaan gagal dengan
+            // "database is locked" (lihat tests/concurrency/bersamaan.sh).
+            'busy_timeout' => env('DB_BUSY_TIMEOUT', 5000),
             'journal_mode' => null,
             'synchronous' => null,
-            'transaction_mode' => 'DEFERRED',
+            'transaction_mode' => env('DB_TRANSACTION_MODE', 'IMMEDIATE'),
         ],
 
         'mysql' => [
