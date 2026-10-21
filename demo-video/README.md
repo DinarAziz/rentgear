@@ -49,9 +49,10 @@ Semua perintah dijalankan dari folder ini.
 
 ## Mengubah isi
 
-- Naskah, judul bagian, langkah di panel kanan, urutan screenshot, dan zoom ada di `src/script.json`. Angka di belakang
-  titik dua (`"sewa-ringkasan:2.6"`) adalah bobot lama tampil. `focus` memperbesar layar ke titik tertentu (koordinat
-  layar 390x844 untuk HP).
+- Naskah, judul bagian, langkah di panel kanan, urutan screenshot, dan sorotan ada di `src/script.json`. Angka di
+  belakang titik dua (`"sewa-ringkasan:2.6"`) adalah bobot lama tampil. `at` pada kalimat menyebut screenshot yang
+  tampil saat kalimat itu mulai. `focus.box` menyorot satu area (x, y, lebar, tinggi dalam koordinat layar 390x844
+  untuk HP); kotak setiap elemen ada di `nodes` pada `public/shots/manifest.json`.
 - `speak` dipakai bila yang diucapkan perlu berbeda dari subtitle, misalnya alamat situs.
 - Setelah mengubah naskah, jalankan lagi `node capture/voice.mjs`. Panjang adegan mengikuti panjang suara.
 - Tanggal sewa di rekaman mengikuti hari perekaman (hari ini sampai lusa, 3 hari), supaya diskon 3 hari terlihat.
