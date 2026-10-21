@@ -1,4 +1,6 @@
+import 'availability.dart';
 import 'models.dart';
+import 'rental_state_machine.dart';
 
 const maxEquipmentPhotos = 8;
 
@@ -49,3 +51,30 @@ List<SizeStock> sortSizes(List<SizeStock> sizes) {
   });
   return list;
 }
+
+/// Stok baru tidak boleh lebih kecil dari unit yang sudah dipesan atau sedang
+/// disewa mulai [today]. Tanpa aturan ini, toko bisa menurunkan stok sampai
+/// booking yang sudah dibayar kehilangan unitnya. Pesannya sama dengan server.
+String? stockReductionError(Equipment draft, Iterable<Rental> rentals, DateTime today) {
+  final from = dateOnly(today);
+  final bySize = <String?, List<OccupancyRange>>{};
+  for (final r in rentals) {
+    if (r.equipmentId != draft.id || !RentalStateMachine.lockingStatuses.contains(r.status)) continue;
+    // Alat yang terlambat kembali masih dipakai sampai hari ini.
+    final end = r.endDate.isBefore(from) ? from : r.endDate;
+    bySize.putIfAbsent(r.size, () => []).add(OccupancyRange(r.startDate, end, r.qty));
+  }
+  for (final MapEntry(key: size, value: ranges) in bySize.entries) {
+    final last = ranges.map((r) => r.end).reduce((a, b) => a.isAfter(b) ? a : b);
+    final booked = peakOccupancy(ranges, from, last);
+    if (draft.stockFor(size) < booked) {
+      final which = size == null ? 'Stok' : 'Stok ukuran $size';
+      return '$which tidak bisa kurang dari $booked unit karena sudah dipesan sampai ${_day(last)}. '
+          'Kurangi stok setelah sewa itu selesai.';
+    }
+  }
+  return null;
+}
+
+/// Sama dengan format `d/m/Y` di server.
+String _day(DateTime d) => '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';

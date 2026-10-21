@@ -82,7 +82,9 @@ mengembalikan konfigurasi lama bila nginx menolaknya. Database dan `.env` tidak 
 
 Batasnya: HP harus menyala dan tersambung internet, `php artisan serve` bukan server untuk beban berat, dan database
 SQLite tidak mengunci baris seperti MySQL, jadi jaminan "unit terakhir hanya untuk satu booking" di sini bergantung
-pada kunci tulis SQLite.
+pada kunci tulis SQLite. Transaksi SQLite dibuat `IMMEDIATE` dengan `busy_timeout` 5 detik
+(`config/database.php`), sehingga booking yang datang bersamaan mengantre. Ujinya: `tests/concurrency/bersamaan.sh`,
+hasilnya di `../docs/11-LAPORAN-PENGUJIAN.md`.
 
 ## Login Google
 

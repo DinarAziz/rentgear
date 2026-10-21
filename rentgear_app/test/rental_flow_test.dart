@@ -305,6 +305,18 @@ void main() {
           throwsA(isA<AppException>().having((e) => e.code, 'code', 'FORBIDDEN')));
     });
 
+    test('stock cannot drop below units already booked', () async {
+      // Data demo: tenda dome dipesan 1 unit dan 2 unit pada hari yang beririsan.
+      final dome = await repo.equipment('e-dome4');
+      Equipment withStock(int stock) => dome.copyWith(stock: stock);
+
+      await expectLater(
+        repo.saveEquipment(withStock(2), sari),
+        throwsA(isA<AppException>().having((e) => e.message, 'message', startsWith('Stok tidak bisa kurang dari 3 unit'))),
+      );
+      expect((await repo.saveEquipment(withStock(3), sari)).stock, 3);
+    });
+
     test('uploaded photos and sizes survive restart', () async {
       final dir = Directory.systemTemp.createTempSync('rentgear');
       addTearDown(() => dir.deleteSync(recursive: true));

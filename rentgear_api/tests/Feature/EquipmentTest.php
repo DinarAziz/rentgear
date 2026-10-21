@@ -80,7 +80,7 @@ class EquipmentTest extends ApiTestCase
     public function test_editing_keeps_reorders_and_adds_photos(): void
     {
         $data = $this->save([
-            'name' => 'Tenda Dome 4 Orang (baru)', 'pricePerDay' => 50000,
+            'name' => 'Tenda Dome 4 Orang (baru)', 'pricePerDay' => 50000, 'stock' => 3,
             'photoOrder' => ['keep:e-dome4-photo-3', 'new:0', 'keep:e-dome4-photo-1', 'keep:e-ul2p-photo-1'],
         ], 'e-dome4')->assertOk()->json('data');
 
@@ -91,6 +91,35 @@ class EquipmentTest extends ApiTestCase
         $this->assertCount(3, $data['photos']);
         $this->assertSame('e-dome4-photo-3', $data['photos'][0]['id']);
         $this->assertSame('e-dome4-photo-1', $data['photos'][2]['id']);
+    }
+
+    public function test_stock_cannot_drop_below_units_already_booked(): void
+    {
+        // Data demo: tenda dome dipesan 1 unit (hari 3-5) dan 2 unit (hari 4-6), jadi puncaknya 3 unit.
+        $keep = ['photoOrder' => ['keep:e-dome4-photo-1'], 'newPhotos' => []];
+        $response = $this->save([...$keep, 'name' => 'Tenda Dome 4 Orang', 'stock' => 2], 'e-dome4');
+        $this->assertApiError($response, 'VALIDATION', 422);
+        $this->assertSame('Stok tidak bisa kurang dari 3 unit karena sudah dipesan sampai '
+            .now()->addDays(6)->format('d/m/Y').'. Kurangi stok setelah sewa itu selesai.', $response->json('error.message'));
+        $this->assertSame(3, Equipment::findOrFail('e-dome4')->stock);
+
+        $this->save([...$keep, 'name' => 'Tenda Dome 4 Orang', 'stock' => 3], 'e-dome4')->assertOk();
+        // Alat tanpa pesanan yang berjalan bebas dikurangi stoknya.
+        $this->save(['photoOrder' => ['keep:e-kompor-photo-1'], 'newPhotos' => [], 'name' => 'Kompor Portable', 'categoryId' => 'masak', 'stock' => 1], 'e-kompor')->assertOk();
+    }
+
+    public function test_a_booked_size_cannot_be_removed(): void
+    {
+        $this->book([
+            'equipmentId' => 'e-sepatu', 'size' => '41', 'qty' => 2,
+        ])->assertOk();
+
+        $response = $this->save([
+            'name' => 'Sepatu Hiking Waterproof', 'categoryId' => 'sepatu', 'photoOrder' => ['keep:e-sepatu-photo-1'], 'newPhotos' => [],
+            'sizes' => [['label' => '40', 'stock' => 2], ['label' => '41', 'stock' => 1]],
+        ], 'e-sepatu', 'dewi');
+        $this->assertApiError($response, 'VALIDATION', 422);
+        $this->assertStringStartsWith('Stok ukuran 41 tidak bisa kurang dari 2 unit', $response->json('error.message'));
     }
 
     public function test_provider_updates_its_guarantee_policy(): void

@@ -2,8 +2,11 @@
 
 namespace App\Services;
 
+use App\Domain\Availability\AvailabilityService;
+use App\Domain\Rental\RentalStateMachine;
 use App\Models\Category;
 use App\Models\Equipment;
+use App\Models\Rental;
 use App\Models\User;
 use App\Support\ApiException;
 use Illuminate\Http\UploadedFile;
@@ -43,6 +46,9 @@ final class EquipmentService
         $errors = $this->validate($data, $sizes, count($photos));
         if ($errors !== []) {
             throw new ApiException('VALIDATION', implode("\n", $errors));
+        }
+        if ($equipment !== null && ($error = $this->stockReductionError($equipment, $data, $sizes)) !== null) {
+            throw new ApiException('VALIDATION', $error);
         }
 
         return DB::transaction(function () use ($actor, $equipment, $data, $sizes, $photos, $kept) {
@@ -125,5 +131,37 @@ final class EquipmentService
         }
 
         return $errors;
+    }
+
+    /**
+     * Stok baru tidak boleh lebih kecil dari unit yang sudah dipesan atau sedang disewa mulai hari ini. Tanpa aturan
+     * ini, toko bisa menurunkan stok sampai booking yang sudah dibayar kehilangan unitnya. Sama dengan
+     * `stockReductionError` di aplikasi.
+     *
+     * @param  array<int, array{label: string, stock: int}>  $sizes
+     */
+    private function stockReductionError(Equipment $equipment, array $data, array $sizes): ?string
+    {
+        $today = now()->format('Y-m-d');
+        $stockFor = fn (?string $size) => $size === null
+            ? ($sizes === [] ? (int) ($data['stock'] ?? 0) : array_sum(array_column($sizes, 'stock')))
+            : (int) collect($sizes)->where('label', $size)->sum('stock');
+        $rentals = Rental::where('equipment_id', $equipment->id)->whereIn('status', RentalStateMachine::LOCKING)
+            ->get(['size', 'start_date', 'end_date', 'qty'])->groupBy(fn (Rental $r) => $r->size ?? '');
+        foreach ($rentals as $size => $group) {
+            // Alat yang terlambat kembali masih dipakai sampai hari ini.
+            $ranges = $group->map(fn (Rental $r) => [$r->start_date, max($r->end_date->format('Y-m-d'), $today), $r->qty])->all();
+            $last = max(array_column($ranges, 1));
+            $booked = AvailabilityService::peakOccupancy($ranges, $today, $last);
+            $label = $size === '' ? null : (string) $size;
+            if ($stockFor($label) < $booked) {
+                $which = $label === null ? 'Stok' : "Stok ukuran $label";
+
+                return "$which tidak bisa kurang dari $booked unit karena sudah dipesan sampai "
+                    .date('d/m/Y', strtotime($last)).'. Kurangi stok setelah sewa itu selesai.';
+            }
+        }
+
+        return null;
     }
 }

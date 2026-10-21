@@ -1037,6 +1037,10 @@ class LocalRentGearRepository implements RentGearRepository {
         }
         final errors = validateEquipment(draft);
         if (errors.isNotEmpty) throw AppException('VALIDATION', errors.join('\n'));
+        if (!isNew) {
+          final stockError = stockReductionError(draft, _rentals, DateTime.now());
+          if (stockError != null) throw AppException('VALIDATION', stockError);
+        }
 
         final saved = Equipment(
           id: isNew ? 'e-${DateTime.now().microsecondsSinceEpoch}' : draft.id,

@@ -6,5 +6,6 @@ pkill -f "artisan schedule:work" 2>/dev/null
 pkill -f "artisan serve" 2>/dev/null
 sleep 1
 php artisan schedule:work >> storage/logs/schedule.log 2>&1 &
+# Tanpa --no-reload, artisan serve mengabaikan PHP_CLI_SERVER_WORKERS dan hanya menjalankan satu pekerja.
 export PHP_CLI_SERVER_WORKERS=4
-exec php artisan serve --host=127.0.0.1 --port=8000
+exec php artisan serve --no-reload --host=127.0.0.1 --port=8000
