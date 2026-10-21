@@ -1,0 +1,246 @@
+Hasil php artisan test (phpunit --testdox), 21 Oktober 2026
+PHPUnit 12.5.37 by Sebastian Bergmann and contributors.
+
+
+Time: 00:01.284, 
+
+Access (Tests\Feature\Access)
+ ✔ Another provider cannot touch the order
+ ✔ Another customer cannot pay cancel or view
+ ✔ The renter the store owner and the admin can view a rental
+ ✔ Guarantee photos and payment proofs are private
+ ✔ Admin only endpoints refuse other roles
+ ✔ Admin verifies a store and its gear appears in the catalog
+
+Ai (Tests\Feature\Ai)
+ ✔ Recommendation keeps only real gear and prices it on the server
+ ✔ A plan outside hiking is refused and never shown
+ ✔ The rules go in the system instruction and the plan is sent as data
+ ✔ Plans without words are refused before calling ai
+ ✔ Each account has a daily limit
+ ✔ Risk and fine opinion are for admin and send no identity
+ ✔ Fine opinion never suggests more than the deposit
+ ✔ The app keeps working when ai is down or not configured
+
+Audit (Tests\Feature\Audit)
+ ✔ Admin actions leave a trail
+ ✔ Logins are recorded including failed ones
+ ✔ Only admin reads the trail and nobody can change it
+
+Auth (Tests\Feature\Auth)
+ ✔ Login returns a token and the user
+ ✔ Provider login carries the store id
+ ✔ Wrong password is refused
+ ✔ Requests without a token get the error envelope
+ ✔ Logout revokes the token
+
+Availability (Tests\Unit\Domain\Availability)
+ ✔ Peak not sum of overlapping bookings
+ ✔ Overlapping bookings stack
+ ✔ Bookings outside the window are ignored
+ ✔ Available never goes below zero
+ ✔ Inclusive days counts both ends
+
+Blacklist (Tests\Feature\Blacklist)
+ ✔ Blacklisted customer cannot book until the admin clears it
+ ✔ Admin sees each customers history
+ ✔ Only customers can be blacklisted
+ ✔ Late return counts as a violation
+ ✔ Third violation blacklists automatically and clearing resets the count
+
+Booking (Tests\Feature\Booking)
+ ✔ Booking locks the price and stores the document privately
+ ✔ The client cannot set the price
+ ✔ Booking without guarantee is refused
+ ✔ High value booking needs two guarantees
+ ✔ Same idempotency key returns the same booking
+ ✔ Idempotency key header is required
+ ✔ Double booking is blocked by alg 2
+ ✔ Last unit goes to exactly one of two bookings
+ ✔ Dates and quantity are checked
+ ✔ Size is required and must exist
+ ✔ Stock is tracked per size
+ ✔ Only customers can book
+
+Catalog (Tests\Feature\Catalog)
+ ✔ Catalog hides inactive gear and unverified stores
+ ✔ Search matches name or brand and filters by category
+ ✔ Equipment json matches the flutter model
+ ✔ Equipment photos are public but nothing else is served
+ ✔ Unknown equipment is not found
+ ✔ Availability uses peak occupancy
+ ✔ Availability is tracked per size
+
+Condition Photo (Tests\Feature\ConditionPhoto)
+ ✔ Only the store adds photos and only at the right time
+ ✔ At most four photos per phase and no way to remove them
+ ✔ Photos are private to the rental parties
+ ✔ The fine opinion compares the photos
+
+Discount Policy (Tests\Feature\DiscountPolicy)
+ ✔ A store sets its discount within the platform limit
+ ✔ A rental keeps the discount it was booked under
+
+Discount Policy (Tests\Unit\Domain\DiscountPolicy)
+ ✔ No discount by default
+ ✔ The percent follows the rental length
+ ✔ The discount cuts the rent but not the deposit
+ ✔ Discounts outside the platform limits are refused
+
+Equipment (Tests\Feature\Equipment)
+ ✔ New equipment needs a photo and appears in the catalog
+ ✔ Shoes must have sizes and hidden items leave the catalog
+ ✔ Validation messages match the flutter rules
+ ✔ Provider cannot edit another stores equipment
+ ✔ Editing keeps reorders and adds photos
+ ✔ Provider updates its guarantee policy
+ ✔ Provider moves its store location
+
+Fine Calculator (Tests\Unit\Domain\FineCalculator)
+ ✔ Late days follow calendar dates and never go negative
+ ✔ Late fee is days times price times qty times one and a half
+ ✔ Damage fee must match condition and stay within deposit
+ ✔ Fee above half the deposit needs admin review
+ ✔ Auto blacklist counts from the baseline
+
+Fine Policy (Tests\Feature\FinePolicy)
+ ✔ A store sets its fine rules within the platform limits
+ ✔ A rental keeps the rules it was booked under
+ ✔ Late fees follow the rules locked at booking
+ ✔ The grace period spares a return just after midnight
+
+Fine Policy (Tests\Unit\Domain\FinePolicy)
+ ✔ Defaults match the old fixed rules
+ ✔ Grace hours and multiplier change the late fee
+ ✔ The damage guideline is a share of the deposit
+ ✔ Rules outside the platform limits are refused
+
+Fines (Tests\Feature\Fines)
+ ✔ Late three days fee is charged on return using the server date
+ ✔ Small damage fee applies at once and the rental can be closed
+ ✔ Invalid damage fee is refused
+ ✔ Large fee waits for the admin before the rental can be closed
+ ✔ Customer can object to a damage fee
+ ✔ Decision without a pending review is refused
+
+Google Login (Tests\Feature\GoogleLogin)
+ ✔ A new google account becomes a customer
+ ✔ An existing account is matched by email and keeps its role
+ ✔ Admin cannot sign in with google
+ ✔ Tokens for another app or unverified emails are refused
+ ✔ Google login is off until a client id is set
+
+Guarantee Policy (Tests\Unit\Domain\GuaranteePolicy)
+ ✔ Required count rises for high value rentals
+ ✔ Valid single ktp passes
+ ✔ High value rental needs two documents
+ ✔ Rejects unaccepted type duplicate bad nik blank name missing photo
+ ✔ The document may belong to someone other than the account holder
+ ✔ Unknown or missing type is reported
+ ✔ Masks all but last four digits
+
+Jobs (Tests\Feature\Jobs)
+ ✔ Scheduled jobs expire cancel no show and flag overdue
+ ✔ Fresh data only flags the overdue demo rental
+ ✔ Expired bookings release their stock
+
+Mismatch (Tests\Feature\Mismatch)
+ ✔ A refund closes the rental returns the documents and frees the stock
+ ✔ An exchange or a refusal lets the rental go on
+ ✔ Reports are only taken on the day the gear is handed over
+
+Password Reset (Tests\Feature\PasswordReset)
+ ✔ The code from the email sets a new password and opens a session
+ ✔ A code works only once
+ ✔ An unknown email and the admin get the same answer but no email
+ ✔ A wrong code is refused and five wrong guesses cancel the code
+ ✔ A code expires after fifteen minutes
+ ✔ A second request within a minute is refused and a later one replaces the code
+ ✔ A short new password is refused and keeps the code usable
+ ✔ A mail server that is down is reported and leaves no code
+ ✔ The mail check command warns while no real sender is set
+ ✔ An account made with google can set a password this way
+
+Payment (Tests\Feature\Payment)
+ ✔ Each proof is kept with the amount due
+ ✔ A rejected proof stays in the history and is not overwritten
+ ✔ Each proof can be opened by the parties only
+ ✔ A payment is decided once
+ ✔ The amount follows the locked discount
+
+Register (Tests\Feature\Register)
+ ✔ A new customer gets a session and can log in again
+ ✔ A new provider gets a store that waits for the admin
+ ✔ A provider without store data is refused
+ ✔ An empty form gets one message not one per field
+ ✔ An email that is already used is refused
+ ✔ Nobody can register as admin
+ ✔ A short password or a bad phone number is refused
+
+Rental Flow (Tests\Feature\RentalFlow)
+ ✔ Full lifecycle guarantee verified held then returned
+ ✔ A rejected payment proof goes back to the renter who can upload again
+ ✔ Rejected guarantee blocks confirmation and the booking can be rejected
+ ✔ Customer can cancel before paying
+ ✔ Handover requires payment first
+ ✔ Guarantees can only be reviewed before confirmation
+ ✔ Each role lists only its own rentals
+
+Rental State Machine (Tests\Unit\Domain\RentalStateMachine)
+ ✔ Happy path is allowed for the right actor
+ ✔ Skipping a step is refused
+ ✔ Wrong actor is refused
+ ✔ Guarantee guards
+ ✔ System jobs use a null actor
+ ✔ Locking statuses match the flutter app
+
+Reschedule (Tests\Feature\Reschedule)
+ ✔ New dates apply only after the store agrees
+ ✔ A refused request keeps the old dates
+ ✔ The rental cannot get longer move to the past or stay the same
+ ✔ Dates taken by another renter are refused at request and at approval
+ ✔ Dates are locked once the gear is picked up
+ ✔ A paid rental is not a no show while the store has not answered
+
+Review (Tests\Feature\Review)
+ ✔ Reviews come only from the renter of a completed rental once
+ ✔ Only the store owner replies to a review
+
+Security (Tests\Feature\Security)
+ ✔ Five wrong passwords lock the account for fifteen minutes
+ ✔ A wrong password is audited but not written to the error log
+ ✔ A successful login resets the count of wrong passwords
+ ✔ Too many requests on a route get the api envelope
+ ✔ A login token stops working after thirty days
+ ✔ Api answers and photos carry security headers
+ ✔ A request without login gets 401 even without the json accept header
+ ✔ Uploads that are not jpg png or webp are refused
+ ✔ A store that is not verified is listed only for its owner and the admin
+ ✔ Hidden gear of a store is shown only to its owner and the admin
+
+Seed (Tests\Feature\Seed)
+ ✔ Demo data matches the flutter seed
+ ✔ More stores can be added to a database in use without duplicates
+ ✔ More gear is added to existing stores without duplicates
+ ✔ Document numbers are encrypted at rest
+
+Store (Tests\Feature\Store)
+ ✔ Store rating is the average of its reviews
+ ✔ Store json carries location and guarantee policy
+ ✔ Follow and unfollow change the follower count
+ ✔ Only customers can follow and the store must exist
+ ✔ Store equipment includes hidden items
+
+Store Verification (Tests\Feature\StoreVerification)
+ ✔ A store without documents cannot be verified
+ ✔ Documents are stored privately and shown masked
+ ✔ Only the owner and admin see the documents
+ ✔ Admin verifies and the owner gets an email
+ ✔ A rejection needs a reason and the owner can send again
+ ✔ The form is checked
+ ✔ Admin sees other stores with the same owner nik
+ ✔ A mail failure does not undo the decision
+ ✔ A customer opens a store and becomes a provider
+ ✔ Opening a store is refused while rentals run or when blacklisted
+
+OK (177 tests, 1634 assertions)

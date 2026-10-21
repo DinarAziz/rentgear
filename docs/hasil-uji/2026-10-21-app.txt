@@ -1,0 +1,182 @@
+Hasil flutter test, 21 Oktober 2026
+
+test/app_smoke_test.dart
+  ✔ AI buttons are hidden when the app runs on local data
+  ✔ admin dashboard and provider tabs render
+  ✔ admin dashboard lists what needs action and recent rentals
+  ✔ admin reads the audit trail of its own actions
+  ✔ admin refunds a rental whose gear did not match
+  ✔ admin sees customer history and can blacklist
+  ✔ admin sees which gear is rented, booked or free today
+  ✔ blacklisted customer cannot open the booking form
+  ✔ customer opens catalog, detail and booking form
+  ✔ customer searches gear across stores and reviews a finished rental
+  ✔ provider opens the store location screen
+  ✔ provider replies to a review from its store page
+  ✔ provider verifies guarantee on pending order
+  ✔ stores are sorted by distance and shown on the map
+  ✔ the Google button is hidden without a server and a client id
+  ✔ the store accepts a transfer proof and the rental becomes ready for pickup
+  ✔ the store approves a date change and the rental moves
+  ✔ the store edits its fine rules and the renter sees them
+  ✔ the store rejects a transfer proof with a reason and the renter may upload again
+  ✔ the store sees where to add condition photos on a paid rental
+
+test/ask_reason_test.dart
+  ✔ askReason disables Kirim until a reason is typed
+
+test/audit_test.dart
+  ✔ aksi admin tercatat dengan pelaku, sasaran, dan rincian
+  ✔ gagal masuk tercatat tanpa password, dan hanya admin yang membaca jejak
+  ✔ jejak tersimpan setelah aplikasi ditutup, termasuk gagal masuk
+  ✔ keputusan denda tercatat dengan nomor invoice
+  ✔ login Google dan saran AI ditolak tanpa server
+
+test/booking_prefill_test.dart
+  ✔ dari katalog biasa, form sewa tetap kosong
+  ✔ dari saran AI, form sewa sudah berisi jumlah unit dan lama sewa mulai besok
+  ✔ jumlah dari saran AI diturunkan ke stok yang tersisa
+
+test/condition_photo_test.dart
+  ✔ aturan waktu foto sama untuk semua status
+  ✔ hanya toko pemilik yang menambah foto, pada tahap yang tepat
+  ✔ paling banyak empat foto per tahap, dan foto tersimpan setelah aplikasi ditutup
+
+test/discount_test.dart
+  ✔ DiscountPolicy di luar batas platform ditolak
+  ✔ DiscountPolicy persen diskon mengikuti lama sewa
+  ✔ DiscountPolicy tanpa diskon bila toko belum mengatur
+  ✔ diskon memotong sewa, bukan deposit, dan dikunci saat dipesan
+  ✔ toko mengatur diskonnya sendiri
+
+test/domain_test.dart
+  ✔ ALG-2 availability sweep-line bookings outside the window are ignored
+  ✔ ALG-2 availability sweep-line inclusiveDays counts both ends
+  ✔ ALG-2 availability sweep-line overlapping bookings stack
+  ✔ ALG-2 availability sweep-line peak, not sum, of overlapping bookings
+  ✔ GuaranteePolicy high-value rental needs two documents
+  ✔ GuaranteePolicy masks all but last 4 digits
+  ✔ GuaranteePolicy rejects unaccepted type, duplicate, bad NIK, blank name, missing photo
+  ✔ GuaranteePolicy required count rises for high-value rentals
+  ✔ GuaranteePolicy the document may belong to someone other than the account holder
+  ✔ GuaranteePolicy valid single KTP passes
+
+test/fine_policy_repo_test.dart
+  ✔ sewa memakai aturan saat dipesan, dan aturannya tersimpan
+  ✔ toko mengatur aturan dendanya sendiri, dalam batas platform
+
+test/fines_test.dart
+  ✔ FinePolicy aturan di luar batas platform ditolak
+  ✔ FinePolicy masa tenggang dan pengali mengubah denda terlambat
+  ✔ FinePolicy nilai bawaan sama dengan aturan tetap sebelumnya
+  ✔ FinePolicy pedoman denda kerusakan adalah bagian dari deposit
+  ✔ blacklist admin melihat riwayat pelanggaran tiap penyewa
+  ✔ blacklist penyewa blacklist tidak bisa booking sampai dicabut admin
+  ✔ blacklist tiga pelanggaran membuat penyewa masuk blacklist otomatis
+  ✔ denda pada transaksi denda besar menunggu keputusan admin sebelum transaksi ditutup
+  ✔ denda pada transaksi denda dan catatannya tersimpan setelah aplikasi ditutup
+  ✔ denda pada transaksi denda kerusakan kecil langsung berlaku dan transaksi bisa ditutup
+  ✔ denda pada transaksi denda kerusakan tidak sah ditolak
+  ✔ denda pada transaksi penyewa bisa mengajukan keberatan atas denda kerusakan
+  ✔ denda pada transaksi terlambat 3 hari: denda dihitung saat alat diterima dan dipotong dari deposit
+  ✔ rumus denda denda di atas separuh deposit ditinjau admin
+  ✔ rumus denda denda kerusakan harus cocok dengan kondisi dan tidak melebihi deposit
+  ✔ rumus denda denda terlambat = hari x tarif x unit x 1,5
+  ✔ rumus denda hari terlambat dihitung dari tanggal selesai, tidak pernah negatif
+
+test/forgot_password_screen_test.dart
+  ✔ email dari layar masuk terbawa, dan email yang salah ditahan
+  ✔ kode diminta, isian diperiksa, lalu penolakan server tampil di layar
+  ✔ mode data lokal tidak menawarkan lupa password
+
+test/format_test.dart
+  ✔ RibuanInputFormatter menambah titik ribuan dan membuang non-angka
+  ✔ RibuanInputFormatter menjaga kursor di tengah angka
+  ✔ ribuan dan parseRibuan saling balik
+
+test/gear_status_test.dart
+  ✔ riwayat kerusakan berisi pengembalian rusak atau hilang, terbaru lebih dulu
+  ✔ tersedia tidak pernah negatif
+  ✔ unit yang sudah diambil dihitung disewa, booking hari ini dihitung dipesan
+
+test/http_repository_test.dart
+  ✔ JSON transaksi dipetakan ke model, termasuk denda dan jaminan tersamar
+  ✔ amplop galat menjadi AppException dengan kode yang sama
+  ✔ booking dikirim sebagai multipart dengan Idempotency-Key
+  ✔ daftar mengirim isian sesuai peran dan langsung membuka sesi
+  ✔ detail transaksi mengunduh foto jaminan dan bukti transfer
+  ✔ ketersediaan memakai tanggal kalender tanpa jam
+  ✔ login menyimpan token dan mengirimnya di permintaan berikutnya
+  ✔ lupa password meminta kode, lalu kode dan password baru membuka sesi
+  ✔ mode server memuat ulang layar saat aplikasi kembali ke depan
+  ✔ pendapat denda dan risiko penyewa dipetakan untuk admin
+  ✔ riwayat pembayaran dibaca dan tiap bukti diunduh dengan id-nya
+  ✔ saran AI dipetakan, dan AI yang mati menjadi pesan biasa
+  ✔ server mati atau jawaban bukan JSON menjadi galat NETWORK
+  ✔ sesi dipulihkan dari token, dan token yang ditolak dibuang
+  ✔ terima pengembalian mengirim kondisi dan denda kerusakan
+  ✔ toko dipetakan dengan rating, pengikut, lokasi, dan aturan jaminan
+
+test/maps_test.dart
+  ✔ distanceKm follows the haversine formula
+  ✔ jarak formats metres and kilometres
+  ✔ koordinat uses a decimal comma
+  ✔ stores a provider moves its own store, and nobody else can
+  ✔ stores sortStores puts the nearest store first when the location is known
+
+test/pick_photo_test.dart
+  ✔ tanpa aplikasi kamera: ada pesan yang jelas, lalu galeri dibuka
+
+test/register_screen_test.dart
+  ✔ isian yang salah ditahan di formulir sebelum dikirim
+  ✔ mode data lokal tidak menawarkan daftar akun
+  ✔ penyedia mengisi data toko, dan penolakan server tampil di layar
+
+test/rental_flow_test.dart
+  ✔ a rejected transfer proof goes back to the renter, who can upload again
+  ✔ another provider cannot touch the order
+  ✔ booking without guarantee is refused
+  ✔ data and session survive app restart
+  ✔ double booking is blocked by ALG-2
+  ✔ full lifecycle: guarantee verified, held, then returned
+  ✔ high-value booking needs two guarantees
+  ✔ payment history survives restart
+  ✔ provider equipment management new equipment needs a photo and appears in catalog
+  ✔ provider equipment management provider cannot edit another store equipment
+  ✔ provider equipment management shoes must have sizes; hidden items leave the catalog
+  ✔ provider equipment management uploaded photos and sizes survive restart
+  ✔ same idempotency key returns the same booking
+  ✔ scheduled jobs expire, cancel, no-show and flag overdue
+  ✔ shoe sizes size is required and must exist
+  ✔ shoe sizes stock is tracked per size
+
+test/reschedule_mismatch_test.dart
+  ✔ barang tidak sesuai a refund closes the rental, returns the documents and frees the stock
+  ✔ barang tidak sesuai an exchange or a refusal lets the rental go on
+  ✔ barang tidak sesuai reports are refused before pickup and for gear picked up on an earlier day
+  ✔ ganti tanggal a refused request keeps the old dates
+  ✔ ganti tanggal dates are locked once the gear is picked up
+  ✔ ganti tanggal dates taken by another rental are refused at request and at approval
+  ✔ ganti tanggal new dates apply only after the store agrees
+  ✔ ganti tanggal the rental cannot get longer, move to the past, or stay the same
+
+test/store_test.dart
+  ✔ follow dan unfollow mengubah jumlah pengikut
+  ✔ hanya pemilik toko yang bisa membalas ulasan, dan balasan tersimpan
+  ✔ rating toko adalah rata-rata ulasannya
+  ✔ tiap toko punya koordinat untuk dibuka di Google Maps
+  ✔ ulasan dan follow tersimpan setelah aplikasi ditutup
+  ✔ ulasan hanya dari penyewa transaksi yang sudah selesai, satu kali
+
+test/store_verification_test.dart
+  ✔ admin melihat toko lain dengan NIK pemilik yang sama
+  ✔ buka toko hanya ada di server
+  ✔ dokumen dan alasan penolakan tersimpan di HP
+  ✔ form dokumen diperiksa dengan pesan yang sama seperti server
+  ✔ hanya pemilik toko dan admin yang melihat dokumen
+  ✔ menolak wajib dengan alasan, lalu pemilik toko mengirim ulang
+  ✔ toko demo Puncak sudah mengirim dokumen, dan admin melihatnya
+  ✔ toko tanpa dokumen tidak bisa diverifikasi
+  ✔ versi server: dokumen dikirim multipart dan fotonya diunduh dengan token
+
+139 dari 139 tes lulus

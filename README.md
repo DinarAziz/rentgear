@@ -4,6 +4,8 @@ Status: **Implementasi berjalan.** Aplikasi Flutter ada di [`rentgear_app/`](ren
 
 ## Daftar Dokumen
 
+Pemetaan ke tabel penilaian dosen: [00-KESESUAIAN-PENILAIAN.md](docs/00-KESESUAIAN-PENILAIAN.md).
+
 | File | Isi | Poin permintaan |
 |---|---|---|
 | [01-KONSEP-DAN-ANALISIS.md](docs/01-KONSEP-DAN-ANALISIS.md) | Ringkasan konsep, problem statement, tujuan, aktor & role, daftar fitur, fitur AI + alasan & alternatif | 1–6 |
@@ -14,6 +16,11 @@ Status: **Implementasi berjalan.** Aplikasi Flutter ada di [`rentgear_app/`](ren
 | [06-KEAMANAN-PRIORITAS-ROADMAP.md](docs/06-KEAMANAN-PRIORITAS-ROADMAP.md) | 9 kelompok risiko keamanan + solusi, MoSCoW, roadmap 12 sprint, risiko teknis, **REKOMENDASI FINAL ARCHITECTURE** | 17–20 |
 | [07-JAMINAN-SEWA.md](docs/07-JAMINAN-SEWA.md) | Jaminan sewa wajib (KTP, SIM, KTM, ijazah, dll.): aturan, status, tabel, endpoint, privasi | tambahan |
 | [08-RENCANA-KERJA.md](docs/08-RENCANA-KERJA.md) | Urutan kerja setelah aplikasi lokal: denda dan blacklist (selesai), halaman toko penyedia, server Laravel, login Google, fitur AI | tambahan |
+| [09-DIAGRAM-KELAS-DAN-PBO.md](docs/09-DIAGRAM-KELAS-DAN-PBO.md) | Diagram kelas (Customer, Gear, Rental, Payment) dan penerapan empat prinsip PBO di kode | penilaian |
+| [10-ACTIVITY-DIAGRAM.md](docs/10-ACTIVITY-DIAGRAM.md) | Activity diagram dengan swimlane: pemesanan, pengembalian, verifikasi toko, saran AI | penilaian |
+| [11-LAPORAN-PENGUJIAN.md](docs/11-LAPORAN-PENGUJIAN.md) | 38 kasus uji (stok habis, pemesanan bersamaan, biaya, keterlambatan, tanggal, pengembalian) dan hasilnya | penilaian |
+| [12-PANDUAN-PENGGUNA.md](docs/12-PANDUAN-PENGGUNA.md) | Panduan penyewa, penyedia, dan admin | penilaian |
+| [13-PANDUAN-OPERASIONAL.md](docs/13-PANDUAN-OPERASIONAL.md) | Menjalankan, memperbarui, cadangan, pemeliharaan stok, pencatatan kerusakan, galat | penilaian |
 
 ## Tiga Inti Teknis
 

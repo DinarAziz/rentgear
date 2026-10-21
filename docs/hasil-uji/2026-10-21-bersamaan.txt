@@ -1,0 +1,35 @@
+Uji pemesanan bersamaan, 21 Oktober 2026
+Skrip: rentgear_api/tests/concurrency/bersamaan.sh, server lokal php artisan serve dengan 8 pekerja (--no-reload), SQLite.
+Tiap putaran: 8 penyewa baru memesan unit terakhir alat yang sama pada tanggal yang sama, dikirim serentak.
+
+Sebelum perbaikan (transaction_mode DEFERRED, tanpa busy_timeout), alat e-carrier60:
+berhasil=1 ditolak_stok_habis=5 galat_lain=2
+Dua penyewa mendapat HTTP 500 "database is locked". Tidak ada pemesanan ganda, tetapi pesan galatnya salah.
+GAGAL
+
+Sesudah perbaikan (transaction_mode IMMEDIATE, busy_timeout 5000 ms):
+== e-kompor
+penyewa 1: HTTP 409 SLOT_UNAVAILABLE
+penyewa 2: HTTP 409 SLOT_UNAVAILABLE
+penyewa 3: HTTP 409 SLOT_UNAVAILABLE
+penyewa 4: HTTP 200 OK
+penyewa 5: HTTP 409 SLOT_UNAVAILABLE
+penyewa 6: HTTP 409 SLOT_UNAVAILABLE
+penyewa 7: HTTP 409 SLOT_UNAVAILABLE
+penyewa 8: HTTP 409 SLOT_UNAVAILABLE
+berhasil=1 ditolak_stok_habis=7 galat_lain=0
+LULUS
+== e-carrier60
+penyewa 1: HTTP 409 SLOT_UNAVAILABLE
+penyewa 2: HTTP 409 SLOT_UNAVAILABLE
+penyewa 3: HTTP 409 SLOT_UNAVAILABLE
+penyewa 4: HTTP 409 SLOT_UNAVAILABLE
+penyewa 5: HTTP 200 OK
+penyewa 6: HTTP 409 SLOT_UNAVAILABLE
+penyewa 7: HTTP 409 SLOT_UNAVAILABLE
+penyewa 8: HTTP 409 SLOT_UNAVAILABLE
+berhasil=1 ditolak_stok_habis=7 galat_lain=0
+LULUS
+== e-sbpolar (ringkasan)
+berhasil=1 ditolak_stok_habis=7 galat_lain=0
+LULUS
