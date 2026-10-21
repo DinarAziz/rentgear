@@ -1,11 +1,16 @@
 // Build the PowerPoint copy of the web deck from step screenshots.
 // Each web step becomes a full-slide picture that fades in on click.
+// With a third argument "tanpa-animasi": one picture per slide in its final state, with no click animation and no
+// slide transition. Slides whose later step replaces a whole panel (PANEL_BERGANTI) keep every step as its own slide;
+// other slides that hide something (the double-booking walk-through) end on a state that already sums up the slide.
 const pptxgen = require('pptxgenjs');
 const sharp = require('sharp');
 const JSZip = require('jszip');
 const fs = require('fs');
 
-const [shots, outFile] = process.argv.slice(2);
+const [shots, outFile, mode] = process.argv.slice(2);
+const still = mode === 'tanpa-animasi';
+const PANEL_BERGANTI = ['implementasi', 'pengujian'];
 const meta = JSON.parse(fs.readFileSync(`${shots}/meta.json`));
 const W = 13.333, H = 7.5, PX = W / 1920;
 
@@ -21,6 +26,15 @@ async function build() {
   let section = null;
   for (const m of meta) {
     if (m.pos !== section) { section = m.pos; pres.addSection({ title: m.pos }); }
+    if (still) {
+      for (const f of PANEL_BERGANTI.includes(m.id) ? m.files : m.files.slice(-1)) {
+        const slide = pres.addSlide({ sectionTitle: m.pos });
+        slide.background = { color: '0E1A17' };
+        slide.addImage({ data: await jpeg(f), x: 0, y: 0, w: W, h: H, objectName: 'halaman', altText: m.text.split('\n').slice(0, 2).join(' — ') });
+        slide.addNotes(m.text);
+      }
+      continue;
+    }
     const slide = pres.addSlide({ sectionTitle: m.pos });
     slide.background = { color: '0E1A17' };
     for (const [k, f] of m.files.entries()) {
@@ -53,4 +67,4 @@ async function animate() {
   fs.writeFileSync(outFile, await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }));
 }
 
-build().then(animate).then(() => console.log('done', outFile));
+build().then(() => (still ? null : animate())).then(() => console.log('done', outFile));

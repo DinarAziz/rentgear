@@ -1537,12 +1537,33 @@ close every gap. Done, in commits after `7794d06`:
 - Privacy rule from the user: no reading `.env` or anything outside `/Users/ds/Kuliah/Semester-1`; temp files go to
   `/Users/ds/Kuliah/Semester-1/.tmp-claude/` (outside the repo).
 
-## Resume here (state saved 2026-10-21, before the payments deploy)
+## Payments deployed, deck and PowerPoint updated for the grading table, 21 October 2026 (afternoon)
 
-`api.tgz`, `web.zip` (build `main.dart.269a852beb.js`), `deck.zip` and `bayar.sh` are on the Redmi in `/sdcard/rg/`.
-The user still has to run `sh /sdcard/rg/run.sh bayar` and then `sh /sdcard/rg/hidup.sh` in Termux. `bayar.sh` backs
-up the database, `storage/app` and the site, runs the payments migration, installs the new `start.sh` (4 workers), and
-replaces the site and `/presentasi/`. After it runs: read `/sdcard/rg/bayar.log` over adb and check the public site.
+- Payments deploy: typed `sh /sdcard/rg/run.sh bayar` into Termux over adb (it worked this time). The log shows the
+  `create_payments_table` migration ran and 2 old proofs moved into `payments`; the site now serves
+  `main.dart.269a852beb.js` and `/presentasi/` says 318 tests. Typing `hidup.sh` afterwards did not run, then wireless
+  adb dropped and the phone locked, so the public API answered 502. The user was asked to run
+  `sh /sdcard/rg/hidup.sh` in Termux.
+- Web deck (`presentasi/`), now 37 slides: Waterfall with 5 stages (Deployment added), new slides "Activity diagram
+  pemesanan" (swimlanes), "Diagram kelas dan penerapan PBO" (Customer/AppUser, Gear/Equipment, Rental, Payment and
+  the four principles), "Fitur baru di aplikasi" (four phone screens), "Temuan dari uji serentak", and "Deployment dan
+  pemeliharaan" (Pos 10). ERD and "Struktur database" include `payments`; the test slide groups 38 cases by the
+  table's categories; the admin role and the conclusion mention store verification and gear status. The new phone
+  screenshots (`assets/app/verifikasi.webp`, `periksa.webp`, `pembayaran.webp`, `status-alat.webp`) were taken from
+  the local-mode web build with puppeteer at 390x844, including a real reject-and-resend of a transfer proof.
+- `presentasi/ppt/build.js` takes a third argument `tanpa-animasi`: one picture per slide in its final state, no click
+  animation, no transition; "implementasi" and "pengujian" keep both panels as separate slides.
+  `../RentGear-presentasi-kelompok4-tanpa-animasi.pptx` (38 slides, 6.6 MB) is the copy for the lecturer;
+  `../RentGear-presentasi-kelompok4.pptx` (36 slides, animated) was rebuilt too. Both open in LibreOffice and all
+  pages render. The promo video slide is left out of both, as before. Build deps were installed in
+  `/Users/ds/Kuliah/Semester-1/.tmp-claude/pptnode` and run with `NODE_PATH` pointing there.
+- `deck.zip` with the new deck is on the phone; installing it needs `sh /sdcard/rg/run.sh deck` in Termux.
+
+## Resume here (state saved 2026-10-21, afternoon)
+
+Waiting on the user, in Termux on the Redmi: `sh /sdcard/rg/hidup.sh` (API is down until then) and
+`sh /sdcard/rg/run.sh deck` (new web deck). Then check `https://rentgear.serverbaik.my.id/api/v1/categories` (401)
+and `/presentasi/` (37 slides).
 
 Still open from before: a new Gmail App Password and Gemini key, a GitHub push when asked, rebuilding the APK on the
-Redmi, the Arunika voice for the video, and the PowerPoint copy of the deck.
+Redmi, and the Arunika voice for the video.

@@ -66,3 +66,10 @@ bukti yang bisa dibuka: dokumen di folder `docs/`, berkas kode, atau hasil uji. 
 | Panduan operasional | `docs/13-PANDUAN-OPERASIONAL.md`: pembaruan server, cadangan dan pemulihan, galat, jadwal pemeliharaan. |
 | Pencatatan kerusakan barang | `docs/13-PANDUAN-OPERASIONAL.md` bagian 5; "Catatan kerusakan" di form alat dan label kerusakan terakhir di layar Alat. |
 | Prosedur pembaruan stok | `docs/13-PANDUAN-OPERASIONAL.md` bagian 4, langkah 1 sampai 5. |
+
+## Presentasi
+
+Deck web di `presentasi/` (juga di `https://rentgear.serverbaik.my.id/presentasi/`) mengikuti urutan Waterfall yang
+sama: metode (5 tahap), perancangan (activity diagram, ERD, struktur database, diagram kelas dan PBO), implementasi
+(fitur baru), pengujian (38 kasus dan temuan uji serentak), serta deployment dan pemeliharaan. Salinan untuk dosen
+tanpa animasi: `RentGear-presentasi-kelompok4-tanpa-animasi.pptx`.

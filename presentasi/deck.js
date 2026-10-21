@@ -345,12 +345,13 @@ function bangunKontur() {
 function bangunTahap() {
   const wadah = $('#tahap');
   const tahap = [
-    ['Analisis', 'Masalah penyewa dan penyedia, peran pengguna, daftar fitur.'],
-    ['Perancangan', 'Algoritma, alur status, use case, rancangan database dan API.'],
+    ['Analisis', 'Kebutuhan penyewaan, stok, durasi, dan pembayaran.'],
+    ['Perancangan', 'Use case, activity diagram, diagram kelas, ERD.'],
     ['Implementasi', 'Aplikasi Flutter untuk Android dan web, server Laravel.'],
-    ['Pengujian', 'Tes otomatis dan pengujian langsung di ponsel.'],
+    ['Pengujian', '318 tes otomatis, uji serentak, uji langsung di ponsel.'],
+    ['Deployment', 'Server publik, panduan, pemeliharaan stok dan data.'],
   ];
-  const titik = [[120, 420], [520, 320], [910, 210], [1300, 100]];
+  const titik = [[70, 425], [380, 340], [690, 255], [1000, 170], [1310, 85]];
   const jalur = lengkung(titik);
   const svg = buat('svg', {}, wadah);
   buat('path', { class: 'dasar', d: jalur }, svg);
@@ -448,6 +449,7 @@ function bangunErd() {
     equipment: [410, 230, ['PK id', 'FK provider_id', 'FK category_id', 'name', 'price_per_day', 'stock']],
     equipment_sizes: [410, 510, ['PK id', 'FK equipment_id', 'label', 'stock']],
     rentals: [800, 140, ['PK id', 'FK customer_id', 'FK provider_id', 'FK equipment_id', 'start_date', 'end_date', 'status']],
+    payments: [800, 450, ['PK id', 'FK rental_id', 'amount', 'status', 'proof_path']],
     guarantees: [1210, 10, ['PK id', 'FK rental_id', 'type', 'number_enc', 'status']],
     rental_status_logs: [1210, 250, ['PK id', 'FK rental_id', 'from', 'to', 'at']],
     reviews: [1210, 490, ['PK id', 'FK rental_id', 'rating', 'comment']],
@@ -463,6 +465,7 @@ function bangunErd() {
     ['M1050 200H1130V90H1210', [1050, 200], [1210, 90], true],
     ['M1050 300H1210', [1050, 300], [1210, 300], true],
     ['M1050 370H1130V570H1210', [1050, 370], [1210, 570], false],
+    ['M925 400V450', [925, 400], [925, 450], true],
   ];
   // Palang melintang terhadap garis (tegak bila garisnya mendatar), digeser `maju` sepanjang garis itu.
   const palang = (x, y, datar, maju) => (datar ? `M${x + maju} ${y - 10}V${y + 10}` : `M${x - 10} ${y + maju}H${x + 10}`);

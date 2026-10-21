@@ -289,7 +289,7 @@
 
   <!-- Pos 5 -->
   <section class="slide" id="metode" data-pos="Pos 5" data-label="Metode">
-    <h2 class="head">Metode pengerjaan</h2>
+    <h2 class="head">Metode pengerjaan: Waterfall</h2>
     <div class="tahap" id="tahap"></div>
     <p class="kecil alat" data-step="1">Perangkat yang digunakan: Flutter dan Dart untuk aplikasi, Laravel dan MySQL untuk server (SQLite hanya pada server demo).</p>
   </section>
@@ -342,9 +342,9 @@
       <div data-step="2">
         <header><svg viewBox="0 0 68 68" class="ikon"><path d="M34 6l22 9v16c0 15-9 24-22 30-13-6-22-15-22-30V15z"/><path d="M23 34l8 8 14-15"/></svg><h3>Admin</h3></header>
         <ul>
-          <li>Memverifikasi atau menolak penyedia baru</li>
+          <li>Memeriksa dokumen toko baru (KTP, swafoto, foto toko), lalu memverifikasi atau menolak dengan alasan</li>
           <li>Meninjau denda yang tidak wajar dan mengelola blacklist penyewa</li>
-          <li>Memantau dashboard: transaksi aktif, jaminan dipegang, nilai sewa</li>
+          <li>Memantau dashboard dan status alat hari ini: unit disewa, dipesan, tersedia</li>
         </ul>
       </div>
     </div>
@@ -389,6 +389,34 @@
       <li><svg viewBox="0 0 60 30"><path d="M2 15L30 2L58 15L30 28z"/></svg>Keputusan</li>
     </ul>
     <p class="inti" data-step="1"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Ringkasan: booking baru disimpan setelah lolos tiga pemeriksaan. Baris data alat dikunci terlebih dahulu sehingga dua pengguna yang memesan unit terakhir pada detik yang sama diproses secara bergantian.</p>
+  </section>
+
+  <section class="slide" id="aktivitas" data-pos="Pos 6" data-label="Perancangan">
+    <h2 class="head">Activity diagram pemesanan</h2>
+    <svg class="bagan aktivitas" viewBox="0 0 1500 540" role="img" aria-label="Activity diagram dengan tiga jalur: penyewa memilih alat, sistem memeriksa stok dan menyimpan booking, penyedia memeriksa jaminan, penyewa mentransfer, sistem membuat Payment, penyedia memeriksa bukti hingga lunas">
+      <defs><marker id="mata-aktivitas" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z"/></marker></defs>
+      <g class="lajur">
+        <rect x="0" y="0" width="1500" height="180"/><rect x="0" y="180" width="1500" height="180"/><rect x="0" y="360" width="1500" height="180"/>
+        <text x="62" y="97">Penyewa</text><text x="62" y="277">Sistem</text><text x="62" y="457">Penyedia</text>
+      </g>
+      <g class="garis">
+        <path d="M186 90H218"/><path d="M440 90H560V208"/><path d="M655 270H698"/><path d="M465 270H330V130"/>
+        <path d="M805 308V410"/><path d="M910 450H950V90H988"/><path d="M1090 128V230"/><path d="M1090 308V450H1213"/>
+        <path d="M1385 450H1428"/><path d="M1300 395V90H1192"/>
+      </g>
+      <circle class="mulai" cx="170" cy="90" r="16"/>
+      <g class="n"><rect x="220" y="52" width="220" height="76" rx="10"/><text x="330" y="84">Pilih alat, tanggal,</text><text x="330" y="110">isi jaminan</text></g>
+      <g class="n tanya"><path d="M465 270L560 210L655 270L560 330z"/><text x="560" y="264">Stok cukup?</text><text x="560" y="290">(ALG-2)</text></g>
+      <g class="n"><rect x="700" y="232" width="210" height="76" rx="10"/><text x="805" y="264">Simpan booking,</text><text x="805" y="290">harga dikunci</text></g>
+      <g class="n"><rect x="700" y="412" width="210" height="76" rx="10"/><text x="805" y="444">Periksa jaminan,</text><text x="805" y="470">konfirmasi</text></g>
+      <g class="n"><rect x="990" y="52" width="200" height="76" rx="10"/><text x="1090" y="84">Transfer, unggah</text><text x="1090" y="110">bukti</text></g>
+      <g class="n"><rect x="990" y="232" width="200" height="76" rx="10"/><text x="1090" y="264">Payment baru,</text><text x="1090" y="290">nominal terkunci</text></g>
+      <g class="n tanya"><path d="M1215 450L1300 395L1385 450L1300 505z"/><text x="1300" y="444">Bukti</text><text x="1300" y="470">cocok?</text></g>
+      <circle class="selesai" cx="1450" cy="450" r="19"/><circle class="selesai-isi" cx="1450" cy="450" r="10"/>
+      <g class="cabang-t"><text x="675" y="258">Ya</text><text x="400" y="258">Tidak</text><text x="1407" y="438">Ya</text><text x="1345" y="300">Tidak</text><text x="1450" y="412">Lunas</text></g>
+    </svg>
+    <p class="kecil aktivitas-ket" data-in>Tanpa jawaban toko 12 jam: booking kedaluwarsa. Tanpa pembayaran 24 jam: batal. Bukti yang ditolak tetap tersimpan, dan penyewa mengirim bukti baru.</p>
+    <p class="inti" data-step="1"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Ringkasan: setiap jalur adalah satu pelaku. Activity diagram pengembalian, verifikasi toko, dan saran AI ada di dokumen laporan.</p>
   </section>
 
   <section class="slide" id="jenis" data-pos="Pos 6" data-label="Perancangan">
@@ -562,7 +590,7 @@
 
   <section class="slide" id="erd" data-pos="Pos 6" data-label="Perancangan">
     <h2 class="head">ERD: hubungan antar tabel</h2>
-    <svg class="erd" id="erd-diagram" viewBox="0 0 1480 690" role="img" aria-label="Diagram hubungan tabel: users, providers, categories, equipment, equipment_sizes, rentals, guarantees, rental_status_logs, reviews"></svg>
+    <svg class="erd" id="erd-diagram" viewBox="0 0 1480 690" role="img" aria-label="Diagram hubungan tabel: users, providers, categories, equipment, equipment_sizes, rentals, payments, guarantees, rental_status_logs, reviews"></svg>
     <p class="kecil erd-ket" data-in><b class="pk">PK</b> adalah kunci utama, <b class="fk">FK</b> adalah kolom penghubung ke tabel lain. Ujung bercabang menandakan relasi banyak: satu alat dapat memiliki banyak transaksi sewa.</p>
   </section>
 
@@ -593,16 +621,38 @@
         <tr><td>start_date</td><td>date</td><td>sampai end_date</td></tr>
         <tr><td>status</td><td>string</td><td>tahap transaksi saat ini</td></tr>
       </tbody></table>
-      <table class="struktur" data-step="1"><caption>guarantees <span>dokumen jaminan</span></caption><tbody>
+      <table class="struktur" data-step="1"><caption>payments <span>bukti transfer</span></caption><tbody>
         <tr><td>id</td><td>string</td><td>kunci utama</td></tr>
         <tr><td>rental_id</td><td>string</td><td>ke rentals</td></tr>
-        <tr><td>type</td><td>string</td><td>KTP, SIM, KTM, dan lainnya</td></tr>
-        <tr><td>number_enc</td><td>text</td><td>nomor dokumen, terenkripsi</td></tr>
-        <tr><td>number_masked</td><td>string</td><td>nomor tersamar untuk layar</td></tr>
-        <tr><td>status</td><td>string</td><td>tahap jaminan saat ini</td></tr>
+        <tr><td>amount</td><td>decimal(12,2)</td><td>dikunci server</td></tr>
+        <tr><td>status</td><td>string</td><td>submitted, accepted, rejected</td></tr>
+        <tr><td>proof_path</td><td>string</td><td>foto bukti, disk privat</td></tr>
+        <tr><td>note</td><td>string</td><td>alasan bila ditolak</td></tr>
       </tbody></table>
     </div>
-    <p class="kecil tabel-lain" data-step="2">16 tabel aplikasi. Dua belas tabel lainnya: providers, categories, equipment_sizes, equipment_photos, rental_status_logs, reviews, follows, blacklist_entries, condition_photos, audit_logs, idempotency_keys, counters.</p>
+    <p class="kecil tabel-lain" data-step="2">17 tabel aplikasi. Tiga belas tabel lainnya: providers, categories, equipment_sizes, equipment_photos, guarantees, rental_status_logs, reviews, follows, blacklist_entries, condition_photos, audit_logs, idempotency_keys, counters.</p>
+  </section>
+
+  <section class="slide" id="kelas" data-pos="Pos 6" data-label="Perancangan">
+    <h2 class="head">Diagram kelas dan penerapan PBO</h2>
+    <div class="kelas">
+      <svg class="erd kelas-bagan" viewBox="0 0 1120 560" data-in role="img" aria-label="Diagram kelas: Customer dan Gear masing-masing berhubungan satu ke banyak dengan Rental, dan Rental tersusun atas banyak Payment">
+        <defs><marker id="belah-kelas" viewBox="0 0 20 12" refX="1" refY="6" markerWidth="20" markerHeight="12" orient="auto"><path d="M1 6L10 1L19 6L10 11z"/></marker></defs>
+        <g class="hub kelas-hub"><path d="M320 95H410V240H500"/><path d="M320 445H410V340H500"/><path class="komposisi" d="M800 289H880"/></g>
+        <g class="label-hub"><text x="332" y="84">1</text><text x="480" y="230">*</text><text x="332" y="434">1</text><text x="480" y="332">*</text><text x="814" y="278">1</text><text x="862" y="278">*</text>
+          <text x="418" y="170" class="kata kiri">menyewa</text><text x="418" y="400" class="kata kiri">disewa</text><text x="840" y="316" class="kata">dibayar</text></g>
+        <g class="tbl"><rect class="badan" x="0" y="20" width="320" height="176" rx="10"/><path class="kepala" d="M0 62V30a10 10 0 0 1 10-10H310a10 10 0 0 1 10 10V62z"/><text class="nama" x="16" y="50">Customer</text><text class="alias" x="308" y="49">AppUser</text><text x="16" y="90">id, name, email</text><text x="16" y="120">phone, city</text><text x="16" y="150">role = customer</text><text x="16" y="180" class="metode">login(), register()</text></g>
+        <g class="tbl"><rect class="badan" x="0" y="360" width="320" height="176" rx="10"/><path class="kepala" d="M0 402V370a10 10 0 0 1 10-10H310a10 10 0 0 1 10 10V402z"/><text class="nama" x="16" y="390">Gear</text><text class="alias" x="308" y="389">Equipment</text><text x="16" y="430">pricePerDay</text><text x="16" y="460">depositAmount</text><text x="16" y="490">stock, sizes</text><text x="16" y="520" class="metode">stockFor(size)</text></g>
+        <g class="tbl"><rect class="badan" x="500" y="140" width="300" height="266" rx="50"/><path class="kepala" d="M500 182V150a10 10 0 0 1 10-10H790a10 10 0 0 1 10 10V182z"/><text class="nama" x="516" y="170">Rental</text><text x="516" y="210">startDate, endDate</text><text x="516" y="240">qty, status</text><text x="516" y="270">priceSnapshot</text><text x="516" y="300">lateFee, damageFee</text><text x="516" y="330" class="metode">grandTotal()</text><text x="516" y="360" class="metode">lateFeeAt(tanggal)</text><text x="516" y="390" class="metode">latestPayment()</text></g>
+        <g class="tbl"><rect class="badan" x="880" y="180" width="240" height="206" rx="50"/><path class="kepala" d="M880 222V190a10 10 0 0 1 10-10H1110a10 10 0 0 1 10 10V222z"/><text class="nama" x="896" y="210">Payment</text><text x="896" y="250">amount</text><text x="896" y="280">status</text><text x="896" y="310">proof, note</text><text x="896" y="340">reviewedAt</text><text x="896" y="370" class="metode">review()</text></g>
+      </svg>
+      <ul class="pbo" data-step="1">
+        <li><h3>Enkapsulasi</h3><p><code>Payment.review()</code> satu-satunya cara mengubah status bayar, dan menolak bila sudah diperiksa.</p></li>
+        <li><h3>Abstraksi</h3><p><code>RentGearRepository</code> berisi kontrak data. Layar tidak tahu data dari HP atau dari server.</p></li>
+        <li><h3>Pewarisan</h3><p><code>AssetPhoto</code>, <code>MemoryPhoto</code>, <code>NetworkPhoto</code> mewarisi <code>ItemPhoto</code>. Model Laravel mewarisi <code>Model</code>.</p></li>
+        <li><h3>Polimorfisme</h3><p>Repository lokal dan repository server dipakai bergantian lewat tipe yang sama.</p></li>
+      </ul>
+    </div>
   </section>
 
   <!-- Pos 7 -->
@@ -721,6 +771,17 @@
     <p class="inti" data-step="3"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Diskon diatur toko karena toko yang menanggungnya; platform hanya memasang batas.</p>
   </section>
 
+  <section class="slide" id="fitur" data-pos="Pos 8" data-label="Implementasi">
+    <h2 class="head">Fitur baru di aplikasi</h2>
+    <div class="hp-deret" data-in>
+      <figure class="hp"><div class="rangka"><img src="assets/app/verifikasi.webp" alt="Form verifikasi toko: data toko, NIK, foto KTP, swafoto, foto toko"></div><figcaption>Penyedia mengirim dokumen</figcaption></figure>
+      <figure class="hp"><div class="rangka"><img src="assets/app/periksa.webp" alt="Admin memeriksa dokumen toko sebelum verifikasi"></div><figcaption>Admin memeriksa toko</figcaption></figure>
+      <figure class="hp"><div class="rangka"><img src="assets/app/pembayaran.webp" alt="Riwayat pembayaran: bukti ditolak dengan alasan, lalu bukti baru diperiksa"></div><figcaption>Riwayat pembayaran</figcaption></figure>
+      <figure class="hp"><div class="rangka"><img src="assets/app/status-alat.webp" alt="Status alat hari ini: disewa, dipesan, tersedia per toko"></div><figcaption>Status alat hari ini</figcaption></figure>
+    </div>
+    <p class="inti" data-step="1"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Asisten AI juga dibatasi: hanya menjawab perlengkapan pendakian dan camping, pertanyaan lain ditolak server, dan tiap akun mendapat 20 saran per hari.</p>
+  </section>
+
   <!-- Pos 9 -->
   <section class="slide" id="pengujian" data-pos="Pos 9" data-label="Pengujian">
     <h2 class="head">Pengujian</h2>
@@ -728,35 +789,84 @@
       <div data-in>
         <p class="skor"><b class="angka" id="skor">318</b><span>dari 318</span></p>
         <p class="teks">skenario tes otomatis lulus: 139 di aplikasi, 179 di server.</p>
-        <p class="kecil jelas">Tes otomatis adalah kode yang menjalankan aplikasi, kemudian memeriksa hasilnya secara mandiri. Dijalankan dengan <code>flutter test</code> dan <code>php artisan test</code>.</p>
+        <p class="kecil jelas">Tes otomatis adalah kode yang menjalankan aplikasi, kemudian memeriksa hasilnya secara mandiri. 38 kasus uji dikelompokkan sesuai tabel penilaian, dengan laporan tertulis.</p>
       </div>
       <div class="narasi">
         <div data-hide-at="1">
           <ul class="kelompok" data-in>
-            <li><h3>Aplikasi: sewa, stok, jaminan, diskon <b>46</b></h3><div class="titik-uji" data-n="46"></div><p>Contoh: pemesanan ganda ditolak, booking tanpa jaminan ditolak, bukti transfer yang ditolak dapat diunggah ulang.</p></li>
-            <li><h3>Aplikasi: denda, blacklist, toko, peta, audit <b>35</b></h3><div class="titik-uji" data-n="35"></div><p>Contoh: keterlambatan 3 hari dikenai 1,5 kali tarif, rating toko merupakan rata-rata ulasan.</p></li>
-            <li><h3>Aplikasi: layar dan format <b>28</b></h3><div class="titik-uji" data-n="28"></div><p>Contoh: halaman awal menampilkan toko, formulir pendaftaran menolak email yang tidak valid.</p></li>
-            <li><h3>Aplikasi: sambungan ke server <b>15</b></h3><div class="titik-uji" data-n="15"></div><p>Contoh: galat dari server ditampilkan dengan pesan yang sama, dan server yang mati tidak membuat aplikasi macet.</p></li>
-            <li><h3>Server: aturan inti <b>30</b></h3><div class="titik-uji" data-n="30"></div><p>Kasus yang sama dengan tes aplikasi untuk membuktikan bahwa kedua sisi menghasilkan angka yang sama.</p></li>
-            <li><h3>Server: API <b>128</b></h3><div class="titik-uji" data-n="128"></div><p>Contoh: unit terakhir hanya diberikan kepada satu booking, email yang sudah terdaftar ditolak, foto KTP tidak dapat dibuka pihak lain.</p></li>
+            <li><h3>Stok habis <b>6</b></h3><div class="titik-uji" data-n="6"></div><p>Pesanan melebihi stok ditolak, stok dihitung per ukuran, dan booking yang batal melepas stok.</p></li>
+            <li><h3>Pemesanan bersamaan <b>5</b></h3><div class="titik-uji" data-n="5"></div><p>8 penyewa memesan unit terakhir serentak: 1 berhasil, 7 ditolak. Kiriman ganda tidak membuat booking kedua.</p></li>
+            <li><h3>Biaya <b>6</b></h3><div class="titik-uji" data-n="6"></div><p>Harga diambil dari server, diskon tidak memotong deposit, dan nominal pembayaran dikunci.</p></li>
+            <li><h3>Keterlambatan <b>5</b></h3><div class="titik-uji" data-n="5"></div><p>Terlambat 3 hari dikenai hari × tarif × unit × 1,5, memakai tanggal server.</p></li>
+            <li><h3>Validasi tanggal <b>4</b></h3><div class="titik-uji" data-n="4"></div><p>Tanggal lampau dan tanggal terbalik ditolak, ganti tanggal tidak boleh memperpanjang sewa.</p></li>
+            <li><h3>Pengembalian <b>7</b></h3><div class="titik-uji" data-n="7"></div><p>Denda kerusakan dibatasi deposit, denda besar ditinjau admin, catatan kerusakan per alat.</p></li>
+            <li><h3>Hak akses dan keamanan <b>5</b></h3><div class="titik-uji" data-n="5"></div><p>Foto jaminan dan bukti transfer privat, akun terkunci setelah 5 kali salah password.</p></li>
           </ul>
         </div>
         <table class="tabel-uji" data-step="1">
           <caption class="sub">Pengujian langsung di ponsel Redmi 17, emulator, dan browser</caption>
           <tbody>
             <tr><td>Proses sewa lengkap dari booking hingga pengembalian</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
-            <tr><td>Jaminan ditolak, booking ditolak, kemudian stok dapat dipesan kembali</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
+            <tr><td>Jaminan dan booking ditolak, stok bisa dipesan lagi</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
             <tr><td>Admin: dashboard, verifikasi penyedia, daftar transaksi</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
-            <tr><td>Server publik: akun terkunci setelah 5 kali kesalahan password, berkas bukan foto ditolak</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
-            <tr><td>Denda dan blacklist di ponsel: keterlambatan, kerusakan, keberatan penyewa, keputusan admin</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
+            <tr><td>Server publik: 5 kali salah password mengunci akun</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
+            <tr><td>Denda dan blacklist di ponsel, termasuk keberatan penyewa</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
             <tr><td>Ponsel dan web melalui server: sewa hingga denda diputuskan</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
-            <tr><td>Versi web pada lebar 390, 820, dan 1440 piksel</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
-            <tr><td>Pendaftaran akun penyewa dan penyedia di server publik</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
+            <tr><td>Uji serentak: 8 penyewa memesan unit terakhir</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
+            <tr><td>Server publik: verifikasi toko dan pembayaran</td><td><svg viewBox="0 0 30 30" class="ikon hijau"><path d="M6 16l6 6 12-13"/></svg>Lulus</td></tr>
           </tbody>
         </table>
       </div>
     </div>
     <p class="inti" data-step="1"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Ringkasan: setiap aturan penting memiliki tes, dan alurnya sudah diuji langsung di ponsel.</p>
+  </section>
+
+  <section class="slide" id="temuan" data-pos="Pos 9" data-label="Pengujian">
+    <h2 class="head">Temuan dari uji serentak</h2>
+    <div class="belah temuan">
+      <div class="papan" data-in>
+        <h3 class="sub">Sebelum perbaikan</h3>
+        <ul class="hasil-uji"><li><b class="angka hijau">1</b><span>booking berhasil</span></li><li><b class="angka">5</b><span>ditolak, stok habis</span></li><li><b class="angka merah">2</b><span>galat server "database is locked"</span></li></ul>
+        <p>Tidak ada pemesanan ganda, tetapi dua penyewa melihat galat, bukan pesan stok habis. Penyebabnya transaksi SQLite yang baru mengunci saat menulis.</p>
+      </div>
+      <div class="papan" data-step="1">
+        <h3 class="sub">Sesudah perbaikan, 3 putaran</h3>
+        <ul class="hasil-uji"><li><b class="angka hijau">1</b><span>booking berhasil</span></li><li><b class="angka">7</b><span>ditolak, stok habis</span></li><li><b class="angka hijau">0</b><span>galat server</span></li></ul>
+        <p>Transaksi dibuat langsung mengunci (<code>IMMEDIATE</code>) dengan waktu tunggu 5 detik, sehingga permintaan yang datang bersamaan mengantre lalu membaca stok terbaru.</p>
+      </div>
+    </div>
+    <p class="inti" data-step="2"><svg viewBox="0 0 38 38" class="ikon"><path d="M9 34V5"/><path d="M9 7l20 6-20 7"/></svg>Temuan lain saat pengujian: stok bisa dikurangi di bawah jumlah yang sudah dipesan. Sekarang ditolak, dengan pesan yang menyebut jumlah unit dan tanggal pesanan terakhir.</p>
+  </section>
+
+  <!-- Pos 10 -->
+  <section class="slide" id="pemeliharaan" data-pos="Pos 10" data-label="Deployment">
+    <h2 class="head">Deployment dan pemeliharaan</h2>
+    <ul class="terbaru dua">
+      <li data-in>
+        <svg viewBox="0 0 68 68" class="ikon"><rect x="8" y="10" width="52" height="20" rx="4"/><rect x="8" y="38" width="52" height="20" rx="4"/><path d="M18 20h2M18 48h2M30 20h20M30 48h20"/></svg>
+        <div><h3>Server publik</h3><p>rentgear.serverbaik.my.id berjalan di ponsel Redmi lewat nginx dan Cloudflare Tunnel, dengan 4 pekerja API.</p></div>
+      </li>
+      <li data-in>
+        <svg viewBox="0 0 68 68" class="ikon"><path d="M34 8v32M22 28l12 12 12-12"/><path d="M10 44v14h48V44"/></svg>
+        <div><h3>Cadangan otomatis</h3><p>Setiap pembaruan menyalin database, unggahan, dan situs lama sebelum migrasi. Cara memulihkan tertulis di panduan.</p></div>
+      </li>
+      <li data-step="1">
+        <svg viewBox="0 0 68 68" class="ikon"><path d="M10 22l24-12 24 12-24 12z"/><path d="M10 22v24l24 12 24-12V22"/><path d="M34 34v24"/></svg>
+        <div><h3>Pemeliharaan stok</h3><p>Stok tidak bisa dikurangi di bawah pesanan. Admin dan penyedia melihat unit disewa, dipesan, dan tersedia hari ini.</p></div>
+      </li>
+      <li data-step="1">
+        <svg viewBox="0 0 68 68" class="ikon"><path d="M42 10l16 16-26 26H16V36z"/><path d="M36 16l16 16"/></svg>
+        <div><h3>Catatan kerusakan</h3><p>Kondisi, catatan, dan foto sebelum dan sesudah tersimpan per alat. Alat yang diperbaiki disembunyikan dari katalog.</p></div>
+      </li>
+      <li data-step="2">
+        <svg viewBox="0 0 68 68" class="ikon"><path d="M14 8h28l12 12v40H14z"/><path d="M42 8v12h12M22 32h24M22 42h24M22 52h14"/></svg>
+        <div><h3>Panduan</h3><p>Panduan penyewa, penyedia, dan admin, panduan operasional, serta video cara pakai.</p></div>
+      </li>
+      <li data-step="2">
+        <svg viewBox="0 0 68 68" class="ikon"><circle cx="34" cy="34" r="24"/><path d="M34 20v16M34 44v2"/></svg>
+        <div><h3>Pencatatan galat</h3><p>Galat server tercatat di log, keputusan admin di jejak audit yang tidak bisa diubah.</p></div>
+      </li>
+    </ul>
   </section>
 
   <!-- Puncak -->
@@ -769,13 +879,14 @@
           <li><span class="angka">1</span><p>Penyewa dapat melihat katalog beberapa penyedia dan memeriksa ketersediaan alat pada tanggal yang dipilih melalui aplikasi.</p></li>
           <li><span class="angka">2</span><p>Pesanan yang melebihi stok ditolak karena aplikasi memeriksa ketersediaan alat pada setiap tanggal. Tes otomatis untuk pemesanan ganda lulus.</p></li>
           <li><span class="angka">3</span><p>Setiap sewa menggunakan jaminan dokumen dan statusnya tercatat. Keterlambatan dan kerusakan dikenai denda yang dipotong dari deposit.</p></li>
+          <li><span class="angka">4</span><p>Penyedia baru diverifikasi admin dengan dokumen, dan setiap bukti transfer tersimpan sebagai riwayat pembayaran.</p></li>
         </ol>
       </div>
       <div class="papan putus" data-step="1">
         <h3 class="sub">Rencana lanjutan</h3>
         <ul class="daftar rencana">
           <li><span class="urut">Berikutnya</span><p>Payment gateway agar pembayaran tercatat secara otomatis.</p></li>
-          <li><span class="urut">Menyusul</span><p>Pengiriman email untuk kode lupa password, kemudian versi iOS.</p></li>
+          <li><span class="urut">Menyusul</span><p>Pindah ke server dengan MySQL untuk beban yang lebih besar, kemudian versi iOS.</p></li>
         </ul>
       </div>
     </div>
