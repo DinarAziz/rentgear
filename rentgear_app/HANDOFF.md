@@ -1593,4 +1593,4 @@ Redmi, and the Arunika voice for the video.
 
 Nothing is waiting on the phone. Pushed to GitHub on 26 October at the user's request (`master` up to date), and
 `rentgear.apk` in release `android-v1.0.0` was replaced with the 26 October build after a scan for keys (none found);
-the download link answers 200. Still open: a new Gmail App Password and Gemini key, and the Arunika voice for the video.
+the download link answers 200. Still open: the Arunika voice for the video. The user chose on 26 October to keep the old Gmail App Password and Gemini key, although both once appeared in the chat.

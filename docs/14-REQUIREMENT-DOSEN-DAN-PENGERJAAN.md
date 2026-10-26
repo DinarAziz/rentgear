@@ -127,7 +127,7 @@ Hal-hal di bawah belum diputuskan dan sebaiknya disepakati sebelum presentasi.
 
 ## 6. Pekerjaan yang masih terbuka
 
-- Ganti Gmail App Password dan kunci Gemini (keduanya pernah tertulis di chat).
+- Gmail App Password dan kunci Gemini tetap memakai yang lama (keputusan 26 Oktober), walau keduanya pernah tertulis di chat.
 - Suara bahasa Indonesia untuk video cara pakai (butuh kredit ElevenLabs).
 
 ## 7. Cara melanjutkan pekerjaan
