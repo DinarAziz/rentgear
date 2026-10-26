@@ -1584,12 +1584,13 @@ Redmi, and the Arunika voice for the video.
 - PowerPoint rebuilt from a fresh capture: tanpa-animasi 39 slides, animated 37. LibreOffice is no longer installed,
   so they were checked by unzipping (zip test clean, slide 14 image is the use case slide), not by rendering.
 - Release APK rebuilt (`API_URL` = public site, Google client ID read from the public web bundle, not from `.env`)
-  and installed on the Redmi; signed in as Budi in the app. Not uploaded to the GitHub release.
+  and installed on the Redmi; signed in as Budi in the app.
 - adb note: the `192.168.100.228:<port>` transport stalled on push/pull while the mDNS `adb-...-tls-connect` one
   worked; later only the IP one was listed. With "Don't keep activities" on, the app closes when Termux comes to the
   front, so check which app is on top before sending taps.
 
 ## Resume here (state saved 2026-10-26)
 
-Nothing is waiting on the phone. Still open: a new Gmail App Password and Gemini key, a GitHub push when asked
-(the GitHub release APK is still 7 October), and the Arunika voice for the video.
+Nothing is waiting on the phone. Pushed to GitHub on 26 October at the user's request (`master` up to date), and
+`rentgear.apk` in release `android-v1.0.0` was replaced with the 26 October build after a scan for keys (none found);
+the download link answers 200. Still open: a new Gmail App Password and Gemini key, and the Arunika voice for the video.

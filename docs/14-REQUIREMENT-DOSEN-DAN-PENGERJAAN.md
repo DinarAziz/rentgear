@@ -3,7 +3,7 @@
 Catatan kerja untuk melanjutkan proyek dan bahan diskusi kelompok 4. Isinya: apa yang diminta dosen lewat tabel
 penilaian, apa yang sudah dikerjakan untuk memenuhinya, status deploy, dan hal yang masih perlu diputuskan bersama.
 
-Status per 21 Oktober 2026, commit terakhir `ccce7be` di branch `master` (belum di-push ke GitHub).
+Status per 21 Oktober 2026, diperbarui 26 Oktober 2026, branch `master` sudah di-push ke GitHub.
 
 ## 1. Requirement dari dosen
 
@@ -120,15 +120,14 @@ Hal-hal di bawah belum diputuskan dan sebaiknya disepakati sebelum presentasi.
    (jawabannya ada di slide 34 dan laporan pengujian).
 5. **Pembayaran.** Sekarang transfer manual dengan bukti foto. Payment gateway masih rencana. Perlu disepakati apakah
    ini disebut sebagai batasan atau rencana lanjutan.
-6. **APK.** APK di HP Redmi sudah dibangun ulang 26 Oktober. APK di rilis GitHub masih versi 7 Oktober.
+6. **APK.** APK di HP Redmi sudah dibangun ulang 26 Oktober. APK di rilis GitHub juga sudah diganti dengan versi 26 Oktober.
 7. **Pembagian presentasi.** Siapa menjelaskan tiap tahap Waterfall (analisis, desain, implementasi, pengujian,
    deployment).
-8. **Push ke GitHub.** Semua commit masih lokal. Perlu keputusan kapan di-push.
+8. **Push ke GitHub.** Sudah di-push 26 Oktober.
 
 ## 6. Pekerjaan yang masih terbuka
 
 - Ganti Gmail App Password dan kunci Gemini (keduanya pernah tertulis di chat).
-- Push ke GitHub setelah disepakati.
 - Suara bahasa Indonesia untuk video cara pakai (butuh kredit ElevenLabs).
 
 ## 7. Cara melanjutkan pekerjaan
