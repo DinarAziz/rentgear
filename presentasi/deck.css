@@ -943,3 +943,17 @@ ol, ul { list-style: none; }
 .hasil-uji .angka.hijau { color: var(--moss); }
 .hasil-uji .angka.merah { color: #f07a5c; }
 .temuan .papan p { font-size: 25px; line-height: 1.38; color: var(--mist); }
+
+/* ---------- use case diagram ---------- */
+.usecase { display: block; width: 1500px; margin-top: 18px; overflow: visible; }
+.usecase .batas { fill: rgba(243, 237, 223, 0.03); stroke: var(--line); stroke-width: 1.5; }
+.usecase .judul-batas { fill: var(--ember); font-family: var(--display); font-weight: 800; font-size: 26px; }
+.usecase .uc ellipse { fill: rgba(8, 19, 15, 0.82); stroke: var(--mist); stroke-width: 2; }
+.usecase text { fill: var(--sand); font-family: var(--body); font-size: 21px; text-anchor: middle; }
+.usecase .judul-batas, .usecase .sertakan text { text-anchor: start; }
+.usecase .hubung path { fill: none; stroke: var(--mist); stroke-width: 2; opacity: 0.7; }
+.usecase .sertakan path { fill: none; stroke: var(--ember); stroke-width: 2; stroke-dasharray: 6 5; marker-end: url(#mata-uc); }
+.usecase .sertakan text { fill: var(--ember); font-size: 18px; }
+.usecase marker path { fill: var(--ember); }
+.usecase .aktor-uc circle, .usecase .aktor-uc path { fill: none; stroke: var(--sand); stroke-width: 3; stroke-linecap: round; }
+.usecase .aktor-uc text { fill: var(--ember); font-family: var(--display); font-weight: 800; font-size: 26px; }

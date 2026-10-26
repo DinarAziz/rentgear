@@ -350,6 +350,34 @@
     </div>
   </section>
 
+  <section class="slide" id="usecase" data-pos="Pos 6" data-label="Perancangan">
+    <h2 class="head">Use case diagram</h2>
+    <svg class="usecase" viewBox="0 0 1500 595" role="img" aria-label="Use case diagram: penyewa mencari alat, booking dengan jaminan yang menyertakan cek stok per tanggal, unggah bukti transfer, melihat status dan memberi ulasan. Penyedia mengelola alat, mengonfirmasi booking, memeriksa bukti, serah terima dan pengembalian, mencatat kerusakan. Admin memverifikasi toko, memantau dashboard, meninjau denda dan blacklist.">
+      <defs><marker id="mata-uc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z"/></marker></defs>
+      <rect class="batas" x="270" y="40" width="980" height="545" rx="18"/><text class="judul-batas" x="290" y="28">Sistem RentGear</text>
+      <g class="hubung"><path d="M150 300L320 85"/><path d="M150 300L320 170"/><path d="M150 300L320 340"/><path d="M150 300L320 425"/><path d="M150 300L320 510"/><path d="M1370 190L1210 85"/><path d="M1370 190L1210 147"/><path d="M1370 190L1210 209"/><path d="M1370 190L1210 271"/><path d="M1370 190L1210 333"/><path d="M1370 465L1210 420"/><path d="M1370 465L1210 482"/><path d="M1370 465L1210 544"/></g>
+      <g class="sertakan"><path d="M520 200V223"/><text x="540" y="217">«include»</text></g>
+      <g class="uc"><ellipse cx="520" cy="85" rx="200" ry="30"/><text x="520" y="92">Cari toko dan alat</text></g>
+      <g class="uc"><ellipse cx="520" cy="170" rx="200" ry="30"/><text x="520" y="177">Booking dengan jaminan</text></g>
+      <g class="uc"><ellipse cx="520" cy="255" rx="200" ry="30"/><text x="520" y="262">Cek stok per tanggal</text></g>
+      <g class="uc"><ellipse cx="520" cy="340" rx="200" ry="30"/><text x="520" y="347">Unggah bukti transfer</text></g>
+      <g class="uc"><ellipse cx="520" cy="425" rx="200" ry="30"/><text x="520" y="432">Lihat status dan riwayat</text></g>
+      <g class="uc"><ellipse cx="520" cy="510" rx="200" ry="30"/><text x="520" y="517">Beri ulasan</text></g>
+      <g class="uc"><ellipse cx="1000" cy="85" rx="210" ry="27"/><text x="1000" y="92">Kelola alat, stok, harga</text></g>
+      <g class="uc"><ellipse cx="1000" cy="147" rx="210" ry="27"/><text x="1000" y="154">Konfirmasi booking</text></g>
+      <g class="uc"><ellipse cx="1000" cy="209" rx="210" ry="27"/><text x="1000" y="216">Periksa bukti transfer</text></g>
+      <g class="uc"><ellipse cx="1000" cy="271" rx="210" ry="27"/><text x="1000" y="278">Serah terima, pengembalian</text></g>
+      <g class="uc"><ellipse cx="1000" cy="333" rx="210" ry="27"/><text x="1000" y="340">Catat kerusakan dan denda</text></g>
+      <g class="uc"><ellipse cx="1000" cy="420" rx="210" ry="27"/><text x="1000" y="427">Verifikasi toko baru</text></g>
+      <g class="uc"><ellipse cx="1000" cy="482" rx="210" ry="27"/><text x="1000" y="489">Dashboard dan status alat</text></g>
+      <g class="uc"><ellipse cx="1000" cy="544" rx="210" ry="27"/><text x="1000" y="551">Tinjau denda, blacklist</text></g>
+      <g class="aktor-uc"><circle cx="120" cy="254" r="15"/><path d="M120 269V309M96 285H144M120 309L100 342M120 309L140 342"/><text x="120" y="376">Penyewa</text></g>
+      <g class="aktor-uc"><circle cx="1400" cy="144" r="15"/><path d="M1400 159V199M1376 175H1424M1400 199L1380 232M1400 199L1420 232"/><text x="1400" y="266">Penyedia</text></g>
+      <g class="aktor-uc"><circle cx="1400" cy="419" r="15"/><path d="M1400 434V474M1376 450H1424M1400 474L1380 507M1400 474L1420 507"/><text x="1400" y="541">Admin</text></g>
+    </svg>
+    <p class="kecil aktivitas-ket" data-in>Ketiga peran mendaftar dan login lebih dulu. Spesifikasi naratif use case ada di dokumen perancangan.</p>
+  </section>
+
   <section class="slide" id="kerja" data-pos="Pos 6" data-label="Perancangan">
     <h2 class="head">Alur kerja aplikasi</h2>
     <div class="kerja" id="kerja-diagram"></div>
@@ -844,7 +872,7 @@
     <ul class="terbaru dua">
       <li data-in>
         <svg viewBox="0 0 68 68" class="ikon"><rect x="8" y="10" width="52" height="20" rx="4"/><rect x="8" y="38" width="52" height="20" rx="4"/><path d="M18 20h2M18 48h2M30 20h20M30 48h20"/></svg>
-        <div><h3>Server publik</h3><p>rentgear.serverbaik.my.id berjalan di ponsel Redmi lewat nginx dan Cloudflare Tunnel, dengan 4 pekerja API.</p></div>
+        <div><h3>Server publik</h3><p>rentgear.serverbaik.my.id berjalan di ponsel Redmi lewat nginx dan Cloudflare Tunnel, dengan 4 pekerja API. Layanan dinyalakan ulang otomatis bila mati.</p></div>
       </li>
       <li data-in>
         <svg viewBox="0 0 68 68" class="ikon"><path d="M34 8v32M22 28l12 12 12-12"/><path d="M10 44v14h48V44"/></svg>

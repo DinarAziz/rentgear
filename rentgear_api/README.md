@@ -59,7 +59,7 @@ ada di `/`, API di `/api`, jadi keduanya satu alamat dan tidak butuh pengaturan 
 - `.env` di HP dibuat dari `rentgear_api/.env.redmi` di Mac (diabaikan git). Isinya `APP_DEBUG=false`, kunci Gemini,
   client ID Google, dan `DEMO_ADMIN_PASSWORD`: password akun admin di server publik. Akun demo penyewa dan penyedia
   tetap memakai `password`, dan tombol demo Admin tidak tampil pada build yang memakai alamat https.
-- API ikut menyala saat HP dinyalakan lewat `~/.termux/boot/start-nginx.sh`. Log: `~/rentgear-api.log` di Termux.
+- API diawasi runit (termux-services) sebagai layanan `rentgear` sejak 26 Oktober 2026: ikut menyala saat HP dinyalakan dan dinyalakan lagi kalau mati. Restart: `server restart rentgear`. Log: `$PREFIX/var/log/sv/rentgear` di Termux.
 
 Memperbarui setelah kode berubah (HP tersambung USB, Termux terbuka):
 

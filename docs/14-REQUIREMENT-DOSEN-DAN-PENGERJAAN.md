@@ -27,29 +27,29 @@ Setiap tahap punya dua baris: isi utama tahap itu, lalu "sistem yang perlu ditam
 ## 2. Status pemenuhan per kriteria
 
 Semua kriteria sudah punya bukti. Pemetaan rinci (butir ke berkas) ada di `docs/00-KESESUAIAN-PENILAIAN.md`.
-Nomor slide di bawah mengikuti deck web (37 slide).
+Nomor slide di bawah mengikuti deck web (38 slide sejak 26 Oktober).
 
 | Kriteria | Status | Bukti utama | Slide |
 |---|---|---|---|
 | Kebutuhan penyewaan, stok, durasi, pembayaran | Ada sejak awal | `docs/01-KONSEP-DAN-ANALISIS.md` | 3–10 |
-| Data penyewa, katalog, durasi, ketentuan pengembalian | Ada sejak awal | aplikasi, `docs/07-JAMINAN-SEWA.md`, `docs/08-RENCANA-KERJA.md` | 12–13, 30 |
-| Use case | Ada sejak awal | `docs/03-FLOW-DAN-USECASE.md` bagian 5 | |
-| Activity diagram | Ditambah 21 Okt | `docs/10-ACTIVITY-DIAGRAM.md` (4 diagram dengan swimlane) | 17 |
-| Class diagram | Ditambah 21 Okt | `docs/09-DIAGRAM-KELAS-DAN-PBO.md` | 24 |
-| ERD | Ada, diperbarui | `docs/04-DATABASE.md`, tabel `payments` ditambahkan | 22–23 |
-| Relasi Customer–Gear–Rental–Payment | Dilengkapi 21 Okt | kelas `Payment` dan tabel `payments` baru | 23–24 |
-| Rancangan ketersediaan stok | Ada sejak awal | `docs/02-ALGORITMA.md` ALG-2 | 19 |
-| Modul katalog, pemesanan, biaya, pengembalian | Ada sejak awal | `rentgear_app/`, `rentgear_api/` | 28 |
-| Dashboard admin, riwayat sewa | Ada sejak awal | menu admin, Sewa Saya, riwayat status | 28 |
-| Status barang tersedia/disewa | Ditambah 21 Okt | layar admin "Status Alat Hari Ini", layar Alat penyedia | 31 |
-| Class Customer, Gear, Rental, Payment (PBO) | Dilengkapi 21 Okt | `AppUser`, `Equipment`, `Rental`, `Payment`; empat prinsip PBO di Bagian 9 | 24 |
-| Uji stok habis, bersamaan, biaya, keterlambatan | Dilengkapi 21 Okt | `docs/11-LAPORAN-PENGUJIAN.md` (38 kasus), `docs/hasil-uji/` | 32–33 |
-| Validasi tanggal, pemesanan ganda, pengembalian | Ada, dilaporkan 21 Okt | kasus 7–11 dan 23–33 di laporan pengujian | 32 |
-| Aplikasi dapat dijalankan | Ada | `https://rentgear.serverbaik.my.id`, APK, `docs/13-PANDUAN-OPERASIONAL.md` bagian 1 | 34 |
-| Panduan penyewa/admin | Ditambah 21 Okt | `docs/12-PANDUAN-PENGGUNA.md`, video cara pakai | 34 |
-| Pemeliharaan stok, prosedur pembaruan stok | Ditambah 21 Okt | aturan stok di kode, `docs/13-PANDUAN-OPERASIONAL.md` bagian 4 | 34 |
-| Panduan operasional | Ditambah 21 Okt | `docs/13-PANDUAN-OPERASIONAL.md` | 34 |
-| Pencatatan kerusakan barang | Ditambah 21 Okt | "Catatan kerusakan" di form alat, `docs/13` bagian 5 | 34 |
+| Data penyewa, katalog, durasi, ketentuan pengembalian | Ada sejak awal | aplikasi, `docs/07-JAMINAN-SEWA.md`, `docs/08-RENCANA-KERJA.md` | 12–13, 31 |
+| Use case | Ada sejak awal, slide ditambah 26 Okt | `docs/03-FLOW-DAN-USECASE.md` bagian 5 | 14 |
+| Activity diagram | Ditambah 21 Okt | `docs/10-ACTIVITY-DIAGRAM.md` (4 diagram dengan swimlane) | 18 |
+| Class diagram | Ditambah 21 Okt | `docs/09-DIAGRAM-KELAS-DAN-PBO.md` | 25 |
+| ERD | Ada, diperbarui | `docs/04-DATABASE.md`, tabel `payments` ditambahkan | 23–24 |
+| Relasi Customer–Gear–Rental–Payment | Dilengkapi 21 Okt | kelas `Payment` dan tabel `payments` baru | 24–25 |
+| Rancangan ketersediaan stok | Ada sejak awal | `docs/02-ALGORITMA.md` ALG-2 | 20 |
+| Modul katalog, pemesanan, biaya, pengembalian | Ada sejak awal | `rentgear_app/`, `rentgear_api/` | 29 |
+| Dashboard admin, riwayat sewa | Ada sejak awal | menu admin, Sewa Saya, riwayat status | 29 |
+| Status barang tersedia/disewa | Ditambah 21 Okt | layar admin "Status Alat Hari Ini", layar Alat penyedia | 32 |
+| Class Customer, Gear, Rental, Payment (PBO) | Dilengkapi 21 Okt | `AppUser`, `Equipment`, `Rental`, `Payment`; empat prinsip PBO di Bagian 9 | 25 |
+| Uji stok habis, bersamaan, biaya, keterlambatan | Dilengkapi 21 Okt | `docs/11-LAPORAN-PENGUJIAN.md` (38 kasus), `docs/hasil-uji/` | 33–34 |
+| Validasi tanggal, pemesanan ganda, pengembalian | Ada, dilaporkan 21 Okt | kasus 7–11 dan 23–33 di laporan pengujian | 33 |
+| Aplikasi dapat dijalankan | Ada | `https://rentgear.serverbaik.my.id`, APK, `docs/13-PANDUAN-OPERASIONAL.md` bagian 1 | 35 |
+| Panduan penyewa/admin | Ditambah 21 Okt | `docs/12-PANDUAN-PENGGUNA.md`, video cara pakai | 35 |
+| Pemeliharaan stok, prosedur pembaruan stok | Ditambah 21 Okt | aturan stok di kode, `docs/13-PANDUAN-OPERASIONAL.md` bagian 4 | 35 |
+| Panduan operasional | Ditambah 21 Okt | `docs/13-PANDUAN-OPERASIONAL.md` | 35 |
+| Pencatatan kerusakan barang | Ditambah 21 Okt | "Catatan kerusakan" di form alat, `docs/13` bagian 5 | 35 |
 
 ## 3. Pengerjaan yang sudah dilakukan
 
@@ -80,59 +80,53 @@ Jumlah tes otomatis sekarang 318 (179 server, 139 aplikasi), semuanya lulus.
 - Deck web (`presentasi/`): metode Waterfall 5 tahap; slide baru activity diagram, diagram kelas dan PBO, fitur baru
   (empat layar asli aplikasi), temuan uji serentak, serta deployment dan pemeliharaan. ERD, struktur database, dan
   slide pengujian ikut diperbarui.
-- `RentGear-presentasi-kelompok4-tanpa-animasi.pptx`: salinan untuk dosen, 38 slide, tanpa animasi dan transisi.
+- `RentGear-presentasi-kelompok4-tanpa-animasi.pptx`: salinan untuk dosen, 39 slide, tanpa animasi dan transisi.
   Slide implementasi dan pengujian masing-masing menjadi 2 halaman supaya tidak ada panel yang hilang.
-- `RentGear-presentasi-kelompok4.pptx`: versi beranimasi, 36 slide.
+- `RentGear-presentasi-kelompok4.pptx`: versi beranimasi, 37 slide.
 - Slide video promo tidak dimasukkan ke kedua PowerPoint, sama seperti sebelumnya.
 
 ## 4. Status deploy
+
+Status per 26 Oktober 2026.
 
 | Bagian | Status |
 |---|---|
 | Situs aplikasi (build `main.dart.269a852beb.js`) | Terpasang |
 | Migrasi tabel `payments` | Terpasang, 2 bukti transfer lama sudah dipindah |
-| API | **Mati (502)** sampai `hidup.sh` dijalankan di HP |
-| Deck web baru (37 slide) | Sudah dikirim ke HP sebagai `deck.zip`, belum dipasang |
+| API | Hidup. Login akun demo berhasil dari web dan dari APK. |
+| Deck web (38 slide, termasuk use case diagram) | Terpasang di `/presentasi/` |
+| APK di HP Redmi | Dibangun ulang 26 Oktober dari commit terbaru dan sudah terpasang |
 
-Yang harus dijalankan di Termux pada HP Redmi, setelah kunci layar dibuka:
+Login sempat gagal karena API mati (502) setelah deploy pembayaran 21 Oktober. Proses API waktu itu dinyalakan
+sekali lewat `nohup` tanpa pengawas, jadi setelah dimatikan tidak menyala lagi. Sejak 26 Oktober API, nginx, dan
+Cloudflare Tunnel diawasi runit (termux-services) dan dinyalakan ulang otomatis bila mati. Server tetap tidak bisa
+diakses bila HP Redmi mati atau kehilangan Wi-Fi.
 
-```bash
-sh /sdcard/rg/hidup.sh
-```
-
-```bash
-sh /sdcard/rg/run.sh deck
-```
-
-Setelah itu periksa: `https://rentgear.serverbaik.my.id/api/v1/categories` menjawab 401 (API hidup), dan
-`https://rentgear.serverbaik.my.id/presentasi/` menampilkan 37 slide.
+Pemeriksaan cepat: `https://rentgear.serverbaik.my.id/api/v1/categories` menjawab 401 bila API hidup.
 
 ## 5. Bahan diskusi kelompok
 
 Hal-hal di bawah belum diputuskan dan sebaiknya disepakati sebelum presentasi.
 
 1. **Nama kelas.** Di kode, Customer bernama `AppUser` (dengan peran penyewa) dan Gear bernama `Equipment`. Saat ini
-   cukup dijelaskan lewat tabel pemetaan di Bagian 9 dan slide 24. Apakah perlu diganti namanya di kode supaya sama
+   cukup dijelaskan lewat tabel pemetaan di Bagian 9 dan slide 25. Apakah perlu diganti namanya di kode supaya sama
    persis dengan tabel dosen? Mengganti nama menyentuh banyak berkas dan berisiko, jadi saran saya cukup pemetaan.
 2. **Bentuk activity diagram.** Diagram dibuat dengan Mermaid dan SVG di slide. Apakah dosen meminta format tertentu
    (mis. gambar UML dari draw.io atau StarUML)?
 3. **File yang dikirim ke dosen.** Kirim versi tanpa animasi saja, atau keduanya? Nomor di pojok slide mengikuti deck
-   web (mis. "11 / 37"), jadi tidak sama persis dengan nomor halaman PowerPoint tanpa animasi.
+   web (mis. "11 / 38"), jadi tidak sama persis dengan nomor halaman PowerPoint tanpa animasi.
 4. **Database.** Slide menyebut MySQL sebagai database utama dan SQLite untuk server demo di HP. Server publik
    sekarang memakai SQLite. Siapkan jawaban bila dosen bertanya kenapa, dan bagaimana pemesanan bersamaan tetap aman
-   (jawabannya ada di slide 33 dan laporan pengujian).
+   (jawabannya ada di slide 34 dan laporan pengujian).
 5. **Pembayaran.** Sekarang transfer manual dengan bukti foto. Payment gateway masih rencana. Perlu disepakati apakah
    ini disebut sebagai batasan atau rencana lanjutan.
-6. **APK di HP belum dibangun ulang.** Fitur 21 Oktober (verifikasi toko, riwayat pembayaran, status alat) baru ada di
-   versi web. Bila demo memakai HP, APK perlu dibangun ulang dulu.
+6. **APK.** APK di HP Redmi sudah dibangun ulang 26 Oktober. APK di rilis GitHub masih versi 7 Oktober.
 7. **Pembagian presentasi.** Siapa menjelaskan tiap tahap Waterfall (analisis, desain, implementasi, pengujian,
    deployment).
 8. **Push ke GitHub.** Semua commit masih lokal. Perlu keputusan kapan di-push.
 
 ## 6. Pekerjaan yang masih terbuka
 
-- Jalankan dua perintah Termux di bagian 4, lalu periksa situs dan API.
-- Bangun ulang APK bila demo memakai HP.
 - Ganti Gmail App Password dan kunci Gemini (keduanya pernah tertulis di chat).
 - Push ke GitHub setelah disepakati.
 - Suara bahasa Indonesia untuk video cara pakai (butuh kredit ElevenLabs).

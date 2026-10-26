@@ -1567,3 +1567,29 @@ and `/presentasi/` (37 slides).
 
 Still open from before: a new Gmail App Password and Gemini key, a GitHub push when asked, rebuilding the APK on the
 Redmi, and the Arunika voice for the video.
+
+## Login outage fixed, use case slide added, APK rebuilt, 26 October 2026
+
+- Cause of the failed logins: after the 21 October payments deploy the API process was not started again
+  (`hidup.sh` never ran, wireless adb dropped), so nginx answered 502 for every API call. The API had been started
+  once with `nohup` from the boot script, with nothing to restart it.
+- Earlier this morning the API, nginx, the panel and Cloudflare Tunnel were moved under runit (termux-services):
+  service `rentgear`, wrapper `$PREFIX/bin/proot-sv` (kills proot and its children on TERM, since proot-distro does
+  not pass the signal on). `deploy/termux-start-api.sh` now just runs `sv restart rentgear` when the service exists.
+  Termux holds a wakelock and is on the battery whitelist.
+- Checked: login as `budi@rentgear.id` and `agus@rentgear.id` answers 200 on the public API, a wrong password 401.
+- Deck: new slide 14 "Use case diagram" (`#usecase`, SVG, three actors, one «include») because the grading table
+  asks for a use case and the deck had none. The deployment slide now says the services restart on their own.
+  38 slides, installed on the phone with `run.sh deck`. `docs/14` slide numbers shifted by one from 14 on.
+- PowerPoint rebuilt from a fresh capture: tanpa-animasi 39 slides, animated 37. LibreOffice is no longer installed,
+  so they were checked by unzipping (zip test clean, slide 14 image is the use case slide), not by rendering.
+- Release APK rebuilt (`API_URL` = public site, Google client ID read from the public web bundle, not from `.env`)
+  and installed on the Redmi; signed in as Budi in the app. Not uploaded to the GitHub release.
+- adb note: the `192.168.100.228:<port>` transport stalled on push/pull while the mDNS `adb-...-tls-connect` one
+  worked; later only the IP one was listed. With "Don't keep activities" on, the app closes when Termux comes to the
+  front, so check which app is on top before sending taps.
+
+## Resume here (state saved 2026-10-26)
+
+Nothing is waiting on the phone. Still open: a new Gmail App Password and Gemini key, a GitHub push when asked
+(the GitHub release APK is still 7 October), and the Arunika voice for the video.
