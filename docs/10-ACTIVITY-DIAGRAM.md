@@ -71,17 +71,19 @@ flowchart TB
     start((●))
 
     subgraph Penyewa
-        C1[Datang ke toko dengan dokumen asli jaminan]
+        C1[Datang ke toko dengan dokumen asli jaminan<br/>dan tunjukkan QR serah terima]
         C2{Barang sesuai pesanan?}
         C3[Laporkan barang tidak sesuai<br/>hanya pada hari diterima]
         C4[Pakai alat]
-        C5[Kembalikan alat]
+        C5[Kembalikan alat dan tunjukkan QR baru]
         C6{Setuju dengan denda kerusakan?}
         C7[Ajukan keberatan]
         C8[Beri ulasan toko]
     end
 
     subgraph Penyedia
+        PQ[Pindai QR penyewa atau ketik kode 6 digit]
+        PQ2[Pindai QR pengembalian]
         P1[Terima dokumen asli, foto kondisi alat<br/>status: pickedUp]
         P2[Periksa kondisi: baik, rusak ringan,<br/>rusak berat, atau hilang]
         P3[Isi denda kerusakan dan catatan, foto kondisi<br/>status: returned]
@@ -89,8 +91,12 @@ flowchart TB
     end
 
     subgraph Sistem
+        SQ{Kode cocok?}
+        SQ2{Kode cocok?}
+        S0[Email pengingat H-1 ke penyewa]
         S1{Lewat tanggal selesai?}
         S2[status: overdue]
+        S7[Email pemberitahuan terlambat]
         S3[Hitung denda terlambat dari tanggal server<br/>hari x tarif x unit x pengali toko]
         S4{Denda kerusakan lebih dari separuh deposit?}
         S5[Masuk tinjauan admin]
@@ -104,14 +110,18 @@ flowchart TB
 
     stop(((selesai)))
 
-    start --> C1 --> P1 --> C2
+    start --> C1 --> PQ --> SQ
+    SQ -- tidak --> PQ
+    SQ -- ya, kode diganti --> P1 --> C2
     C2 -- tidak --> C3 --> D1
     D1 -- refund --> stop
     D1 -- tukar atau tolak --> C4
-    C2 -- ya --> C4 --> S1
-    S1 -- ya --> S2 --> C5
+    C2 -- ya --> C4 --> S0 --> S1
+    S1 -- ya --> S2 --> S7 --> C5
     S1 -- tidak --> C5
-    C5 --> P2 --> P3 --> S3 --> S4
+    C5 --> PQ2 --> SQ2
+    SQ2 -- tidak --> PQ2
+    SQ2 -- ya --> P2 --> P3 --> S3 --> S4
     S4 -- ya --> S5 --> D2 --> S6
     S4 -- tidak --> C6
     C6 -- tidak --> C7 --> S5
@@ -121,6 +131,9 @@ flowchart TB
 
 Catatan:
 
+- Kode serah terima hanya terlihat di aplikasi penyewa. Server menolak kode yang salah (`HANDOVER_CODE_INVALID`) dan
+  membuat kode baru setelah alat diambil, sehingga kode lama tidak bisa dipakai untuk mencatat pengembalian.
+- Email pengingat dan email terlambat dikirim scheduler, masing-masing sekali per sewa.
 - Penyedia tidak bisa menutup transaksi selama denda masih ditinjau admin (`DAMAGE_REVIEW_PENDING`).
 - Pengembalian dengan kondisi selain baik muncul di "Catatan kerusakan" pada form alat, sebagai riwayat kerusakan per
   alat.

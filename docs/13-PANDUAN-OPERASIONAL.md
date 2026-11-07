@@ -27,7 +27,9 @@ Detail lain (login Google, email, Gemini) ada di `rentgear_api/README.md`.
 Situs dan API berjalan di HP Redmi: Termux, Ubuntu lewat `proot-distro`, nginx, dan Cloudflare Tunnel, di alamat
 `https://rentgear.serverbaik.my.id`. API berjalan dengan `php artisan serve` (4 pekerja) di `127.0.0.1:8000`, dan
 `php artisan schedule:work` menjalankan pekerjaan terjadwal: kedaluwarsa booking (12 jam), pembatalan karena belum
-dibayar (24 jam), tidak datang, dan terlambat, setiap 10 menit.
+dibayar (24 jam), tidak datang, dan terlambat, setiap 10 menit. Pekerjaan yang sama mengirim email pengingat ke penyewa
+sehari sebelum tanggal kembali dan email pemberitahuan saat sewa terlambat, masing-masing sekali per sewa. Email yang
+gagal terkirim dicatat di `storage/logs/laravel.log` dan tidak dicoba ulang.
 
 Bila situs menjawab galat 502, 530, atau "error code: 1033", berarti Termux atau API berhenti. Buka Termux di HP, lalu:
 

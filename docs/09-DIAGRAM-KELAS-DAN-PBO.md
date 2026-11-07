@@ -83,6 +83,7 @@ classDiagram
         +double lateFee
         +double damageFee
         +ReturnCondition? returnCondition
+        +String? handoverCode
         +double subtotal()
         +double grandTotal()
         +double depositRefund()

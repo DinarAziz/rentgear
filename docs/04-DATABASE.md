@@ -174,7 +174,9 @@ Index: `(equipment_id, sort_order)`
 `status` VARCHAR(30) (lihat state machine) ·
 `idempotency_key` VARCHAR(64) UNIQUE NULL ·
 `confirmed_at` · `picked_up_at` · `returned_at` · `completed_at` ·
-`cancel_reason` · `notes`
+`cancel_reason` · `notes` ·
+`handover_code` CHAR(6) (kode QR serah terima, diganti setelah alat diambil) ·
+`due_reminder_sent_at` · `overdue_notice_sent_at` (email pengingat H-1 dan email terlambat, masing-masing sekali)
 Index: **`(status, start_date)`** (untuk job harian), `(user_id, status)`,
 `(provider_id, status)`, `(invoice_code)`
 
@@ -273,6 +275,10 @@ Index: `(user_id, created_at)`, `(feature, created_at)` ← untuk rate limiting 
 `comment` TEXT · `condition_rating` TINYINT · `is_visible` BOOL · `created_at`
 Index: `(equipment_id, is_visible)`, `(provider_id)`, UNIQUE `(transaction_id)`
 
+**wishlists** — PK `(user_id, equipment_id)`
+`user_id` FK (penyewa) · `equipment_id` FK · `created_at`
+Daftar alat favorit penyewa. Satu alat hanya sekali per penyewa.
+
 **notifications** — PK `id`
 `user_id` FK · `type` · `title` · `body` · `link_url` · `read_at` · `created_at`
 Index: `(user_id, read_at)`
@@ -311,6 +317,7 @@ Index: `(entity_type, entity_id)`, `(actor_user_id, created_at)`
 | rental_transactions → damage_claims | 1:0..N | |
 | rental_transactions → reviews | 1:0..1 | |
 | users → notifications | 1:N | |
+| users ↔ equipment | M:N | lewat `wishlists` (alat favorit) |
 
 ---
 
@@ -347,6 +354,8 @@ erDiagram
     EQUIPMENT ||--o{ REVIEWS : menerima
     PROVIDERS ||--o{ REVIEWS : menerima
     USERS ||--o{ NOTIFICATIONS : menerima
+    USERS ||--o{ WISHLISTS : menyimpan
+    EQUIPMENT ||--o{ WISHLISTS : difavoritkan
     USERS ||--o{ TRIP_REQUESTS : mengajukan
     USERS ||--o{ AI_USAGE_LOGS : memicu
     RENTAL_TRANSACTIONS ||--o{ DISPUTES : disengketakan
@@ -453,6 +462,14 @@ erDiagram
         decimal grand_total
         varchar status
         varchar idempotency_key UK
+        char6 handover_code "QR serah terima"
+        timestamp due_reminder_sent_at
+        timestamp overdue_notice_sent_at
+    }
+    WISHLISTS {
+        bigint user_id PK_FK
+        bigint equipment_id PK_FK
+        timestamp created_at
     }
     RENTAL_DETAILS {
         bigint id PK

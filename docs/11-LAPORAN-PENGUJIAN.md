@@ -7,7 +7,14 @@ Tanggal uji: 21 Oktober 2026. Semua tes dijalankan di Mac pengembang. Hasil leng
 - `2026-10-21-app.txt`: 139 tes aplikasi Flutter (`flutter test`), semua lulus.
 - `2026-10-21-bersamaan.txt`: uji pemesanan bersamaan terhadap server yang berjalan.
 
-Total 316 tes otomatis. Tes server memakai database SQLite di memori yang diisi data demo yang sama dengan aplikasi,
+Total 316 tes otomatis.
+
+Uji ulang 7 November 2026, setelah fitur pengingat email, laporan admin, QR serah terima, dan favorit ditambahkan:
+
+- `2026-11-07-server.txt`: 185 tes server, 1.678 assertion, semua lulus.
+- `2026-11-07-app.txt`: 144 tes aplikasi, semua lulus.
+
+Total sekarang 329 tes otomatis. Kasus 39 sampai 45 di bawah berasal dari uji ulang ini. Tes server memakai database SQLite di memori yang diisi data demo yang sama dengan aplikasi,
 dan penyimpanan file palsu (`Storage::fake`), sehingga tidak menyentuh data sungguhan.
 
 ## 1. Cara menjalankan ulang
@@ -110,6 +117,18 @@ aplikasi (`rentgear_app/test/`).
 | 37 | Unggahan bukan JPG, PNG, atau WebP | Ditolak | S: `SecurityTest::test_uploads_that_are_not_jpg_png_or_webp_are_refused` | Lulus |
 | 38 | Pertanyaan di luar topik ke asisten AI | Ditolak `AI_OFF_TOPIC`, jawaban AI tidak diteruskan | S: `AiTest::test_a_plan_outside_hiking_is_refused_and_never_shown` | Lulus |
 
+### Uji fitur tambahan 7 November 2026
+
+| No | Skenario | Hasil yang diharapkan | Tes | Hasil |
+|---|---|---|---|---|
+| 39 | Kode serah terima salah atau kosong | Ditolak `HANDOVER_CODE_INVALID` atau `VALIDATION`, status tetap `paid` | S: `HandoverCodeTest::test_only_the_renter_sees_the_code_and_a_wrong_code_is_refused`, A: "kode salah ditolak, dan kode berganti setelah alat diambil" | Lulus |
+| 40 | Kode yang sudah dipakai saat pengambilan dipakai lagi untuk pengembalian | Ditolak; hanya kode baru yang diterima | S: `HandoverCodeTest::test_the_code_changes_after_pickup_so_it_cannot_be_reused_for_the_return` | Lulus |
+| 41 | QR dari sewa lain atau QR bukan RentGear dipindai | Tidak menghasilkan kode | A: "isi QR hanya berlaku untuk sewanya sendiri" | Lulus |
+| 42 | Email pengingat H-1 dan email terlambat | Masing-masing terkirim sekali, tidak berulang setiap scheduler jalan | S: `ReturnReminderTest::test_renter_gets_one_reminder_the_day_before_and_one_notice_when_late`, `test_the_reminder_text_renders` | Lulus |
+| 43 | Penyewa menyimpan dan menghapus alat favorit | Alat tersimpan sekali, bisa dihapus, tidak terlihat penyewa lain | S: `WishlistTest::test_renter_saves_and_removes_favourites`, A: "favorit: penyewa menyimpan dan menghapus, toko ditolak" | Lulus |
+| 44 | Toko mencoba menyimpan favorit, atau alat tidak ada | Ditolak `FORBIDDEN` atau 404 | S: `WishlistTest::test_only_renters_and_only_existing_gear` | Lulus |
+| 45 | Laporan admin | Hanya sewa yang sudah dibayar dihitung, deposit tidak masuk pendapatan, filter bulan bekerja, PDF terbentuk | A: "laporan menghitung sewa yang dibayar saja dan tidak memasukkan deposit" | Lulus |
+
 ## 3. Temuan dan perbaikan
 
 Uji pemesanan bersamaan pertama kali dijalankan pada 21 Oktober 2026 dengan konfigurasi SQLite bawaan Laravel
@@ -123,6 +142,11 @@ Setelah perbaikan, tiga putaran uji dengan alat berbeda masing-masing menghasilk
 `SLOT_UNAVAILABLE`, dan 0 galat. Seluruh 177 tes server tetap lulus.
 
 ## 4. Uji manual di server publik
+
+Pada 7 November 2026, setelah deploy fitur tambahan: situs memuat `main.dart.4658996dc0.js`, `/api/v1/me/wishlist`
+menjawab 401 tanpa token, migrasi memberi kode serah terima ke keenam sewa yang sudah ada, dan dengan akun Budi alat
+favorit bisa ditambah lalu dihapus. Email percobaan dari server sampai di kotak masuk Gmail.
+
 
 Pada 21 Oktober 2026, setelah deploy verifikasi toko, alamat `https://rentgear.serverbaik.my.id` diperiksa dari luar:
 

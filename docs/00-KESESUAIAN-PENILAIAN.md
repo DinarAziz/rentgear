@@ -1,7 +1,7 @@
 # Kesesuaian dengan tabel penilaian proyek
 
 Tabel di bawah mengikuti kolom RENT GEAR pada "Tabel penilaian proyek mahasiswa" dari dosen. Setiap baris menyebut
-bukti yang bisa dibuka: dokumen di folder `docs/`, berkas kode, atau hasil uji. Diperbarui 21 Oktober 2026.
+bukti yang bisa dibuka: dokumen di folder `docs/`, berkas kode, atau hasil uji. Diperbarui 21 Oktober 2026, ditambah 7 November 2026.
 
 ## 1. Analisis kebutuhan (15%)
 
@@ -9,9 +9,9 @@ bukti yang bisa dibuka: dokumen di folder `docs/`, berkas kode, atau hasil uji. 
 |---|---|
 | Identifikasi kebutuhan penyewaan, stok, durasi, dan pembayaran | `docs/01-KONSEP-DAN-ANALISIS.md`: problem statement, tujuan, aktor dan peran, daftar fitur. |
 | Data penyewa | Akun penyewa (`AppUser`, tabel `users`), riwayat penyewa untuk admin (menu Penyewa), jaminan per sewa (`docs/07-JAMINAN-SEWA.md`). |
-| Katalog | Katalog per toko, kategori, pencarian, stok per ukuran (`catalog_screen.dart`, `provider_store_screen.dart`). |
+| Katalog | Katalog per toko, kategori, pencarian, stok per ukuran, dan daftar alat favorit penyewa (`catalog_screen.dart`, `provider_store_screen.dart`, `wishlist_screen.dart`). |
 | Durasi sewa | Tanggal mulai dan selesai inklusif, diskon sewa panjang, ganti tanggal dengan persetujuan toko (`docs/02-ALGORITMA.md` ALG-2, `docs/08-RENCANA-KERJA.md`). |
-| Ketentuan pengembalian | Aturan denda per toko, masa tenggang, pedoman denda kerusakan, tinjauan admin (`docs/08-RENCANA-KERJA.md` bagian 1 dan 6, `docs/12-PANDUAN-PENGGUNA.md` bagian 2.4). |
+| Ketentuan pengembalian | Aturan denda per toko, masa tenggang, pedoman denda kerusakan, tinjauan admin, email pengingat H-1 dan email terlambat (`RentalJobs.php`), QR serah terima saat alat diambil dan dikembalikan (`docs/08-RENCANA-KERJA.md` bagian 1 dan 6, `docs/12-PANDUAN-PENGGUNA.md` bagian 2.4). |
 
 ## 2. Desain sistem (20%)
 
@@ -31,8 +31,8 @@ bukti yang bisa dibuka: dokumen di folder `docs/`, berkas kode, atau hasil uji. 
 | Modul katalog | Aplikasi Flutter (`rentgear_app/`) dan API (`rentgear_api/`), di `https://rentgear.serverbaik.my.id`. |
 | Modul pemesanan | `booking_screen.dart`, `BookingService.php` (kunci harga, cek stok, jaminan, Idempotency-Key). |
 | Perhitungan biaya | `Rental.subtotal`, `discount`, `grandTotal`, `depositRefund`; `PriceCalculator.php`; denda di `FinePolicy`. |
-| Modul pengembalian | Serah terima, terima pengembalian, denda, kembalikan jaminan (`rental_detail_screen.dart`, `RentalFlowService.php`). |
-| Dashboard admin | Menu admin Dashboard: ringkasan, perlu tindakan, transaksi terbaru, jejak audit. |
+| Modul pengembalian | Serah terima dan terima pengembalian dengan kode QR dari HP penyewa, denda, kembalikan jaminan (`rental_detail_screen.dart`, `handover_qr.dart`, `RentalFlowService.php`). |
+| Dashboard admin | Menu admin Dashboard: ringkasan, perlu tindakan, transaksi terbaru, jejak audit, dan laporan transaksi dengan unduhan PDF (`admin_report_screen.dart`, `report.dart`). |
 | Riwayat penyewaan | Sewa Saya (penyewa), tab Riwayat di Pesanan (penyedia), menu Transaksi dan Penyewa (admin), riwayat status di tiap transaksi. |
 | Status barang tersedia/disewa | Admin: Dashboard > "Status alat hari ini". Penyedia: layar Alat (tersedia, sedang disewa, dipesan hari ini). |
 
@@ -50,11 +50,11 @@ bukti yang bisa dibuka: dokumen di folder `docs/`, berkas kode, atau hasil uji. 
 | Uji stok habis | `docs/11-LAPORAN-PENGUJIAN.md` kasus 1 sampai 6. |
 | Uji pemesanan bersamaan | Kasus 7 sampai 11, termasuk uji serentak 8 penyewa (`rentgear_api/tests/concurrency/bersamaan.sh`, hasil di `docs/hasil-uji/2026-10-21-bersamaan.txt`). |
 | Uji biaya | Kasus 12 sampai 17. |
-| Uji keterlambatan | Kasus 18 sampai 22. |
+| Uji keterlambatan | Kasus 18 sampai 22, ditambah kasus 42 (email pengingat dan email terlambat). |
 | Validasi tanggal | Kasus 23 sampai 26. |
 | Pencegahan pemesanan ganda | Kasus 7 sampai 10 (ALG-2, antrean transaksi, Idempotency-Key). |
-| Pengujian pengembalian | Kasus 27 sampai 33. |
-| Hasil uji | `docs/hasil-uji/`: 177 tes server dan 139 tes aplikasi lulus pada 21 Oktober 2026. |
+| Pengujian pengembalian | Kasus 27 sampai 33, ditambah kasus 39 sampai 41 (kode QR serah terima). |
+| Hasil uji | `docs/hasil-uji/`: 177 tes server dan 139 tes aplikasi lulus pada 21 Oktober 2026; 185 tes server dan 144 tes aplikasi lulus pada 7 November 2026. |
 
 ## 5. Deployment dan maintenance (15%)
 

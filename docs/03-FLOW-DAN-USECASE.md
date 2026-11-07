@@ -214,6 +214,10 @@ flowchart LR
         U21[UC-21 Konfigurasi Bobot & Aturan]
         U22[UC-22 Auto-expire & Reminder]
         U23[UC-23 Hitung Denda Keterlambatan]
+        U24[UC-24 Simpan Alat Favorit]
+        U25[UC-25 Tunjukkan QR Serah Terima]
+        U26[UC-26 Pindai QR Penyewa]
+        U27[UC-27 Lihat & Unduh Laporan]
     end
 
     C --- U1
@@ -225,6 +229,8 @@ flowchart LR
     C --- U7
     C --- U8
     C --- U9
+    C --- U24
+    C --- U25
     P --- U10
     P --- U11
     P --- U12
@@ -233,12 +239,14 @@ flowchart LR
     P --- U15
     P --- U16
     P --- U17
+    P --- U26
     A --- U10
     A --- U18
     A --- U19
     A --- U20
     A --- U21
     A --- U9
+    A --- U27
     S --- U22
     S --- U23
     U3 -.->|include| U4
@@ -246,7 +254,13 @@ flowchart LR
     U16 -.->|uses| G
     U5 -.->|include| U4
     U17 -.->|precedes| U18
+    U14 -.->|include| U26
+    U15 -.->|include| U26
 ```
+
+UC-22 mengirim email pengingat ke penyewa sehari sebelum tanggal kembali, lalu sekali lagi bila sewa terlambat.
+UC-14 dan UC-15 hanya bisa diselesaikan setelah toko memindai QR di HP penyewa (UC-26) atau mengetik kode 6 digit di
+bawah QR itu. Server menolak kode yang salah, dan kode berganti setelah alat diambil.
 
 ### 5.1 Spesifikasi use case naratif (dua yang paling kritis)
 

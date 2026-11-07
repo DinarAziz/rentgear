@@ -43,7 +43,7 @@ Nomor slide di bawah mengikuti deck web (38 slide sejak 26 Oktober).
 | Dashboard admin, riwayat sewa | Ada sejak awal | menu admin, Sewa Saya, riwayat status | 29 |
 | Status barang tersedia/disewa | Ditambah 21 Okt | layar admin "Status Alat Hari Ini", layar Alat penyedia | 32 |
 | Class Customer, Gear, Rental, Payment (PBO) | Dilengkapi 21 Okt | `AppUser`, `Equipment`, `Rental`, `Payment`; empat prinsip PBO di Bagian 9 | 25 |
-| Uji stok habis, bersamaan, biaya, keterlambatan | Dilengkapi 21 Okt | `docs/11-LAPORAN-PENGUJIAN.md` (38 kasus), `docs/hasil-uji/` | 33–34 |
+| Uji stok habis, bersamaan, biaya, keterlambatan | Dilengkapi 21 Okt, ditambah 7 Nov | `docs/11-LAPORAN-PENGUJIAN.md` (45 kasus), `docs/hasil-uji/` | 33–34 |
 | Validasi tanggal, pemesanan ganda, pengembalian | Ada, dilaporkan 21 Okt | kasus 7–11 dan 23–33 di laporan pengujian | 33 |
 | Aplikasi dapat dijalankan | Ada | `https://rentgear.serverbaik.my.id`, APK, `docs/13-PANDUAN-OPERASIONAL.md` bagian 1 | 35 |
 | Panduan penyewa/admin | Ditambah 21 Okt | `docs/12-PANDUAN-PENGGUNA.md`, video cara pakai | 35 |
@@ -73,7 +73,16 @@ Nomor slide di bawah mengikuti deck web (38 slide sejak 26 Oktober).
 | `4fc41ff` | Dokumen 00 dan 09–13: pemetaan penilaian, diagram kelas dan PBO, activity diagram, laporan pengujian, panduan pengguna, panduan operasional. |
 | `ccce7be` | Deck web diperbarui (37 slide) dan PowerPoint tanpa animasi. |
 
-Jumlah tes otomatis sekarang 318 (179 server, 139 aplikasi), semuanya lulus.
+Jumlah tes otomatis waktu itu 318 (179 server, 139 aplikasi), semuanya lulus.
+
+### Fitur tambahan (7 November)
+
+| Commit | Isi |
+|---|---|
+| `8ccc12a` | Email pengingat H-1 dan email terlambat; laporan transaksi admin dengan unduhan PDF; kode QR serah terima yang diperiksa server saat alat diambil dan dikembalikan; daftar alat favorit penyewa. |
+
+Dokumen 00, 03, 04, 10, 11, 12, dan 13 ikut diperbarui. Jumlah tes otomatis sekarang 329 (185 server, 144 aplikasi),
+semuanya lulus. Deck web belum memuat fitur ini.
 
 ### Presentasi
 
@@ -87,15 +96,16 @@ Jumlah tes otomatis sekarang 318 (179 server, 139 aplikasi), semuanya lulus.
 
 ## 4. Status deploy
 
-Status per 26 Oktober 2026.
+Status per 7 November 2026.
 
 | Bagian | Status |
 |---|---|
-| Situs aplikasi (build `main.dart.269a852beb.js`) | Terpasang |
+| Situs aplikasi (build `main.dart.4658996dc0.js`) | Terpasang 7 November |
+| Migrasi kode serah terima, pengingat, dan tabel `wishlists` | Terpasang 7 November |
 | Migrasi tabel `payments` | Terpasang, 2 bukti transfer lama sudah dipindah |
 | API | Hidup. Login akun demo berhasil dari web dan dari APK. |
 | Deck web (38 slide, termasuk use case diagram) | Terpasang di `/presentasi/` |
-| APK di HP Redmi | Dibangun ulang 26 Oktober dari commit terbaru dan sudah terpasang |
+| APK | Dibangun ulang 7 November dan sudah mengganti `rentgear.apk` di rilis GitHub. Di HP Redmi belum terpasang (MIUI menolak pemasangan lewat USB); berkasnya ada di `Download/rentgear-7nov.apk`. |
 
 Login sempat gagal karena API mati (502) setelah deploy pembayaran 21 Oktober. Proses API waktu itu dinyalakan
 sekali lewat `nohup` tanpa pengawas, jadi setelah dimatikan tidak menyala lagi. Sejak 26 Oktober API, nginx, dan
@@ -120,7 +130,8 @@ Hal-hal di bawah belum diputuskan dan sebaiknya disepakati sebelum presentasi.
    (jawabannya ada di slide 34 dan laporan pengujian).
 5. **Pembayaran.** Sekarang transfer manual dengan bukti foto. Payment gateway masih rencana. Perlu disepakati apakah
    ini disebut sebagai batasan atau rencana lanjutan.
-6. **APK.** APK di HP Redmi sudah dibangun ulang 26 Oktober. APK di rilis GitHub juga sudah diganti dengan versi 26 Oktober.
+6. **APK.** APK 7 November sudah ada di rilis GitHub. APK lama (26 Oktober) tidak mengirim kode serah terima, jadi semua
+   HP toko harus memasang versi baru.
 7. **Pembagian presentasi.** Siapa menjelaskan tiap tahap Waterfall (analisis, desain, implementasi, pengujian,
    deployment).
 8. **Push ke GitHub.** Sudah di-push 26 Oktober.
@@ -129,6 +140,7 @@ Hal-hal di bawah belum diputuskan dan sebaiknya disepakati sebelum presentasi.
 
 - Gmail App Password dan kunci Gemini tetap memakai yang lama (keputusan 26 Oktober), walau keduanya pernah tertulis di chat.
 - Video cara pakai dan suaranya ditunda sampai aplikasi final, lalu dibuat ulang.
+- Deck web dan laporan UTS belum memuat fitur 7 November (ERD, use case, fitur, jumlah kasus uji).
 
 ## 7. Cara melanjutkan pekerjaan
 
@@ -166,7 +178,7 @@ Memperbarui server publik: ikuti `docs/13-PANDUAN-OPERASIONAL.md` bagian 2.
 | `docs/00-KESESUAIAN-PENILAIAN.md` | Pemetaan setiap baris tabel dosen ke bukti |
 | `docs/09-DIAGRAM-KELAS-DAN-PBO.md` | Diagram kelas dan empat prinsip PBO |
 | `docs/10-ACTIVITY-DIAGRAM.md` | Activity diagram pemesanan, pengembalian, verifikasi toko, saran AI |
-| `docs/11-LAPORAN-PENGUJIAN.md` | 38 kasus uji dan temuan |
+| `docs/11-LAPORAN-PENGUJIAN.md` | 45 kasus uji dan temuan |
 | `docs/hasil-uji/` | Hasil tes per 21 Oktober 2026 |
 | `docs/12-PANDUAN-PENGGUNA.md` | Panduan penyewa, penyedia, admin |
 | `docs/13-PANDUAN-OPERASIONAL.md` | Menjalankan, memperbarui, cadangan, stok, kerusakan, galat |

@@ -18,7 +18,7 @@ Pemetaan ke tabel penilaian dosen: [00-KESESUAIAN-PENILAIAN.md](docs/00-KESESUAI
 | [08-RENCANA-KERJA.md](docs/08-RENCANA-KERJA.md) | Urutan kerja setelah aplikasi lokal: denda dan blacklist (selesai), halaman toko penyedia, server Laravel, login Google, fitur AI | tambahan |
 | [09-DIAGRAM-KELAS-DAN-PBO.md](docs/09-DIAGRAM-KELAS-DAN-PBO.md) | Diagram kelas (Customer, Gear, Rental, Payment) dan penerapan empat prinsip PBO di kode | penilaian |
 | [10-ACTIVITY-DIAGRAM.md](docs/10-ACTIVITY-DIAGRAM.md) | Activity diagram dengan swimlane: pemesanan, pengembalian, verifikasi toko, saran AI | penilaian |
-| [11-LAPORAN-PENGUJIAN.md](docs/11-LAPORAN-PENGUJIAN.md) | 38 kasus uji (stok habis, pemesanan bersamaan, biaya, keterlambatan, tanggal, pengembalian) dan hasilnya | penilaian |
+| [11-LAPORAN-PENGUJIAN.md](docs/11-LAPORAN-PENGUJIAN.md) | 45 kasus uji (stok habis, pemesanan bersamaan, biaya, keterlambatan, tanggal, pengembalian) dan hasilnya | penilaian |
 | [12-PANDUAN-PENGGUNA.md](docs/12-PANDUAN-PENGGUNA.md) | Panduan penyewa, penyedia, dan admin | penilaian |
 | [13-PANDUAN-OPERASIONAL.md](docs/13-PANDUAN-OPERASIONAL.md) | Menjalankan, memperbarui, cadangan, pemeliharaan stok, pencatatan kerusakan, galat | penilaian |
 | [14-REQUIREMENT-DOSEN-DAN-PENGERJAAN.md](docs/14-REQUIREMENT-DOSEN-DAN-PENGERJAAN.md) | Requirement dosen, status pengerjaan, deploy, bahan diskusi kelompok, cara melanjutkan | penilaian |

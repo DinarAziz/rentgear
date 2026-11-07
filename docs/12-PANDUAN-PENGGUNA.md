@@ -21,7 +21,7 @@ dan di samping kiri pada layar lebar.
 
 ## 2. Penyewa
 
-Menu penyewa: Katalog, Sewa Saya, dan Profil.
+Menu penyewa: Katalog, Sewa Saya, Favorit, dan Profil.
 
 ### 2.1 Mencari alat
 
@@ -33,6 +33,8 @@ Menu penyewa: Katalog, Sewa Saya, dan Profil.
 4. Tidak tahu alat apa yang dibutuhkan: tekan "Saran AI". Tulis tujuan dan rencana perjalanan (paling banyak 200
    huruf), jumlah orang, dan lama sewa. AI memilih alat dari katalog dan menghitung perkiraan biaya. Asisten ini hanya
    membahas perlengkapan pendakian dan camping; pertanyaan lain ditolak. Tiap akun bisa meminta 20 saran per hari.
+5. Ingin menyimpan alat untuk disewa nanti: buka halaman alat lalu ketuk ikon hati di pojok kanan atas. Alat yang
+   disimpan ada di menu Favorit. Ketuk ikon hati lagi untuk menghapusnya.
 
 ### 2.2 Memesan
 
@@ -56,13 +58,16 @@ Menu penyewa: Katalog, Sewa Saya, dan Profil.
 
 ### 2.4 Mengambil, memakai, dan mengembalikan alat
 
-1. Datang ke toko dengan dokumen asli jaminan. Toko menyimpan dokumen itu selama alat dipinjam.
+1. Datang ke toko dengan dokumen asli jaminan. Toko menyimpan dokumen itu selama alat dipinjam. Buka transaksi di
+   Sewa Saya dan tunjukkan QR di bagian "Serah terima" ke petugas toko. Bila kamera toko tidak bisa memindai, sebutkan
+   kode 6 digit di bawah QR. Jangan bagikan kode sebelum Anda berada di toko.
 2. Bila barang tidak sesuai pesanan, tekan "Laporkan barang tidak sesuai" pada hari yang sama. Admin akan memutuskan
    refund, tukar barang, atau menolak laporan.
 3. Perlu ganti tanggal sebelum alat diambil: tekan "Ganti tanggal". Lama sewa harus tetap, dan tanggal baru berlaku
    setelah toko setuju.
-4. Kembalikan alat paling lambat di tanggal selesai. Keterlambatan didenda per hari sesuai aturan toko yang tampil
-   saat memesan.
+4. Kembalikan alat paling lambat di tanggal selesai. Sehari sebelumnya RentGear mengirim email pengingat, dan bila
+   terlambat Anda menerima email pemberitahuan. Keterlambatan didenda per hari sesuai aturan toko yang tampil saat
+   memesan. Saat mengembalikan, tunjukkan lagi QR di transaksi. Kodenya sudah berganti sejak alat diambil.
 5. Toko memeriksa kondisi alat. Bila ada denda kerusakan dan Anda tidak setuju, tekan "Ajukan keberatan denda"; admin
    akan meninjau.
 6. Setelah toko mengembalikan dokumen jaminan, status menjadi "Selesai". Sisa deposit setelah denda tampil di
@@ -128,11 +133,12 @@ Layar Pesanan punya tiga tab: Aksi (pesanan yang perlu dijawab), Belum bayar, da
 2. Bukti transfer: cocokkan nominal dan rekening dengan mutasi rekening Anda. Tekan "Terima pembayaran" atau "Tolak
    bukti" dengan alasan.
 3. Serah terima: ambil foto kondisi alat ("Tambah foto"), terima dokumen asli jaminan, lalu tekan "Terima jaminan &
-   serahkan alat".
+   serahkan alat". Tekan "Pindai QR" dan arahkan kamera ke QR di HP penyewa, atau ketik kode 6 digit yang tampil di
+   bawah QR. Alat baru tercatat diserahkan bila kodenya cocok.
 4. Permintaan ganti tanggal: tekan "Setujui pindah ke ..." atau "Tolak ganti tanggal" dengan alasan.
 5. Pengembalian: tekan "Terima pengembalian alat". Pilih kondisi (baik, rusak ringan, rusak berat, hilang), isi denda
-   kerusakan dan catatan, dan tambahkan foto kondisi. Denda terlambat dihitung otomatis. Denda lebih dari separuh
-   deposit ditinjau admin dulu.
+   kerusakan dan catatan, dan tambahkan foto kondisi. Lalu pindai QR pengembalian di HP penyewa atau ketik kodenya.
+   Denda terlambat dihitung otomatis. Denda lebih dari separuh deposit ditinjau admin dulu.
 6. Kembalikan dokumen jaminan ke penyewa, lalu tekan "Kembalikan jaminan & selesaikan".
 
 ## 4. Admin
@@ -147,6 +153,9 @@ Menu admin: Dashboard, Penyedia, Penyewa, Transaksi, dan Profil.
   tidak sesuai.
 - "Status alat hari ini": semua alat per toko dengan jumlah unit disewa, dipesan, dan tersedia. Nyalakan "Hanya alat
   yang sedang dipakai" untuk menyaring.
+- "Laporan transaksi": jumlah transaksi, sewa yang sudah dibayar, pendapatan sewa dan denda (deposit tidak dihitung),
+  alat terlaris, dan pendapatan per toko. Pilih bulan di atas atau "Semua waktu", lalu tekan "Unduh PDF" untuk
+  menyimpan atau mencetak laporan.
 - "Jejak audit" di pojok kanan atas: catatan siapa melakukan apa dan kapan. Catatan ini tidak bisa diubah atau dihapus.
 
 ### 4.2 Memverifikasi toko
