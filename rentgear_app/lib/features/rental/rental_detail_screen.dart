@@ -17,6 +17,7 @@ import '../../widgets/photo_widgets.dart';
 import '../customer/provider_store_screen.dart';
 import 'condition_photos.dart';
 import 'fine_widgets.dart';
+import 'handover_qr.dart';
 
 /// Detail transaksi untuk semua role. Tombol aksi menyesuaikan role & status.
 class RentalDetailScreen extends StatelessWidget {
@@ -165,6 +166,12 @@ class _Body extends StatelessWidget {
               ),
             ),
           ),
+        ],
+        if (user.role == UserRole.customer &&
+            r.handoverCode != null &&
+            const {RentalStatus.paid, RentalStatus.pickedUp, RentalStatus.overdue}.contains(r.status)) ...[
+          const SectionTitle('Serah terima'),
+          HandoverQrCard(rental: r),
         ],
         if (r.status == RentalStatus.awaitingPayment &&
             user.role == UserRole.customer &&
@@ -693,8 +700,10 @@ class _ActionBar extends StatelessWidget {
                   confirmLabel: 'Sudah diterima',
                 );
                 if (!ok || !context.mounted) return;
+                final code = await askHandoverCode(context, r);
+                if (code == null || !context.mounted) return;
                 await act(
-                  () => state.repo.handover(r.id, user),
+                  () => state.repo.handover(r.id, user, code: code),
                   'Alat diserahkan. Jaminan tercatat dipegang.',
                 );
               },
@@ -715,10 +724,13 @@ class _ActionBar extends StatelessWidget {
               onPressed: () async {
                 final check = await askReturnCheck(context, r);
                 if (check == null || !context.mounted) return;
+                final code = await askHandoverCode(context, r);
+                if (code == null || !context.mounted) return;
                 await act(
                   () => state.repo.receiveReturn(
                     r.id,
                     user,
+                    code: code,
                     condition: check.condition,
                     damageFee: check.damageFee,
                     damageNote: check.note,

@@ -235,6 +235,7 @@ abstract final class ApiCodec {
       ],
     )
       ..cancelReason = j['cancelReason'] as String?
+      ..handoverCode = j['handoverCode'] as String?
       ..payments.addAll([for (final p in _maps(j['payments'] ?? const [])) payment(p)])
       ..returnedAt = _time(j['returnedAt'])
       ..returnCondition = _byName(ReturnCondition.values, j['returnCondition'])

@@ -154,6 +154,8 @@ final class Present
             'finePolicy' => $r->finePolicy()->toArray(),
             'discountPercent' => (int) $r->discount_percent,
             'status' => $r->status, 'createdAt' => self::time($r->created_at),
+            // Hanya penyewa yang melihat kodenya; toko mendapatkannya dengan memindai QR di HP penyewa.
+            'handoverCode' => auth()->id() === $r->customer_id ? $r->handover_code : null,
             // `hasPaymentProof` tetap dikirim untuk APK lama; bukti yang berlaku adalah pembayaran terakhir.
             'cancelReason' => $r->cancel_reason, 'hasPaymentProof' => $r->latestPayment()?->proof_path !== null,
             'payments' => $r->payments->map(self::payment(...))->all(),

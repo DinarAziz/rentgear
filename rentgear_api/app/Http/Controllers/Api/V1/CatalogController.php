@@ -8,9 +8,11 @@ use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\Provider;
 use App\Services\AvailabilityQuery;
+use App\Support\ApiException;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CatalogController extends Controller
 {
@@ -53,5 +55,37 @@ class CatalogController extends Controller
             'available' => $availability->available($equipment, $data['start'], $data['end'], $data['size'] ?? null),
             'sizes' => (object) $availability->bySize($equipment, $data['start'], $data['end']),
         ]);
+    }
+
+    /** Id alat favorit penyewa yang sedang masuk. */
+    public function myWishlist(Request $request): JsonResponse
+    {
+        return ApiResponse::ok(DB::table('wishlists')->where('customer_id', $request->user()->id)
+            ->orderByDesc('created_at')->pluck('equipment_id'));
+    }
+
+    public function addToWishlist(Request $request, string $id): JsonResponse
+    {
+        return $this->setWishlist($request, $id, true);
+    }
+
+    public function removeFromWishlist(Request $request, string $id): JsonResponse
+    {
+        return $this->setWishlist($request, $id, false);
+    }
+
+    private function setWishlist(Request $request, string $equipmentId, bool $add): JsonResponse
+    {
+        $user = $request->user();
+        if (! $user->isCustomer()) {
+            throw new ApiException('FORBIDDEN', 'Hanya penyewa yang bisa menyimpan alat favorit.');
+        }
+        Equipment::findOrFail($equipmentId);
+
+        $row = ['customer_id' => $user->id, 'equipment_id' => $equipmentId];
+        $add ? DB::table('wishlists')->insertOrIgnore($row + ['created_at' => now()])
+            : DB::table('wishlists')->where($row)->delete();
+
+        return $this->myWishlist($request);
     }
 }

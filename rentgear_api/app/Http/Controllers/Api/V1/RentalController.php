@@ -161,7 +161,9 @@ class RentalController extends Controller
 
     public function handover(Request $request, string $id): JsonResponse
     {
-        return $this->present($this->flow->handover($id, $request->user()));
+        $code = $request->validate(['code' => 'required|string|max:16'])['code'];
+
+        return $this->present($this->flow->handover($id, $request->user(), $code));
     }
 
     public function mismatch(Request $request, string $id): JsonResponse
@@ -187,6 +189,7 @@ class RentalController extends Controller
             'condition' => ['nullable', new Enum(ReturnCondition::class)],
             'damageFee' => 'nullable|numeric',
             'damageNote' => 'nullable|string|max:255',
+            'code' => 'required|string|max:16',
         ]);
 
         return $this->present($this->flow->receiveReturn(
@@ -194,6 +197,7 @@ class RentalController extends Controller
             ReturnCondition::from($data['condition'] ?? 'good'),
             (float) ($data['damageFee'] ?? 0),
             $data['damageNote'] ?? null,
+            $data['code'],
         ));
     }
 

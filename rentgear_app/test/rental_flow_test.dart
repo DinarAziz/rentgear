@@ -62,15 +62,15 @@ void main() {
     r = await repo.submitPayment(r.id, budi, photo);
     expect(r.status, RentalStatus.paymentReview);
     // Bukti belum diperiksa, jadi alat belum bisa diserahkan.
-    await expectLater(repo.handover(r.id, sari),
+    await expectLater(repo.handover(r.id, sari, code: (await repo.rental(r.id)).handoverCode!),
         throwsA(isA<AppException>().having((e) => e.code, 'code', 'INVALID_STATE')));
     r = await repo.reviewPayment(r.id, sari, accept: true);
     expect(r.status, RentalStatus.paid);
-    r = await repo.handover(r.id, sari);
+    r = await repo.handover(r.id, sari, code: (await repo.rental(r.id)).handoverCode!);
     expect(r.status, RentalStatus.pickedUp);
     expect(r.guarantees.single.status, GuaranteeStatus.held);
 
-    r = await repo.receiveReturn(r.id, sari);
+    r = await repo.receiveReturn(r.id, sari, code: (await repo.rental(r.id)).handoverCode!);
     r = await repo.returnGuaranteesAndComplete(r.id, sari);
     expect(r.status, RentalStatus.completed);
     expect(r.guarantees.single.status, GuaranteeStatus.returned);

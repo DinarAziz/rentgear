@@ -26,12 +26,12 @@ class RentalFlowTest extends ApiTestCase
         Storage::disk('local')->assertExists(Rental::findOrFail($id)->latestPayment()->proof_path);
 
         // Bukti belum diperiksa, jadi alat belum bisa diserahkan.
-        $this->assertApiError($this->as('sari')->postJson("/api/v1/rentals/$id/handover"), 'INVALID_STATE', 409);
+        $this->assertApiError($this->as('sari')->postJson("/api/v1/rentals/$id/handover", ['code' => $this->code($id)]), 'INVALID_STATE', 409);
         $this->postJson("/api/v1/rentals/$id/payment-review", ['accept' => true])->assertJsonPath('data.status', 'paid');
 
-        $this->as('sari')->postJson("/api/v1/rentals/$id/handover")
+        $this->as('sari')->postJson("/api/v1/rentals/$id/handover", ['code' => $this->code($id)])
             ->assertJsonPath('data.status', 'pickedUp')->assertJsonPath('data.guarantees.0.status', 'held');
-        $this->postJson("/api/v1/rentals/$id/return")
+        $this->postJson("/api/v1/rentals/$id/return", ['code' => $this->code($id)])
             ->assertJsonPath('data.status', 'returned')->assertJsonPath('data.returnCondition', 'good');
         $done = $this->postJson("/api/v1/rentals/$id/complete")->assertOk()->json('data');
 
@@ -91,7 +91,7 @@ class RentalFlowTest extends ApiTestCase
 
     public function test_handover_requires_payment_first(): void
     {
-        $this->assertApiError($this->as('sari')->postJson('/api/v1/rentals/r-2/handover'), 'INVALID_STATE', 409);
+        $this->assertApiError($this->as('sari')->postJson('/api/v1/rentals/r-2/handover', ['code' => $this->code('r-2')]), 'INVALID_STATE', 409);
     }
 
     public function test_guarantees_can_only_be_reviewed_before_confirmation(): void

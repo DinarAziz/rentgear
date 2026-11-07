@@ -167,7 +167,7 @@ class SeedData {
           for (final (i, h) in history.indexed)
             StatusLog(from: h.$1, to: h.$2, actorName: h.$3, at: created.add(Duration(minutes: i * 20))),
         ],
-      );
+      )..handoverCode = newHandoverCode();
     }
 
     final budi = users[0];

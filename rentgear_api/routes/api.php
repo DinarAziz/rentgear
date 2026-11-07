@@ -30,6 +30,9 @@ Route::prefix('v1')->group(function () {
         Route::get('equipment', [CatalogController::class, 'index']);
         Route::get('equipment/{id}', [CatalogController::class, 'show']);
         Route::get('equipment/{id}/availability', [CatalogController::class, 'availability']);
+        Route::get('me/wishlist', [CatalogController::class, 'myWishlist']);
+        Route::put('equipment/{id}/wishlist', [CatalogController::class, 'addToWishlist']);
+        Route::delete('equipment/{id}/wishlist', [CatalogController::class, 'removeFromWishlist']);
 
         Route::post('equipment', [ProviderController::class, 'storeEquipment']);
         // POST, bukan PUT: PHP hanya membaca berkas multipart pada POST.
@@ -64,10 +67,10 @@ Route::prefix('v1')->group(function () {
         Route::post('rentals/{id}/payment', [RentalController::class, 'payment']);
         Route::post('rentals/{id}/payment-review', [RentalController::class, 'paymentReview']);
         Route::post('rentals/{id}/condition-photos', [RentalController::class, 'conditionPhoto']);
-        Route::post('rentals/{id}/handover', [RentalController::class, 'handover']);
+        Route::post('rentals/{id}/handover', [RentalController::class, 'handover'])->middleware('throttle:10,1');
         Route::post('rentals/{id}/mismatch', [RentalController::class, 'mismatch']);
         Route::post('rentals/{id}/mismatch-decision', [RentalController::class, 'mismatchDecision']);
-        Route::post('rentals/{id}/return', [RentalController::class, 'receiveReturn']);
+        Route::post('rentals/{id}/return', [RentalController::class, 'receiveReturn'])->middleware('throttle:10,1');
         Route::post('rentals/{id}/complete', [RentalController::class, 'complete']);
         Route::post('rentals/{id}/damage-objection', [RentalController::class, 'damageObjection']);
         Route::post('rentals/{id}/damage-decision', [RentalController::class, 'damageDecision']);

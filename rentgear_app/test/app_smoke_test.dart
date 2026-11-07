@@ -515,7 +515,7 @@ void main() {
       await repo.confirmBooking(r.id, sari);
       await repo.submitPayment(r.id, budi, onePixelPng);
       await repo.reviewPayment(r.id, sari, accept: true);
-      await repo.handover(r.id, sari);
+      await repo.handover(r.id, sari, code: (await repo.rental(r.id)).handoverCode!);
       await repo.reportMismatch(r.id, budi, 'Kompor tidak menyala');
       await repo.logout();
       return r;

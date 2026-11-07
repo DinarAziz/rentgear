@@ -54,7 +54,7 @@ void main() {
     final dewi = await repo.login('dewi@rentgear.id', 'password');
     final admin = await repo.login('admin@rentgear.id', 'password');
     // r-4: tenda ultralight Budi di Semeru Camp Rent, sedang disewa. Deposit 150.000.
-    await repo.receiveReturn('r-4', dewi, condition: ReturnCondition.majorDamage, damageFee: 100000, damageNote: 'Robek');
+    await repo.receiveReturn('r-4', dewi, code: (await repo.rental('r-4')).handoverCode!, condition: ReturnCondition.majorDamage, damageFee: 100000, damageNote: 'Robek');
     final r = await repo.decideDamageFee('r-4', admin, amount: 40000, note: ' Sebagian saja ');
 
     final entry = (await repo.auditLog(admin)).firstWhere((e) => e.action == AuditAction.damageFeeDecided);

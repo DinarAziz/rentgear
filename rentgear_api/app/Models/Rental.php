@@ -32,6 +32,12 @@ class Rental extends Model
         ];
     }
 
+    /** Enam digit acak untuk QR serah terima. */
+    public static function newHandoverCode(): string
+    {
+        return str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+    }
+
     public function guarantees(): HasMany
     {
         return $this->hasMany(Guarantee::class)->orderBy('id');

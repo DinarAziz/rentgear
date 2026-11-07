@@ -194,7 +194,7 @@ class DemoSeeder extends Seeder
         $created = $startOffset >= 0 ? $this->now->subHours(2) : $this->day(min(-1, $startOffset - 2));
 
         $rental = Rental::create([
-            'id' => $id, 'invoice_code' => $invoice, 'customer_id' => $customer->id, 'customer_name' => $customer->name,
+            'id' => $id, 'invoice_code' => $invoice, 'handover_code' => Rental::newHandoverCode(), 'customer_id' => $customer->id, 'customer_name' => $customer->name,
             'provider_id' => $equipment->provider_id, 'provider_name' => $equipment->provider->business_name,
             'equipment_id' => $equipment->id, 'equipment_name' => $equipment->name,
             'category_id' => $equipment->category_id, 'qty' => $qty, 'photo_path' => $equipment->photos->first()?->path,

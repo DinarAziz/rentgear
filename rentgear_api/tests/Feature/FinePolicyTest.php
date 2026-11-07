@@ -47,7 +47,7 @@ class FinePolicyTest extends ApiTestCase
         $rental->update(['fine_policy' => [...self::POLICY, 'lateMultiplier' => 2, 'graceHours' => 0]]);
         $this->travelTo($rental->end_date->copy()->addDays(2)->setTime(10, 0));
 
-        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', ['condition' => 'good'])->assertOk()
+        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', ['code' => $this->code('r-4'), 'condition' => 'good'])->assertOk()
             ->assertJsonPath('data.lateFee', 240000);
     }
 
@@ -57,7 +57,7 @@ class FinePolicyTest extends ApiTestCase
         $rental->update(['fine_policy' => self::POLICY]);
         $this->travelTo($rental->end_date->copy()->addDay()->setTime(2, 30));
 
-        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', ['condition' => 'good'])->assertOk()
+        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', ['code' => $this->code('r-4'), 'condition' => 'good'])->assertOk()
             ->assertJsonPath('data.lateFee', 0);
     }
 }

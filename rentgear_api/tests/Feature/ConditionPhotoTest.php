@@ -30,8 +30,8 @@ class ConditionPhotoTest extends ApiTestCase
         $this->assertApiError($this->add('r-3', 'return'), 'INVALID_STATE', 409);
         $this->assertApiError($this->add('r-3', 'lain'), 'VALIDATION', 422);
 
-        $this->postJson('/api/v1/rentals/r-3/handover')->assertOk();
-        $this->postJson('/api/v1/rentals/r-3/return', ['condition' => 'good'])->assertOk();
+        $this->postJson('/api/v1/rentals/r-3/handover', ['code' => $this->code('r-3')])->assertOk();
+        $this->postJson('/api/v1/rentals/r-3/return', ['code' => $this->code('r-3'), 'condition' => 'good'])->assertOk();
         $this->assertApiError($this->add('r-3', 'handover'), 'INVALID_STATE', 409);
         $this->add('r-3', 'return')->assertOk()->assertJsonCount(2, 'data.conditionPhotos');
     }
@@ -69,7 +69,7 @@ class ConditionPhotoTest extends ApiTestCase
         config(['services.gemini.api_key' => 'kunci-uji']);
         $this->as('dewi');
         $this->add('r-4', 'handover')->assertOk();
-        $this->postJson('/api/v1/rentals/r-4/return', ['condition' => 'majorDamage', 'damageFee' => 100000, 'damageNote' => 'Robek'])->assertOk();
+        $this->postJson('/api/v1/rentals/r-4/return', ['code' => $this->code('r-4'), 'condition' => 'majorDamage', 'damageFee' => 100000, 'damageNote' => 'Robek'])->assertOk();
         $this->add('r-4', 'return')->assertOk();
 
         Http::fake(['generativelanguage.googleapis.com/*' => Http::response(['candidates' => [['content' => ['parts' => [['text' => json_encode([

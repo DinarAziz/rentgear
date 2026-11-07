@@ -170,6 +170,7 @@ class LocalCodec {
         'status': r.status.name,
         'createdAt': _date(r.createdAt),
         'cancelReason': r.cancelReason,
+        'handoverCode': r.handoverCode,
         'payments': [
           for (final p in r.payments)
             {
@@ -249,6 +250,8 @@ class LocalCodec {
         ],
       )
         ..cancelReason = j['cancelReason'] as String?
+        // Data lama belum punya kode; dibuat sekali saat dibaca.
+        ..handoverCode = j['handoverCode'] as String? ?? newHandoverCode()
         ..payments.addAll(_paymentsFrom(j))
         ..finePolicy = FinePolicy.fromJson(j['finePolicy'] as Map<String, dynamic>?)
         ..discountPercent = (j['discountPercent'] as num?)?.toInt() ?? 0

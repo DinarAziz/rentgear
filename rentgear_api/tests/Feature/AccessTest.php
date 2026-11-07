@@ -12,7 +12,7 @@ class AccessTest extends ApiTestCase
         // r-1 milik Arjuna Outdoor (Sari). Dewi punya toko lain.
         $this->as('dewi');
         foreach (['confirm', 'handover', 'return', 'complete'] as $action) {
-            $this->assertApiError($this->postJson("/api/v1/rentals/r-1/$action"), 'FORBIDDEN', 403);
+            $this->assertApiError($this->postJson("/api/v1/rentals/r-1/$action", ["code" => "000000"]), 'FORBIDDEN', 403);
         }
         $this->assertApiError($this->postJson('/api/v1/rentals/r-1/reject', ['reason' => 'x']), 'FORBIDDEN', 403);
         $this->assertApiError($this->postJson('/api/v1/rentals/r-1/guarantees/g-1/review', ['accept' => true]), 'FORBIDDEN', 403);

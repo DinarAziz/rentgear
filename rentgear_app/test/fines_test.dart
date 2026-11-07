@@ -79,7 +79,7 @@ void main() {
       () async {
         expect((await repo.rental('r-4')).status, RentalStatus.overdue);
 
-        final r = await repo.receiveReturn('r-4', dewi);
+        final r = await repo.receiveReturn('r-4', dewi, code: (await repo.rental('r-4')).handoverCode!);
         expect(r.status, RentalStatus.returned);
         expect(r.returnCondition, ReturnCondition.good);
         expect(r.lateFee, 3 * r.pricePerDaySnapshot * r.qty * 1.5);
@@ -99,7 +99,7 @@ void main() {
         final deposit = (await repo.rental('r-4')).depositTotal;
         var r = await repo.receiveReturn(
           'r-4',
-          dewi,
+          dewi, code: (await repo.rental('r-4')).handoverCode!,
           condition: ReturnCondition.minorDamage,
           damageFee: deposit * 0.2,
           damageNote: 'Pasak bengkok',
@@ -117,7 +117,7 @@ void main() {
       await expectLater(
         repo.receiveReturn(
           'r-4',
-          dewi,
+          dewi, code: (await repo.rental('r-4')).handoverCode!,
           condition: ReturnCondition.good,
           damageFee: 10000,
         ),
@@ -126,7 +126,7 @@ void main() {
       await expectLater(
         repo.receiveReturn(
           'r-4',
-          dewi,
+          dewi, code: (await repo.rental('r-4')).handoverCode!,
           condition: ReturnCondition.lost,
           damageFee: deposit + 1,
         ),
@@ -141,7 +141,7 @@ void main() {
         final deposit = (await repo.rental('r-4')).depositTotal;
         var r = await repo.receiveReturn(
           'r-4',
-          dewi,
+          dewi, code: (await repo.rental('r-4')).handoverCode!,
           condition: ReturnCondition.majorDamage,
           damageFee: deposit * 0.8,
           damageNote: 'Flysheet sobek',
@@ -181,7 +181,7 @@ void main() {
       final deposit = (await repo.rental('r-4')).depositTotal;
       await repo.receiveReturn(
         'r-4',
-        dewi,
+        dewi, code: (await repo.rental('r-4')).handoverCode!,
         condition: ReturnCondition.minorDamage,
         damageFee: deposit * 0.3,
         damageNote: 'Resleting macet',
@@ -215,7 +215,7 @@ void main() {
       await local.runScheduledJobs();
       final saved = await local.receiveReturn(
         'r-4',
-        dewi,
+        dewi, code: (await local.rental('r-4')).handoverCode!,
         condition: ReturnCondition.majorDamage,
         damageFee: (await local.rental('r-4')).depositTotal * 0.8,
         damageNote: 'Frame patah',
@@ -334,7 +334,7 @@ void main() {
       expect((await recordOfBudi()).violations, 0);
 
       // Budi terlambat: pelanggaran pertama.
-      await old.receiveReturn('r-4', dewi);
+      await old.receiveReturn('r-4', dewi, code: (await old.rental('r-4')).handoverCode!);
       final budiRecord = await recordOfBudi();
       expect(budiRecord.lateCount, 1);
       expect(budiRecord.violations, 1);

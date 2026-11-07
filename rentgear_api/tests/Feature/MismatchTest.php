@@ -15,7 +15,7 @@ class MismatchTest extends ApiTestCase
         $this->postJson("/api/v1/rentals/$id/confirm");
         $this->as('budi')->post("/api/v1/rentals/$id/payment", ['proof' => $this->photo()], ['Accept' => 'application/json']);
         $this->as('sari')->postJson("/api/v1/rentals/$id/payment-review", ['accept' => true]);
-        $this->postJson("/api/v1/rentals/$id/handover")->assertJsonPath('data.status', 'pickedUp');
+        $this->postJson("/api/v1/rentals/$id/handover", ['code' => $this->code($id)])->assertJsonPath('data.status', 'pickedUp');
 
         return $id;
     }
@@ -41,7 +41,7 @@ class MismatchTest extends ApiTestCase
             ->assertJsonPath('data.mismatchStatus', 'pending')->assertJsonPath('data.mismatchReason', 'Kompor tidak menyala');
         $this->assertApiError($this->report($id), 'INVALID_STATE', 409);
         // Selama admin belum memutuskan, toko belum bisa menerima alat kembali.
-        $this->assertApiError($this->as('sari')->postJson("/api/v1/rentals/$id/return"), 'MISMATCH_PENDING', 409);
+        $this->assertApiError($this->as('sari')->postJson("/api/v1/rentals/$id/return", ['code' => $this->code($id)]), 'MISMATCH_PENDING', 409);
         // Hanya admin yang memutuskan.
         $this->assertApiError($this->postJson("/api/v1/rentals/$id/mismatch-decision", ['decision' => 'refund']), 'FORBIDDEN', 403);
         $this->assertApiError($this->decide($id, 'gratis'), 'VALIDATION', 422);
@@ -62,7 +62,7 @@ class MismatchTest extends ApiTestCase
 
             $this->assertSame(['pickedUp', $decision], [$done['status'], $done['mismatchStatus']]);
             $this->assertStringEndsWith($label, end($done['logs'])['note']);
-            $this->as('sari')->postJson("/api/v1/rentals/$id/return")->assertJsonPath('data.status', 'returned');
+            $this->as('sari')->postJson("/api/v1/rentals/$id/return", ['code' => $this->code($id)])->assertJsonPath('data.status', 'returned');
         }
     }
 

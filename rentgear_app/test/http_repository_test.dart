@@ -288,11 +288,11 @@ void main() {
     final api = repo((_) async => ok(rentalJson()));
     const dewi = AppUser(id: 'u-dewi', name: 'Dewi', email: 'e', phone: 'p', role: UserRole.provider, city: 'c', providerId: 'p-semeru');
 
-    await api.receiveReturn('r-9', dewi, condition: ReturnCondition.majorDamage, damageFee: 80000, damageNote: 'Sol lepas');
+    await api.receiveReturn('r-9', dewi, condition: ReturnCondition.majorDamage, damageFee: 80000, damageNote: 'Sol lepas', code: '123456');
 
     expect(seen.single.method, 'POST');
     expect(seen.single.url.path, '/api/v1/rentals/r-9/return');
-    expect(jsonDecode(seen.single.body), {'condition': 'majorDamage', 'damageFee': 80000.0, 'damageNote': 'Sol lepas'});
+    expect(jsonDecode(seen.single.body), {'condition': 'majorDamage', 'damageFee': 80000.0, 'damageNote': 'Sol lepas', 'code': '123456'});
   });
 
   test('ketersediaan memakai tanggal kalender tanpa jam', () async {

@@ -46,7 +46,7 @@ void main() {
     await repo.confirmBooking(r.id, sari);
     await repo.submitPayment(r.id, budi, photo);
     await repo.reviewPayment(r.id, sari, accept: true);
-    return repo.handover(r.id, sari);
+    return repo.handover(r.id, sari, code: (await repo.rental(r.id)).handoverCode!);
   }
 
   group('ganti tanggal', () {
@@ -109,7 +109,7 @@ void main() {
       r = await repo.reportMismatch(r.id, budi, 'Kompor tidak menyala');
       expect(r.mismatch, MismatchStatus.pending);
       await expectLater(repo.reportMismatch(r.id, budi, 'Lagi'), fails('INVALID_STATE'));
-      await expectLater(repo.receiveReturn(r.id, sari), fails('MISMATCH_PENDING'));
+      await expectLater(repo.receiveReturn(r.id, sari, code: (await repo.rental(r.id)).handoverCode!), fails('MISMATCH_PENDING'));
       await expectLater(repo.decideMismatch(r.id, sari, MismatchStatus.refund), fails('FORBIDDEN'));
 
       r = await repo.decideMismatch(r.id, admin, MismatchStatus.refund, note: 'Terlihat di foto');
@@ -125,7 +125,7 @@ void main() {
         await repo.reportMismatch(r.id, budi, 'Tenda sobek');
         r = await repo.decideMismatch(r.id, admin, decision);
         expect([r.status, r.mismatch], [RentalStatus.pickedUp, decision]);
-        expect((await repo.receiveReturn(r.id, sari)).status, RentalStatus.returned);
+        expect((await repo.receiveReturn(r.id, sari, code: (await repo.rental(r.id)).handoverCode!)).status, RentalStatus.returned);
       }
     });
 

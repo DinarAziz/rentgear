@@ -433,13 +433,17 @@ class HttpRentGearRepository implements RentGearRepository {
       _action(rentalId, 'mismatch-decision', {'decision': decision.name, 'note': note});
 
   @override
-  Future<Rental> handover(String rentalId, AppUser actor) => _action(rentalId, 'handover');
+  Future<Rental> handover(String rentalId, AppUser actor, {required String code}) =>
+      _action(rentalId, 'handover', {'code': code});
 
   @override
   Future<Rental> receiveReturn(String rentalId, AppUser actor,
-          {ReturnCondition condition = ReturnCondition.good, double damageFee = 0, String? damageNote}) =>
+          {ReturnCondition condition = ReturnCondition.good,
+          double damageFee = 0,
+          String? damageNote,
+          required String code}) =>
       _action(rentalId, 'return',
-          {'condition': condition.name, 'damageFee': damageFee, 'damageNote': damageNote});
+          {'condition': condition.name, 'damageFee': damageFee, 'damageNote': damageNote, 'code': code});
 
   @override
   Future<Rental> objectToDamageFee(String rentalId, AppUser actor, String reason) =>
@@ -542,6 +546,14 @@ class HttpRentGearRepository implements RentGearRepository {
   @override
   Future<ProviderProfile> setFollow(String providerId, AppUser actor, {required bool follow}) async =>
       _provider(await _send(follow ? 'PUT' : 'DELETE', 'providers/$providerId/follow'));
+
+  @override
+  Future<List<String>> wishlist(String customerId) async =>
+      (await _get('me/wishlist') as List).cast<String>();
+
+  @override
+  Future<List<String>> setWishlist(String equipmentId, AppUser actor, {required bool saved}) async =>
+      (await _send(saved ? 'PUT' : 'DELETE', 'equipment/$equipmentId/wishlist') as List).cast<String>();
 
   @override
   Future<List<CustomerRecord>> customers(AppUser actor) async =>

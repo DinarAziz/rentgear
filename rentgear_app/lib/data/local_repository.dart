@@ -26,6 +26,7 @@ class LocalRentGearRepository implements RentGearRepository {
         _rentals = seed.rentals(),
         _reviews = seed.reviews(),
         _follows = seed.follows(),
+        _wishlists = {},
         _verifications = seed.verifications(),
         _niks = {'p-puncak': SeedData.puncakNik};
 
@@ -62,6 +63,9 @@ class LocalRentGearRepository implements RentGearRepository {
 
   /// Id penyewa -> id toko yang diikutinya.
   Map<String, Set<String>> _follows;
+
+  /// Id penyewa -> id alat favorit, terbaru lebih dulu.
+  Map<String, List<String>> _wishlists;
 
   /// Id toko -> dokumen verifikasinya, dan NIK pemilik untuk mencari toko
   /// lain dengan pemilik yang sama.
@@ -131,6 +135,7 @@ class LocalRentGearRepository implements RentGearRepository {
           if (r.reply != null) r.id: {'reply': r.reply, 'at': r.repliedAt!.toIso8601String()},
       },
       'follows': {for (final f in _follows.entries) f.key: f.value.toList()},
+      'wishlists': _wishlists,
       'verifications': {
         for (final v in _verifications.values)
           v.providerId: {
@@ -225,6 +230,10 @@ class LocalRentGearRepository implements RentGearRepository {
     if (follows != null) {
       _follows = {for (final f in follows.entries) f.key: {...(f.value as List).cast<String>()}};
     }
+    final wishlists = data['wishlists'] as Map<String, dynamic>?;
+    if (wishlists != null) {
+      _wishlists = {for (final w in wishlists.entries) w.key: (w.value as List).cast<String>().toList()};
+    }
     // Data lama belum menyimpan dokumen verifikasi; pakai data demo.
     final verifications = data['verifications'] as Map<String, dynamic>?;
     if (verifications != null) {
@@ -275,6 +284,7 @@ class LocalRentGearRepository implements RentGearRepository {
         _rentals = fresh.rentals();
         _reviews = fresh.reviews();
         _follows = fresh.follows();
+        _wishlists = {};
         _verifications = fresh.verifications();
         _niks = {'p-puncak': SeedData.puncakNik};
         _refreshStoreStats();
@@ -333,6 +343,13 @@ class LocalRentGearRepository implements RentGearRepository {
   void _requireOwner(Rental r, AppUser actor) {
     if (actor.role != UserRole.provider || actor.providerId != r.providerId) {
       throw const AppException('FORBIDDEN', 'Transaksi ini bukan milik toko Anda.');
+    }
+  }
+
+  void _requireHandoverCode(Rental r, String code) {
+    if (r.handoverCode == null || r.handoverCode != code.trim()) {
+      throw const AppException(
+          'HANDOVER_CODE_INVALID', 'Kode serah terima salah. Minta penyewa menunjukkan QR di aplikasinya.');
     }
   }
 
@@ -671,7 +688,8 @@ class LocalRentGearRepository implements RentGearRepository {
         )
           // Aturan denda ikut dikunci, seperti harga dan deposit.
           ..finePolicy = p.finePolicy
-          ..discountPercent = discountPercent;
+          ..discountPercent = discountPercent
+          ..handoverCode = newHandoverCode();
         _rentals.add(rental);
         _idempotency[req.idempotencyKey] = id;
         return rental;
@@ -907,12 +925,15 @@ class LocalRentGearRepository implements RentGearRepository {
       });
 
   @override
-  Future<Rental> handover(String rentalId, AppUser actor) => _mutate(() {
+  Future<Rental> handover(String rentalId, AppUser actor, {required String code}) => _mutate(() {
         final r = _rentalById(rentalId);
         _requireOwner(r, actor);
         if (r.status != RentalStatus.paid) {
           throw const AppException('INVALID_STATE', 'Alat hanya bisa diserahkan setelah pembayaran.');
         }
+        _requireHandoverCode(r, code);
+        // Kode baru untuk pengembalian, supaya kode yang sudah dilihat toko tidak bisa dipakai lagi.
+        r.handoverCode = newHandoverCode();
         final now = DateTime.now();
         for (final g in r.guarantees) {
           g
@@ -931,10 +952,12 @@ class LocalRentGearRepository implements RentGearRepository {
     ReturnCondition condition = ReturnCondition.good,
     double damageFee = 0,
     String? damageNote,
+    required String code,
   }) =>
       _mutate(() {
         final r = _rentalById(rentalId);
         _requireOwner(r, actor);
+        _requireHandoverCode(r, code);
         if (r.mismatch == MismatchStatus.pending) {
           throw const AppException('MISMATCH_PENDING', 'Laporan barang tidak sesuai masih diproses admin.');
         }
@@ -1293,6 +1316,20 @@ class LocalRentGearRepository implements RentGearRepository {
   @override
   Future<Set<String>> followedProviders(String customerId) =>
       _delay(() => {...?_follows[customerId]});
+
+  @override
+  Future<List<String>> wishlist(String customerId) => _delay(() => [...?_wishlists[customerId]]);
+
+  @override
+  Future<List<String>> setWishlist(String equipmentId, AppUser actor, {required bool saved}) => _mutate(() {
+        if (actor.role != UserRole.customer) {
+          throw const AppException('FORBIDDEN', 'Hanya penyewa yang bisa menyimpan alat favorit.');
+        }
+        _equipmentById(equipmentId);
+        final ids = _wishlists.putIfAbsent(actor.id, () => [])..remove(equipmentId);
+        if (saved) ids.insert(0, equipmentId);
+        return [...ids];
+      });
 
   @override
   Future<ProviderProfile> setFollow(String providerId, AppUser actor, {required bool follow}) =>

@@ -95,6 +95,7 @@ final class BookingService
 
             $rental = Rental::create([
                 'invoice_code' => $this->nextInvoiceCode(),
+                'handover_code' => Rental::newHandoverCode(),
                 'customer_id' => $customer->id, 'customer_name' => $customer->name,
                 'provider_id' => $provider->id, 'provider_name' => $provider->business_name,
                 'equipment_id' => $equipment->id, 'equipment_name' => $equipment->name,

@@ -23,7 +23,7 @@ class FinesTest extends ApiTestCase
         $this->assertSame('overdue', Rental::find('r-4')->status);
 
         // Tanggal kembali yang dikirim aplikasi diabaikan: server memakai tanggalnya sendiri.
-        $data = $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', ['returnedAt' => $this->day(-3)])
+        $data = $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', ['code' => $this->code('r-4'), 'returnedAt' => $this->day(-3)])
             ->assertOk()->json('data');
 
         $this->assertSame('returned', $data['status']);
@@ -36,7 +36,7 @@ class FinesTest extends ApiTestCase
 
     public function test_small_damage_fee_applies_at_once_and_the_rental_can_be_closed(): void
     {
-        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', [
+        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', ['code' => $this->code('r-4'), 
             'condition' => 'minorDamage', 'damageFee' => $this->deposit * 0.2, 'damageNote' => ' Pasak bengkok ',
         ])->assertOk()
             ->assertJsonPath('data.damageReview', 'none')
@@ -49,15 +49,15 @@ class FinesTest extends ApiTestCase
     public function test_invalid_damage_fee_is_refused(): void
     {
         $this->as('dewi');
-        $this->assertApiError($this->postJson('/api/v1/rentals/r-4/return', ['condition' => 'good', 'damageFee' => 10000]), 'VALIDATION', 422);
-        $this->assertApiError($this->postJson('/api/v1/rentals/r-4/return', ['condition' => 'lost', 'damageFee' => $this->deposit + 1]), 'VALIDATION', 422);
-        $this->assertApiError($this->postJson('/api/v1/rentals/r-4/return', ['condition' => 'meledak']), 'VALIDATION', 422);
+        $this->assertApiError($this->postJson('/api/v1/rentals/r-4/return', ['code' => $this->code('r-4'), 'condition' => 'good', 'damageFee' => 10000]), 'VALIDATION', 422);
+        $this->assertApiError($this->postJson('/api/v1/rentals/r-4/return', ['code' => $this->code('r-4'), 'condition' => 'lost', 'damageFee' => $this->deposit + 1]), 'VALIDATION', 422);
+        $this->assertApiError($this->postJson('/api/v1/rentals/r-4/return', ['code' => $this->code('r-4'), 'condition' => 'meledak']), 'VALIDATION', 422);
         $this->assertSame('overdue', Rental::find('r-4')->status);
     }
 
     public function test_large_fee_waits_for_the_admin_before_the_rental_can_be_closed(): void
     {
-        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', [
+        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', ['code' => $this->code('r-4'), 
             'condition' => 'majorDamage', 'damageFee' => $this->deposit * 0.8, 'damageNote' => 'Flysheet sobek',
         ])->assertJsonPath('data.damageReview', 'pending')
             ->assertJsonPath('data.reviewReason', 'Denda kerusakan lebih dari separuh deposit.');
@@ -76,7 +76,7 @@ class FinesTest extends ApiTestCase
 
     public function test_customer_can_object_to_a_damage_fee(): void
     {
-        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', [
+        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', ['code' => $this->code('r-4'), 
             'condition' => 'minorDamage', 'damageFee' => $this->deposit * 0.3, 'damageNote' => 'Resleting macet',
         ])->assertOk();
 

@@ -16,6 +16,7 @@ import '../shared/profile_screen.dart';
 import 'admin_audit_screen.dart';
 import 'admin_customers_screen.dart';
 import 'admin_gear_status_screen.dart';
+import 'admin_report_screen.dart';
 import 'admin_store_review_screen.dart';
 
 class AdminShell extends StatefulWidget {
@@ -246,6 +247,20 @@ class AdminDashboardScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 rentalCards(mismatchReports),
               ],
+              const SectionTitle('Laporan'),
+              Card(
+                clipBehavior: Clip.antiAlias,
+                child: ListTile(
+                  leading: const Icon(Icons.bar_chart_outlined),
+                  title: const Text('Laporan transaksi'),
+                  subtitle: const Text('Pendapatan, alat terlaris, dan pendapatan per toko. Bisa diunduh PDF.'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(builder: (_) => const AdminReportScreen()),
+                  ),
+                ),
+              ),
               const SectionTitle('Stok'),
               Card(
                 clipBehavior: Clip.antiAlias,

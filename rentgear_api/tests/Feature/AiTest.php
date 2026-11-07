@@ -128,7 +128,7 @@ class AiTest extends ApiTestCase
     public function test_fine_opinion_never_suggests_more_than_the_deposit(): void
     {
         // r-4: tenda ultralight Budi, deposit 150.000, diterima kembali rusak berat dengan denda 100.000.
-        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', ['condition' => 'majorDamage', 'damageFee' => 100000, 'damageNote' => 'Robek'])
+        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', ['code' => $this->code('r-4'), 'condition' => 'majorDamage', 'damageFee' => 100000, 'damageNote' => 'Robek'])
             ->assertOk();
         $this->gemini(['penilaian' => 'terlalu_tinggi', 'denda_saran' => 9000000, 'penjelasan' => 'Catatan terlalu singkat.']);
 

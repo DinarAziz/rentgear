@@ -14,6 +14,7 @@ import '../provider/discount_policy_screen.dart';
 import '../rental/fine_widgets.dart';
 import 'booking_screen.dart';
 import 'provider_store_screen.dart';
+import 'wishlist_screen.dart';
 
 class EquipmentDetailScreen extends StatelessWidget {
   const EquipmentDetailScreen({super.key, required this.equipmentId, this.prefill});
@@ -36,7 +37,10 @@ class EquipmentDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.read<AppState>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Detail Alat')),
+      appBar: AppBar(
+        title: const Text('Detail Alat'),
+        actions: [WishlistButton(equipmentId: equipmentId)],
+      ),
       body: AsyncView<(Equipment, ProviderProfile, BlacklistEntry?)>(
         load: () => _load(state),
         builder: (context, data) {

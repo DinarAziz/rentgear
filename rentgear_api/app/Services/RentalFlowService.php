@@ -49,6 +49,14 @@ final class RentalFlowService
         });
     }
 
+    /** Kode dari QR atau layar penyewa. Membuktikan penyewa hadir saat alat diambil atau dikembalikan. */
+    private function requireHandoverCode(Rental $r, string $code): void
+    {
+        if ($r->handover_code === null || ! hash_equals($r->handover_code, trim($code))) {
+            throw new ApiException('HANDOVER_CODE_INVALID', 'Kode serah terima salah. Minta penyewa menunjukkan QR di aplikasinya.');
+        }
+    }
+
     private function requireOwner(Rental $r, User $actor): void
     {
         if (! $actor->isProvider() || $actor->provider_id !== $r->provider_id) {
@@ -266,13 +274,16 @@ final class RentalFlowService
         });
     }
 
-    public function handover(string $rentalId, User $actor): Rental
+    public function handover(string $rentalId, User $actor, string $code): Rental
     {
-        return $this->on($rentalId, function (Rental $r) use ($actor) {
+        return $this->on($rentalId, function (Rental $r) use ($actor, $code) {
             $this->requireOwner($r, $actor);
             if ($r->status !== 'paid') {
                 throw new ApiException('INVALID_STATE', 'Alat hanya bisa diserahkan setelah pembayaran.');
             }
+            $this->requireHandoverCode($r, $code);
+            // Kode baru untuk pengembalian, supaya kode yang sudah dilihat toko tidak bisa dipakai lagi.
+            $r->update(['handover_code' => Rental::newHandoverCode()]);
             $r->guarantees->each->update(['status' => 'held', 'held_at' => now()]);
             $this->transition($r, RentalStatus::PickedUp, $actor, 'Dokumen asli jaminan diterima provider');
         });
@@ -326,10 +337,11 @@ final class RentalFlowService
     }
 
     /** Denda keterlambatan memakai tanggal server, bukan tanggal dari aplikasi. */
-    public function receiveReturn(string $rentalId, User $actor, ReturnCondition $condition, float $damageFee, ?string $damageNote): Rental
+    public function receiveReturn(string $rentalId, User $actor, ReturnCondition $condition, float $damageFee, ?string $damageNote, string $code): Rental
     {
-        return $this->on($rentalId, function (Rental $r) use ($actor, $condition, $damageFee, $damageNote) {
+        return $this->on($rentalId, function (Rental $r) use ($actor, $condition, $damageFee, $damageNote, $code) {
             $this->requireOwner($r, $actor);
+            $this->requireHandoverCode($r, $code);
             if ($r->mismatch_status === 'pending') {
                 throw new ApiException('MISMATCH_PENDING', 'Laporan barang tidak sesuai masih diproses admin.');
             }

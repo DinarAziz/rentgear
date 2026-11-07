@@ -82,8 +82,8 @@ abstract class RentGearRepository {
   /// Penyedia menambah satu foto kondisi alat. Foto tidak bisa dihapus.
   Future<Rental> addConditionPhoto(String rentalId, AppUser actor, ConditionPhase phase, Uint8List photo);
 
-  /// Provider menerima dokumen asli jaminan lalu menyerahkan alat.
-  Future<Rental> handover(String rentalId, AppUser actor);
+  /// Provider menerima dokumen asli jaminan lalu menyerahkan alat. [code] dari QR penyewa.
+  Future<Rental> handover(String rentalId, AppUser actor, {required String code});
 
   /// Penyewa melaporkan barang tidak sesuai ke admin, hanya pada hari alat diterima.
   Future<Rental> reportMismatch(String rentalId, AppUser actor, String reason);
@@ -100,6 +100,7 @@ abstract class RentGearRepository {
     ReturnCondition condition = ReturnCondition.good,
     double damageFee = 0,
     String? damageNote,
+    required String code,
   });
 
   /// Penyewa meminta admin meninjau denda kerusakan.
@@ -156,6 +157,12 @@ abstract class RentGearRepository {
   Future<Set<String>> followedProviders(String customerId);
 
   Future<ProviderProfile> setFollow(String providerId, AppUser actor, {required bool follow});
+
+  /// Id alat favorit penyewa, terbaru lebih dulu.
+  Future<List<String>> wishlist(String customerId);
+
+  /// Menambah atau menghapus alat favorit; mengembalikan daftar terbaru.
+  Future<List<String>> setWishlist(String equipmentId, AppUser actor, {required bool saved});
 
   /// Riwayat semua penyewa, untuk admin.
   Future<List<CustomerRecord>> customers(AppUser actor);

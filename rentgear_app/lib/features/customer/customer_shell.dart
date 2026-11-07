@@ -4,6 +4,7 @@ import '../../core/responsive.dart';
 import '../shared/profile_screen.dart';
 import 'catalog_screen.dart';
 import 'my_rentals_screen.dart';
+import 'wishlist_screen.dart';
 
 class CustomerShell extends StatefulWidget {
   const CustomerShell({super.key});
@@ -19,7 +20,7 @@ class _CustomerShellState extends State<CustomerShell> {
   Widget build(BuildContext context) => AdaptiveShell(
     selectedIndex: _index,
     onSelect: (i) => setState(() => _index = i),
-    pages: const [CatalogScreen(), MyRentalsScreen(), ProfileScreen()],
+    pages: const [CatalogScreen(), MyRentalsScreen(), WishlistScreen(), ProfileScreen()],
     destinations: const [
       NavigationDestination(
         icon: Icon(Icons.explore_outlined),
@@ -29,6 +30,7 @@ class _CustomerShellState extends State<CustomerShell> {
         icon: Icon(Icons.receipt_long_outlined),
         label: 'Sewa Saya',
       ),
+      NavigationDestination(icon: Icon(Icons.favorite_border), label: 'Favorit'),
       NavigationDestination(icon: Icon(Icons.person_outline), label: 'Profil'),
     ],
   );

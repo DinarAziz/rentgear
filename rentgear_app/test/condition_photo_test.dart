@@ -26,8 +26,8 @@ void main() {
     expect(() => repo.addConditionPhoto('r-3', sari, ConditionPhase.returned, foto), throwsCode('INVALID_STATE'));
 
     await repo.addConditionPhoto('r-3', sari, ConditionPhase.handover, foto);
-    await repo.handover('r-3', sari);
-    await repo.receiveReturn('r-3', sari, condition: ReturnCondition.good);
+    await repo.handover('r-3', sari, code: (await repo.rental('r-3')).handoverCode!);
+    await repo.receiveReturn('r-3', sari, code: (await repo.rental('r-3')).handoverCode!, condition: ReturnCondition.good);
     expect(() => repo.addConditionPhoto('r-3', sari, ConditionPhase.handover, foto), throwsCode('INVALID_STATE'));
     final r = await repo.addConditionPhoto('r-3', sari, ConditionPhase.returned, foto);
 

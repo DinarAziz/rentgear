@@ -63,6 +63,12 @@ abstract class ApiTestCase extends TestCase
         $this->artisan('rentgear:run-jobs')->assertSuccessful();
     }
 
+    /** Kode serah terima yang berlaku, seperti yang dipindai toko dari QR penyewa. */
+    protected function code(string $rentalId): string
+    {
+        return \App\Models\Rental::findOrFail($rentalId)->handover_code;
+    }
+
     protected function day(int $offset): string
     {
         return now()->startOfDay()->addDays($offset)->format('Y-m-d');

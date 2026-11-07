@@ -46,7 +46,7 @@ class BlacklistTest extends ApiTestCase
     public function test_late_return_counts_as_a_violation(): void
     {
         $this->afterDays(4);
-        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return')->assertOk();
+        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', ['code' => $this->code('r-4')])->assertOk();
 
         $budi = collect($this->as('admin')->getJson('/api/v1/customers')->json('data'))->firstWhere('user.id', 'u-budi');
         $this->assertSame(1, $budi['lateCount']);
@@ -64,7 +64,7 @@ class BlacklistTest extends ApiTestCase
 
         // Pelanggaran ketiga: r-4 terlambat.
         $this->afterDays(4);
-        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return')->assertOk();
+        $this->as('dewi')->postJson('/api/v1/rentals/r-4/return', ['code' => $this->code('r-4')])->assertOk();
 
         $entry = BlacklistEntry::find('u-budi');
         $this->assertSame('Sistem', $entry->by);

@@ -465,6 +465,19 @@ const beforePickupStatuses = {
   RentalStatus.paid,
 };
 
+/// Enam digit acak untuk QR serah terima.
+String newHandoverCode() => Random.secure().nextInt(1000000).toString().padLeft(6, '0');
+
+/// Isi QR serah terima: penanda aplikasi, id sewa, dan kodenya.
+String handoverQrPayload(Rental r) => 'rentgear:${r.id}:${r.handoverCode}';
+
+/// Kode dari isi QR, atau `null` bila QR bukan milik sewa [rentalId].
+String? codeFromHandoverQr(String payload, String rentalId) {
+  final parts = payload.trim().split(':');
+  if (parts.length != 3 || parts[0] != 'rentgear' || parts[1] != rentalId) return null;
+  return parts[2];
+}
+
 class Rental {
   Rental({
     required this.id,
@@ -523,6 +536,9 @@ class Rental {
   /// Bukti transfer, terlama lebih dulu. Yang terakhir adalah kiriman yang berlaku.
   final List<Payment> payments = [];
   String? cancelReason;
+
+  /// Kode serah terima. Dari server hanya terisi untuk penyewa; toko mendapatkannya dari QR.
+  String? handoverCode;
 
   /// Terisi saat penyedia menerima alat kembali, bersama kondisi dan dendanya.
   DateTime? returnedAt;
