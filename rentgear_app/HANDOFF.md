@@ -1609,5 +1609,10 @@ the download link answers 200. On hold: the video and its Arunika voice wait unt
   add/remove checked as Budi. Over adb, `&&` inside `input text` is run by the adb shell, so type commands one at a time.
 - `dinaraziz942@gmail.com` was changed from customer to admin on the public server at the user's request
   (backup `database.sqlite.bak-admin-20261107`).
-- The release APK (Redmi and GitHub `android-v1.0.0`) is from 26 October. It sends no handover code, so stores
-  using it cannot hand over or receive gear until it is rebuilt.
+- Release APK rebuilt the same day (85 MB, public `API_URL`, Google client ID from the live bundle) and scanned
+  for keys (none). `rentgear.apk` in GitHub release `android-v1.0.0` was replaced (84655236 bytes, link answers 200).
+  `adb install -r` on the Redmi failed with `INSTALL_FAILED_VERIFICATION_FAILURE` (MIUI USB install check), so
+  the APK was copied to `/sdcard/Download/rentgear-7nov.apk` for the user to install by hand.
+- The admin password for `dinaraziz942@gmail.com` was set on the server at the user's request. Admin accounts get
+  no reset email and cannot use Google login, by design; all of that day's "forgot password" requests were for
+  this admin account, and a reset for `budi@rentgear.id` worked.
