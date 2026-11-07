@@ -1594,3 +1594,20 @@ Redmi, and the Arunika voice for the video.
 Nothing is waiting on the phone. Pushed to GitHub on 26 October at the user's request (`master` up to date), and
 `rentgear.apk` in release `android-v1.0.0` was replaced with the 26 October build after a scan for keys (none found);
 the download link answers 200. On hold: the video and its Arunika voice wait until the app is final (user, 26 October); generate the video again then. The user chose on 26 October to keep the old Gmail App Password and Gemini key, although both once appeared in the chat.
+
+## Reminders, admin report, handover QR, wishlist, 7 November 2026
+
+- Commit `8ccc12a`. Scheduler emails the renter one day before the return date and once when overdue
+  (`due_reminder_sent_at`, `overdue_notice_sent_at`). Admin dashboard has "Laporan transaksi" with PDF export
+  (`printing`). Pickup and return need the renter's 6-digit `handover_code` (QR via `qr_flutter`, scan via
+  `mobile_scanner`, typing also works); only the renter gets it from the API and it changes after pickup.
+  Renters have a "Favorit" tab (`wishlists` table). Tests: 185 API, 144 app.
+- `tool/build_web.sh` now passes its arguments to `flutter build web`; the public build needs
+  `--dart-define=API_URL=https://rentgear.serverbaik.my.id --dart-define=GOOGLE_CLIENT_ID=<from live bundle>`.
+- Deployed with `/sdcard/rg/fitur.sh` (backup, migrate, web without touching `/presentasi/`), then
+  `sv restart rentgear`. Live: `main.dart.4658996dc0.js`, migration ran, all 6 rentals have a code, wishlist
+  add/remove checked as Budi. Over adb, `&&` inside `input text` is run by the adb shell, so type commands one at a time.
+- `dinaraziz942@gmail.com` was changed from customer to admin on the public server at the user's request
+  (backup `database.sqlite.bak-admin-20261107`).
+- The release APK (Redmi and GitHub `android-v1.0.0`) is from 26 October. It sends no handover code, so stores
+  using it cannot hand over or receive gear until it is rebuilt.
